@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MonSantorin</title>
+    
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='15' y='10' width='70' height='80' rx='8' fill='%232563eb'/%3E%3Crect x='30' y='30' width='40' height='6' rx='3' fill='white'/%3E%3Crect x='30' y='45' width='25' height='6' rx='3' fill='white'/%3E%3Crect x='60' y='65' width='8' height='15' rx='2' fill='%23facc15'/%3E%3Crect x='72' y='55' width='8' height='25' rx='2' fill='%23facc15'/%3E%3Cpath d='M20 65 l15 15 l35 -35' fill='none' stroke='%2322c55e' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='white'/%3E%3Crect x='15' y='10' width='70' height='80' rx='8' fill='%232563eb'/%3E%3Crect x='30' y='30' width='40' height='6' rx='3' fill='white'/%3E%3Crect x='30' y='45' width='25' height='6' rx='3' fill='white'/%3E%3Crect x='60' y='65' width='8' height='15' rx='2' fill='%23facc15'/%3E%3Crect x='72' y='55' width='8' height='25' rx='2' fill='%23facc15'/%3E%3Cpath d='M20 65 l15 15 l35 -35' fill='none' stroke='%2322c55e' stroke-width='12' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="MonSantorin">
+    <meta name="apple-mobile-web-app-title" content="MonSantorin">
+    <meta name="theme-color" content="#2563eb">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <link rel="preload" href="MonSantorin.webp" as="image" type="image/webp">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js" integrity="sha512-Qlv6VSKh1gDKGoJbnyA5RMXYcvnpIqhO++MhIM2fStMcGT9i2T//tSwYFlcyoRRDcDZ+TYHpH8azBBCyhpSeqw==" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" integrity="sha512-WWG/QztPBvezaRo3WuRRhsIuvpBPq0jqrQhuD6neZjle2/Fwj/spneB5NxBptNJDdYU/+u2bztZlDpz0JCHyBQ==" crossorigin="anonymous"></script>
+    <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'none' },
+      options: { enableMenu: false }
+    };
+    </script>
+    <script id="MathJax-script" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-svg.js" integrity="sha512-pGJyN3p49vbRRHkfHe462v7eeH0S9WnPJh4k0d/652ivGz09VtRWZoFjHId4s/GFu0ucgoqFqQChcNsjfOL7fg==" crossorigin="anonymous"></script>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "@myriaddreamin/typst.ts": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst.ts@0.7.0-rc2/dist/esm/main.mjs",
+        "@myriaddreamin/typst.ts/compiler": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst.ts@0.7.0-rc2/dist/esm/compiler.mjs",
+        "@myriaddreamin/typst.ts/renderer": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst.ts@0.7.0-rc2/dist/esm/renderer.mjs",
+        "@myriaddreamin/typst.ts/contrib/global-compiler": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst.ts@0.7.0-rc2/dist/esm/contrib/global-compiler.mjs",
+        "@myriaddreamin/typst.ts/contrib/global-renderer": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst.ts@0.7.0-rc2/dist/esm/contrib/global-renderer.mjs",
+        "@myriaddreamin/typst-ts-web-compiler": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-web-compiler@0.7.0-rc2/pkg/wasm-pack-shim.mjs",
+        "@myriaddreamin/typst-ts-renderer": "https://cdn.jsdelivr.net/npm/@myriaddreamin/typst-ts-renderer@0.7.0-rc2/pkg/wasm-pack-shim.mjs",
+        "@cantoo/pdf-lib": "https://cdn.jsdelivr.net/npm/@cantoo/pdf-lib@2.7.1/dist/pdf-lib.esm.js"
+      }
+    }
+    </script>
+</head>
+<body>
+
+<div class="container-fluid px-4">
+    <div class="app-header text-center position-relative d-flex justify-content-center align-items-center" style="min-height: 45px;">
+        <div id="title-edit-group" class="title-edit-group">
+            <h2 id="mainTitle" class="d-inline-block mb-0 align-middle">Chargement...</h2>
+            <button id="btn-edit-title" class="btn btn-sm btn-outline-secondary ms-2 align-middle border-0" title="Modifier le titre du devoir" aria-label="Modifier le titre du devoir">✏️</button>
+        </div>
+        <div class="position-absolute end-0 d-flex align-items-center gap-1">
+            <button id="btn-settings-modal" class="btn btn-sm align-middle rounded-circle text-white" title="Paramètres (PDF, capacités attendues...)" aria-label="Ouvrir les paramètres" style="width:32px;height:32px;padding:0;line-height:30px;background-color:#5c7fa3;border-color:#5c7fa3;">⚙️</button>
+            <button id="btn-help-modal" class="btn btn-sm btn-info text-white align-middle rounded-circle" title="Afficher le mode d'emploi" aria-label="Afficher le mode d'emploi" style="width: 32px; height: 32px; padding: 0; line-height: 30px;">❓</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card p-2 sidebar-sticky">
+
+                <button id="btn-config-modal" class="btn btn-primary w-100 mb-2 fw-bold" title="Créer ou modifier le barème du devoir." aria-label="Éditer le barème">
+                    ✏️ Éditer le barème
+                </button>
+                <button id="btn-stats-modal" class="btn w-100 mb-2 fw-bold text-white" style="background-color:#7b68aa; border-color:#7b68aa;" title="Afficher la moyenne, la médiane et la réussite globale par question." aria-label="Statistiques de classe">
+                    📊 Statistiques de classe
+                </button>
+                <button id="btn-zip" class="btn w-100 mb-2 fw-bold text-white" style="background-color:#5c7fa3; border-color:#5c7fa3;" title="Générer une archive ZIP contenant les PDF individuels de chaque élève." aria-label="Tout télécharger en ZIP">
+                    📦 Télécharger les PDF de la classe
+                </button>
+                <button id="main-btn-publipostage" class="btn btn-info w-100 mb-2 fw-bold text-white" title="Préparer l'envoi automatique des copies par mail." aria-label="Communication des notes">
+                    📧 Communication des notes
+                </button>
+
+                <div class="border-top mt-2 pt-2">
+                    <p class="text-muted small mb-1 fw-semibold text-uppercase" style="font-size:0.7rem; letter-spacing:0.05em;">Liste des copies</p>
+                    <div id="studentList" class="list-group student-list-container"></div>
+                    <div class="mt-2 text-center">
+                        <small class="text-muted">Total : <span id="totalStudentsDisplay">1</span> copie(s)</small>
+                    </div>
+                </div>
+
+                <div class="mt-3 pt-3 border-top">
+                    <button id="btn-import-class" class="btn btn-outline-primary w-100 fw-bold" title="Importer la liste des élèves depuis Pronote." aria-label="Importer la liste des élèves depuis Pronote">
+                        📂 Importer la liste Pronote des élèves
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="card p-3 mb-4">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-7">
+                        <label class="form-label fw-bold">Nom de l'élève :</label>
+                        <input type="text" id="studentName" class="form-control" placeholder="Entrez le nom...">
+                    </div>
+                    <div class="col-md-5 text-end">
+                        <button id="btn-generate-pdf" class="btn btn-dark btn-sm mt-4 me-1" title="Télécharger la copie PDF de cet élève." aria-label="Télécharger le PDF individuel de cet élève">📄 PDF (Individuel)</button>
+                        <button id="btn-mark-tt" class="btn btn-sm mt-4 me-1" style="background-color:#d4eaf5; border-color:#8bbdd9; color:#1a4a6b;" title="Activer/désactiver le Tiers-Temps pour cet élève (+33% sur la note finale)." aria-label="Marquer Tiers-Temps">⏱️ TT</button>
+                        <button id="btn-mark-absent" class="btn btn-outline-secondary btn-sm mt-4 me-1" title="Marquer cet élève comme absent (aucun PDF généré, exclu des stats)." aria-label="Marquer absent">🚫 ABS</button>
+                        <button id="btn-delete-student" class="btn btn-outline-danger btn-sm mt-4" title="Supprimer cet élève" aria-label="Supprimer cet élève">🗑️</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="gradingArea"></div>
+
+            <div class="card p-3">
+                <h4 class="mb-3">Appréciation</h4>
+                <textarea id="appreciation" class="form-control" rows="3" placeholder="Saisir les commentaires ici..."></textarea>
+                <div id="appreciation-preview" class="mt-2 p-3 border rounded" style="display: none; background-color: #fdfdfd; min-height: 40px; font-size: 0.95em;"></div>
+                <div id="quickCommentsContainer" class="mt-3"></div>
+
+                <div id="skillBilanDisplay" class="mt-3 p-3 border rounded shadow-sm" style="display:none; background-color: #f0fdf4; border-color: #bbf7d0 !important;">
+                    <h6 class="text-success fw-bold mb-2">🎯 Bilan des capacités attendues (Automatique)</h6>
+                    <div id="skillBilanContent" class="small" style="line-height: 1.5;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-primary shadow-lg">
+            <div class="modal-body text-center p-4">
+                <img src="MonSantorin.webp" alt="Logo MonSantorin" class="img-fluid mb-4" style="max-height: 140px;" loading="eager" decoding="sync">
+                
+                <h4 id="welcomeModalLabel" class="text-primary mb-3 fw-bold">👋 Bienvenue !</h4>
+                <p class="mb-3 text-secondary">Pour corriger encore plus vite, saviez-vous que vous pouvez utiliser votre clavier ?</p>
+                
+                <div class="text-start bg-light p-3 rounded mb-4 shadow-sm" style="font-size: 0.95em;">
+                    <ul class="mb-0 ps-3" style="line-height: 1.8;">
+                        <li>Utilisez les flèches <kbd>↑</kbd> et <kbd>↓</kbd> pour passer d'une question à l'autre.</li>
+                        <li>Utilisez les flèches <kbd>←</kbd> et <kbd>→</kbd> pour baisser ou augmenter la note.</li>
+                        <li>Cliquez sur l'icône <span class="badge bg-info text-white rounded-circle p-1">❓</span> en haut de l'écran pour découvrir d'autres astuces !</li>
+                    </ul>
+                </div>
+                
+                <div class="form-check text-start mb-4 ms-1">
+                    <input class="form-check-input" type="checkbox" id="hideWelcomeCheckbox" style="cursor: pointer;">
+                    <label class="form-check-label text-muted small" for="hideWelcomeCheckbox" style="cursor: pointer;">
+                        Ne plus afficher ce message au démarrage
+                    </label>
+                </div>
+                
+                <button type="button" class="btn btn-primary w-100 fw-bold py-2" id="btn-close-welcome">Commencer à corriger 🚀</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="statsModal" tabindex="-1" aria-labelledby="statsModalLabel">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 id="statsModalLabel" class="modal-title">📊 Statistiques de la classe</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="alert alert-secondary py-1 mb-3" id="stat-scale-info" style="display:none; font-size: 0.9em;">Calculé sur la note ramenée sur 20.</div>
+                <div class="row mb-4">
+                    <div class="col-6">
+                        <div class="card bg-light border-0 h-100 py-3 d-flex flex-column justify-content-center">
+                            <h3 class="mb-0 text-primary" id="stat-avg">--</h3>
+                            <small class="text-muted fw-bold">Moyenne</small>
+                            <small class="text-muted mt-2">Écart-type : <span id="stat-sd" class="text-dark fw-bold">--</span></small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="card bg-light border-0 h-100 py-3 d-flex flex-column justify-content-center">
+                            <h3 class="mb-0 text-success" id="stat-median">--</h3>
+                            <small class="text-muted fw-bold">Médiane</small>
+                            <small class="text-muted mt-2">IQR : <span id="stat-iqr" class="text-dark fw-bold">--</span></small>
+                            <div class="d-flex justify-content-center gap-3 mt-1" style="font-size: 0.85em;">
+                                <span class="text-muted">Q1 : <span id="stat-q1" class="text-dark fw-bold">--</span></span>
+                                <span class="text-muted">Q3 : <span id="stat-q3" class="text-dark fw-bold">--</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-4"><div class="p-2 border rounded"><div class="fw-bold" id="stat-min">--</div><small class="text-muted">Min</small></div></div>
+                    <div class="col-4"><div class="p-2 border rounded"><div class="fw-bold" id="stat-max">--</div><small class="text-muted">Max</small></div></div>
+                    <div class="col-4"><div class="p-2 border rounded"><div class="fw-bold" id="stat-count">--</div><small class="text-muted">Copies terminées</small></div></div>
+                </div>
+                <div style="position: relative; height: 400px; width: 100%;">
+                    <canvas id="questionsChart" role="img" aria-label="Graphique de réussite par question et par exercice"></canvas>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 id="helpModalLabel" class="modal-title">📖 Mode d'emploi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="helpModalBody"></div>
+            <div class="modal-footer">
+                <button id="btn-help-load-example" class="btn btn-outline-primary btn-sm me-auto">🎓 Charger le barème d'exemple</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modale Paramètres (séparée de l'éditeur de barème) -->
+<div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color:#5c7fa3;">
+                <h5 id="settingsModalLabel" class="modal-title">⚙️ Paramètres</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size:0.75rem; letter-spacing:0.06em;">📄 Options PDF</h6>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="conf-showAppreciation" checked><label class="form-check-label" for="conf-showAppreciation">Afficher l'appréciation sur le PDF</label></div></div>
+                    <div class="col-md-6"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="conf-showPdfChart" checked><label class="form-check-label" for="conf-showPdfChart">Afficher le graphique sur le PDF</label></div></div>
+                    <div class="col-md-6"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="conf-showAnswersOnPdf" checked><label class="form-check-label" for="conf-showAnswersOnPdf">Afficher les réponses corrigées sur le PDF</label></div></div>
+                    <div class="col-md-6"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="conf-generateGlobalPdf" checked><label class="form-check-label" for="conf-generateGlobalPdf">Générer un PDF global de la classe (ZIP)</label></div></div>
+                    <div class="col-md-6"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="conf-blankPageForDuplex" checked><label class="form-check-label" for="conf-blankPageForDuplex">Ajouter une page blanche au PDF global (Recto-Verso)</label></div></div>
+                    <div class="col-md-6"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" id="conf-showPublipostage" checked><label class="form-check-label" for="conf-showPublipostage">Afficher le bouton 📧 Communication des notes</label></div></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="fw-semibold small">Taille du texte sur le PDF :</label>
+                    <select id="conf-pdfFontSize" class="form-select form-select-sm w-auto d-inline-block ms-2">
+                        <option value="12">12px</option><option value="14">14px</option><option value="16" selected>16px</option><option value="18">18px</option>
+                    </select>
+                </div>
+
+                <hr>
+                <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size:0.75rem; letter-spacing:0.06em;">🧠 Capacités attendues</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="small fw-semibold">Seuil Acquis (%) :</label>
+                        <input type="number" id="conf-threshold-acquis" class="form-control form-control-sm" value="75">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="small fw-semibold">Seuil En cours (%) :</label>
+                        <input type="number" id="conf-threshold-encours" class="form-control form-control-sm" value="40">
+                    </div>
+                </div>
+
+                <hr>
+                <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size:0.75rem; letter-spacing:0.06em;">✨ Génération IA</h6>
+                <div class="mb-3">
+                    <label class="small fw-semibold" for="conf-ai-step">Pas de notation IA :</label>
+                    <input type="number" id="conf-ai-step" class="form-control form-control-sm d-inline-block w-auto ms-2" value="0.25" step="0.125">
+                    <span class="form-text d-inline ms-2">Incrément utilisé lors de la génération du barème par l'IA (ex : 0.25, 0.5, 1).</span>
+                </div>
+
+                <hr>
+                <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size:0.75rem; letter-spacing:0.06em;">🔐 Mots de passe PDF (Nuage sécurisé)</h6>
+                <div class="mb-3">
+                    <label class="small fw-semibold" for="conf-establishment-key">Clé secrète de l'établissement</label>
+                    <input type="password" id="conf-establishment-key" class="form-control form-control-sm" placeholder="Communiquez la même clé à tous les collègues" autocomplete="off">
+                    <div class="form-text">Utilisée pour générer automatiquement le mot de passe PDF de chaque élève (à partir de son nom). Minimum 8 caractères recommandé.</div>
+                </div>
+
+                <hr>
+                <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size:0.75rem; letter-spacing:0.06em;">📧 Mode de communication</h6>
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="conf-comm-mode" id="conf-comm-cloud-password" value="cloud-password">
+                        <label class="form-check-label small" for="conf-comm-cloud-password">🔒 Nuage — dossier unique avec mots de passe individuels</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="conf-comm-mode" id="conf-comm-encrypted-manual" value="encrypted-manual">
+                        <label class="form-check-label small" for="conf-comm-encrypted-manual">🔐 PDF chiffrés — diffusion manuelle (sans Python)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="conf-comm-mode" id="conf-comm-pronote" value="pronote">
+                        <label class="form-check-label small" for="conf-comm-pronote">☁️ Nuage — liens de partage individuels</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="conf-comm-mode" id="conf-comm-monlycee" value="monlycee">
+                        <label class="form-check-label small" for="conf-comm-monlycee">📧 Messagerie monlycee.net (Île-de-France)</label>
+                    </div>
+                </div>
+
+                <hr>
+                <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size:0.75rem; letter-spacing:0.06em;">☁️ Stockage WebDAV
+                    <span id="btn-help-webdav-settings" role="button" tabindex="0" style="cursor:pointer; font-size:0.9em; margin-left:5px;" title="Comment trouver ces informations ?" aria-label="Aide : informations WebDAV">❓</span>
+                </h6>
+                <div class="mb-2">
+                    <label class="small fw-semibold" for="conf-webdav-url">URL du dossier racine WebDAV</label>
+                    <input type="url" id="conf-webdav-url" class="form-control form-control-sm" placeholder="https://nuageXX.apps.education.fr/remote.php/dav/files/votre%20identifiant">
+                </div>
+                <div class="mb-3">
+                    <label class="small fw-semibold" for="conf-webdav-user">Utilisateur WebDAV</label>
+                    <input type="text" id="conf-webdav-user" class="form-control form-control-sm" placeholder="votre identifiant">
+                </div>
+
+                <div id="conf-ent-section" class="d-none">
+                <hr>
+                <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size:0.75rem; letter-spacing:0.06em;">📧 Base ENT monlycee.net</h6>
+                <div class="mb-2">
+                    <label class="small fw-semibold" for="entCsvInput">Fichier CSV de la base élèves/parents (export ENT)</label>
+                    <input class="form-control form-control-sm" type="file" id="entCsvInput" accept=".csv">
+                    <div class="form-text">Demandez ce fichier à votre référent numérique. Champs obligatoires : <code>Type</code>, <code>Nom</code>, <code>Prénom</code>, <code>Identifiant</code>, <code>Parents</code>.</div>
+                </div>
+                </div>
+
+                <hr>
+                <h6 class="text-uppercase text-muted fw-bold mb-3" style="font-size:0.75rem; letter-spacing:0.06em;">📧 Serveur SMTP (monlycee.net)</h6>
+                <div class="row g-2">
+                    <div class="col-md-5">
+                        <label class="small fw-semibold" for="conf-smtp-host">Serveur SMTP</label>
+                        <input type="text" id="conf-smtp-host" class="form-control form-control-sm" placeholder="smtps.monlycee.net">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="small fw-semibold" for="conf-smtp-port">Port</label>
+                        <input type="number" id="conf-smtp-port" class="form-control form-control-sm" placeholder="465">
+                    </div>
+                    <div class="col-md-5">
+                        <label class="small fw-semibold" for="conf-smtp-user">Adresse e-mail</label>
+                        <input type="email" id="conf-smtp-user" class="form-control form-control-sm" placeholder="votre@email.fr">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                <button id="btn-save-settings" class="btn btn-primary btn-sm fw-bold">💾 Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Éditeur de barème -->
+<div class="modal fade" id="configModal" tabindex="-1" aria-labelledby="configModalLabel">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background-color:#5c7fa3;">
+                <h5 id="configModalLabel" class="modal-title">✏️ Éditeur de Barème</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body bg-light">
+
+                <!-- Réglages indépendants + import -->
+                <div class="d-flex flex-wrap gap-3 align-items-center px-1 mb-3 pb-3 border-bottom">
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="conf-scaleTo20">
+                        <label class="form-check-label fw-bold" for="conf-scaleTo20">Note sur 20</label>
+                    </div>
+                    <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="conf-showSkills" checked>
+                        <label class="form-check-label fw-bold" for="conf-showSkills">Capacités attendues</label>
+                    </div>
+                    <button id="btn-global-skills-editor" class="btn btn-sm btn-outline-info">✏️ Gérer les capacités</button>
+                    <span class="ms-auto fw-bold small">TOTAL BRUT : <span id="conf-total-global" class="badge bg-primary ms-1">0 pts</span></span>
+                    <button id="btn-import-config" class="btn btn-sm btn-primary fw-bold">📥 Importer un barème (.json)</button>
+                </div>
+
+                <!-- Choix 1 : Avec l'aide d'une IA -->
+                <div class="card mb-3 border-success">
+                    <div class="card-header bg-success bg-opacity-10 text-success fw-bold py-2">
+                        ✨ Choix 1 — Avec l'aide d'une IA
+                    </div>
+                    <div class="card-body py-2 d-flex flex-wrap gap-2 align-items-center">
+                        <button id="btn-generate-full-prompt" class="btn btn-sm btn-success" title="Génère la structure complète : exercices, questions, points, capacités attendues et réponses.">✨ Créer barème, capacités &amp; réponses</button>
+                        <button id="btn-generate-ia-prompt" class="btn btn-sm btn-outline-success" title="Analyse le barème existant dans l'éditeur et ajoute les capacités attendues et les réponses à chaque question.">🤖 Ajouter capacités &amp; réponses à un barème existant</button>
+                    </div>
+                </div>
+
+                <!-- Choix 2 : Manuellement -->
+                <div class="card mb-3 border-secondary">
+                    <div class="card-header bg-secondary bg-opacity-10 text-secondary fw-bold py-2">
+                        ✏️ Choix 2 — Manuellement
+                    </div>
+                    <div class="card-body py-2">
+                        <div id="configEditorContent"></div>
+                        <button id="btn-add-config-exercise" class="btn btn-outline-secondary w-100 mt-3">+ Ajouter un exercice</button>
+                    </div>
+                </div>
+
+                <div class="alert alert-warning py-2 mb-0 small">
+                    💡 Si vous avez déjà commencé à noter, évitez de modifier le nombre de questions ou d'exercices.
+                </div>
+            </div>
+            <div class="modal-footer align-items-center">
+                <div class="me-auto d-flex flex-wrap gap-1">
+                    <button id="btn-clear-full-bareme" class="btn btn-outline-danger btn-sm" title="Conserve les élèves, mais efface le barème et les notes.">Supprimer barème</button>
+                    <button id="btn-delete-all-students" class="btn btn-outline-danger btn-sm" title="Efface tous les élèves et toutes les notes, conserve le barème." aria-label="Supprimer la classe">Supprimer classe</button>
+                    <button id="btn-clear-bareme-class" class="btn btn-danger btn-sm" title="Efface le barème, toutes les notes et toute la classe.">Supprimer barème et classe</button>
+                </div>
+                <div class="form-check form-switch me-3 mb-0">
+                    <input class="form-check-input" type="checkbox" id="conf-autoExport" checked>
+                    <label class="small text-muted mb-0" for="conf-autoExport" style="margin-top: 2px;">Auto-sauvegarde</label>
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Annuler</button>
+                <button id="btn-save-config" class="btn btn-primary btn-sm fw-bold">💾 Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="publipostageModal" tabindex="-1" aria-labelledby="publipostageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header text-white" style="background-color:#5c7fa3;">
+        <h5 class="modal-title" id="publipostageModalLabel">Envoi des corrections aux élèves <img id="comm-mode-logo" src="" alt="" style="height:28px; margin-left:8px; vertical-align:middle; border-radius:4px;"><span id="comm-mode-label" class="fw-bold ms-1" style="color:#5bc8f5;"></span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+            <div class="modal-body">
+
+        <div class="alert alert-info d-flex align-items-start gap-2 py-2 mb-3 small" role="note">
+          <span class="flex-shrink-0">ℹ️</span>
+          <span>D'autres façons de communiquer les notes sont disponibles (PDF chiffrés sans Python, Nuage avec liens individuels, monlycee.net…). Le mode actif se choisit dans <strong>⚙️ Paramètres</strong>.</span>
+        </div>
+
+        <div id="publipostageTabsContent">
+
+          <div id="tab-cloud-password">
+
+            <div class="d-flex justify-content-center gap-3 mb-3 mt-1">
+
+              <div class="card p-3 shadow-sm" style="width:190px;">
+                <span class="badge bg-primary rounded-circle mb-2 mx-auto" style="width:30px;height:30px;line-height:20px;">1</span>
+                <small class="fw-bold text-center">Cliquez sur <strong>📦 Télécharger les PDF de la classe</strong> et décompressez l'archive dans un dossier sur votre ordinateur.</small>
+              </div>
+
+              <div class="card p-3 shadow-sm d-flex flex-column align-items-center" style="width:190px;">
+                <span class="badge bg-primary rounded-circle mb-2" style="width:30px;height:30px;line-height:20px;">2</span>
+                <small class="fw-bold text-center mb-2">Générez le script et double-cliquez dessus pour envoyer les copies sur le Nuage.</small>
+                <button class="btn btn-sm fw-bold text-white mt-auto" id="btn-start-cloud-password-script" style="background-color:#5c7fa3;border-color:#5c7fa3;">🚀 Générer le script</button>
+                <div class="d-flex align-items-center gap-1 mt-2">
+                  <img src="img/python-logo.svg" alt="Python" width="14" height="14">
+                  <span class="text-muted" style="font-size:0.72em;">Python requis</span>
+                </div>
+              </div>
+
+              <div class="card p-3 shadow-sm" style="width:190px;">
+                <span class="badge bg-primary rounded-circle mb-2 mx-auto" style="width:30px;height:30px;line-height:20px;">3</span>
+                <small class="fw-bold text-center">Copiez le lien vers le dossier généré par le script et donnez-le aux élèves de la classe par message.</small>
+              </div>
+
+            </div>
+
+            <div class="alert alert-secondary d-flex align-items-center gap-2 py-2 mb-3" style="font-size:0.85em;">
+              <span>⚙️</span>
+              <span>Première utilisation : configurez votre accès Nuage et votre clé d'établissement dans <strong>⚙️ Paramètres</strong>.</span>
+            </div>
+
+            <details class="mb-2">
+              <summary class="small text-muted" style="cursor:pointer;">Voir les mots de passe des élèves</summary>
+              <div class="mt-2 p-2 bg-light rounded border" style="border-color:#5c7fa3 !important;">
+                <div id="passwordImportStatus" class="mb-2 small fw-bold"></div>
+                <div class="table-responsive" style="max-height: 220px; overflow-y: auto;" id="passwordMappingTableContainer"></div>
+              </div>
+            </details>
+
+            <div class="d-flex justify-content-between align-items-center border-top pt-2">
+              <button class="btn btn-sm fw-bold" id="btn-download-password-csv" style="border:2px solid #5c7fa3; color:#5c7fa3; background:transparent;">📥 Télécharger la liste des mots de passe</button>
+              <button class="btn btn-sm fw-bold" id="btn-copy-grades-cloud-password" style="border:2px solid #5c7fa3; color:#5c7fa3; background:transparent;" data-bs-toggle="tooltip" data-bs-placement="top" title="Copie les notes dans le presse-papier pour les coller dans le client lourd Pronote.">📋 Copier les notes</button>
+            </div>
+
+          </div>
+
+          <div id="tab-encrypted-manual" class="d-none">
+
+            <div class="d-flex justify-content-center gap-3 mb-3 mt-1">
+
+              <div class="card p-3 shadow-sm" style="width:190px;">
+                <span class="badge bg-primary rounded-circle mb-2 mx-auto" style="width:30px;height:30px;line-height:20px;">1</span>
+                <small class="fw-bold text-center">Vérifiez que la <strong>clé secrète de l'établissement</strong> est renseignée dans <strong>⚙️ Paramètres</strong>.</small>
+              </div>
+
+              <div class="card p-3 shadow-sm d-flex flex-column align-items-center" style="width:190px;">
+                <span class="badge bg-primary rounded-circle mb-2" style="width:30px;height:30px;line-height:20px;">2</span>
+                <small class="fw-bold text-center mb-2">Téléchargez l'archive des copies <strong>PDF chiffrées</strong> (mot de passe personnel par élève).</small>
+                <button class="btn btn-sm fw-bold text-white mt-auto" id="btn-download-encrypted-zip" style="background-color:#5c7fa3;border-color:#5c7fa3;">📦 Télécharger les PDF chiffrés</button>
+              </div>
+
+              <div class="card p-3 shadow-sm" style="width:190px;">
+                <span class="badge bg-primary rounded-circle mb-2 mx-auto" style="width:30px;height:30px;line-height:20px;">3</span>
+                <small class="fw-bold text-center">Téléversez sur un dossier partagé de Nuage (ou autre) les PDF chiffrés et diffusez le lien de partage à vos élèves.</small>
+              </div>
+
+            </div>
+
+            <div class="alert alert-secondary d-flex align-items-center gap-2 py-2 mb-3" style="font-size:0.85em;">
+              <span>💡</span>
+              <span>Les mots de passe sont déterminés par la clé secrète de l'établissement et doivent être diffusés aux élèves en amont.</span>
+            </div>
+
+            <details class="mb-2">
+              <summary class="small text-muted" style="cursor:pointer;">Voir les mots de passe des élèves</summary>
+              <div class="mt-2 p-2 bg-light rounded border" style="border-color:#5c7fa3 !important;">
+                <div id="encryptedPasswordStatus" class="mb-2 small fw-bold"></div>
+                <div class="table-responsive" style="max-height: 220px; overflow-y: auto;" id="encryptedPasswordTableContainer"></div>
+              </div>
+            </details>
+
+            <div class="d-flex justify-content-between align-items-center border-top pt-2">
+              <button class="btn btn-sm fw-bold" id="btn-download-password-csv-manual" style="border:2px solid #5c7fa3; color:#5c7fa3; background:transparent;">📥 Télécharger la liste des mots de passe</button>
+              <button class="btn btn-sm fw-bold" id="btn-copy-grades-encrypted-manual" style="border:2px solid #5c7fa3; color:#5c7fa3; background:transparent;" data-bs-toggle="tooltip" data-bs-placement="top" title="Copie les notes dans le presse-papier pour les coller dans le client lourd Pronote.">📋 Copier les notes</button>
+            </div>
+
+          </div>
+
+          <div id="tab-pronote" class="d-none">
+
+            <div class="d-flex justify-content-center gap-3 mb-3 mt-1">
+
+              <div class="card p-3 shadow-sm" style="width:190px;">
+                <span class="badge bg-primary rounded-circle mb-2 mx-auto" style="width:30px;height:30px;line-height:20px;">1</span>
+                <small class="fw-bold text-center">Cliquez sur <strong>📦 Télécharger les PDF de la classe</strong> et décompressez l'archive dans un dossier sur votre ordinateur.</small>
+              </div>
+
+              <div class="card p-3 shadow-sm d-flex flex-column align-items-center" style="width:190px;">
+                <span class="badge bg-primary rounded-circle mb-2" style="width:30px;height:30px;line-height:20px;">2</span>
+                <small class="fw-bold text-center mb-2">Générez le script et double-cliquez dessus pour déposer les copies sur le Nuage.</small>
+                <button class="btn btn-sm fw-bold text-white mt-auto" id="btn-start-cloud-upload" style="background-color:#5c7fa3;border-color:#5c7fa3;">🚀 Générer le script</button>
+                <div class="d-flex align-items-center gap-1 mt-2">
+                  <img src="img/python-logo.svg" alt="Python" width="14" height="14">
+                  <span class="text-muted" style="font-size:0.72em;">Python requis</span>
+                </div>
+              </div>
+
+              <div class="card p-3 shadow-sm" style="width:190px;">
+                <span class="badge bg-primary rounded-circle mb-2 mx-auto" style="width:30px;height:30px;line-height:20px;">3</span>
+                <small class="fw-bold text-center">Ouvrez le fichier <code>liens_partages.csv</code> créé dans votre dossier de copies et distribuez les liens à chaque élève.</small>
+              </div>
+
+            </div>
+
+            <div class="alert alert-secondary d-flex align-items-center gap-2 py-2 mb-2" style="font-size:0.85em;">
+              <span>⚙️</span>
+              <span>Première utilisation : configurez votre accès Nuage dans <strong>⚙️ Paramètres</strong>.</span>
+            </div>
+
+            <div class="d-flex justify-content-end border-top pt-2">
+              <button class="btn btn-sm fw-bold" id="btn-copy-grades-cloud" style="border:2px solid #5c7fa3; color:#5c7fa3; background:transparent;" data-bs-toggle="tooltip" data-bs-placement="top" title="Copie les notes dans le presse-papier pour les coller dans le client lourd Pronote.">📋 Copier les notes</button>
+            </div>
+
+          </div>
+
+          <div id="tab-monlycee" class="d-none">
+
+            <div class="d-flex justify-content-center gap-3 mb-3 mt-1">
+
+              <div class="card p-3 shadow-sm d-flex flex-column align-items-center" style="width:190px;">
+                <span class="badge bg-primary rounded-circle mb-2" style="width:30px;height:30px;line-height:20px;">1</span>
+                <small class="fw-bold text-center mb-2">Lancez le rapprochement entre vos élèves et la base ENT.</small>
+                <button class="btn btn-sm fw-bold mt-auto" id="btn-render-matching-table" style="border:2px solid #5c7fa3; color:#5c7fa3; background:transparent;">🔄 Lancer le rapprochement</button>
+              </div>
+
+              <div class="card p-3 shadow-sm" style="width:190px;">
+                <span class="badge bg-primary rounded-circle mb-2 mx-auto" style="width:30px;height:30px;line-height:20px;">2</span>
+                <small class="fw-bold text-center">Personnalisez le message qui accompagnera la copie.</small>
+              </div>
+
+              <div class="card p-3 shadow-sm d-flex flex-column align-items-center" style="width:190px;">
+                <span class="badge bg-primary rounded-circle mb-2" style="width:30px;height:30px;line-height:20px;">3</span>
+                <small class="fw-bold text-center mb-2">Générez le script Python et double-cliquez dessus pour envoyer les copies aux élèves (et parents si activé).</small>
+                <button class="btn btn-sm fw-bold text-white mt-auto" id="btn-publipostage" style="background-color:#5c7fa3;border-color:#5c7fa3;">🚀 Générer le script</button>
+                <div class="d-flex align-items-center gap-1 mt-2">
+                  <img src="img/python-logo.svg" alt="Python" width="14" height="14">
+                  <span class="text-muted" style="font-size:0.72em;">Python requis</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Personnalisation du message (sous les cartes) -->
+            <div class="p-3 bg-light rounded border mb-3" style="border-color:#5c7fa3 !important;">
+              <h6 class="fw-bold mb-2 small">✉️ Personnalisation du message</h6>
+              <div class="mb-2">
+                <label class="form-label fw-bold small mb-1" for="smtpSubject">Sujet</label>
+                <input type="text" class="form-control form-control-sm" id="smtpSubject" placeholder="Correction de votre devoir de NSI">
+              </div>
+              <div>
+                <label class="form-label fw-bold small mb-1" for="smtpBody">Corps de l'e-mail</label>
+                <textarea class="form-control form-control-sm" id="smtpBody" rows="3" placeholder="Rédigez votre message ici..."></textarea>
+              </div>
+            </div>
+
+            <div class="form-check form-switch mb-3" style="margin-left:0;">
+              <input class="form-check-input ms-0 me-2" type="checkbox" id="chk-add-parents">
+              <label class="form-check-label small fw-semibold" for="chk-add-parents">👨‍👩‍👦 Inclure les représentants légaux dans les envois</label>
+            </div>
+
+            <div class="alert alert-secondary d-flex align-items-center gap-2 py-2 mb-2" style="font-size:0.85em;">
+              <span>⚙️</span>
+              <span>Première utilisation : importez la base ENT et configurez le serveur SMTP dans <strong>⚙️ Paramètres</strong>.</span>
+            </div>
+
+            <details id="matching-details" class="mb-2">
+              <summary class="small text-muted" style="cursor:pointer;">Voir le tableau de rapprochement</summary>
+              <div class="mt-2 table-responsive" style="max-height:220px; overflow-y:auto;">
+                <table class="table table-sm table-bordered table-hover">
+                  <thead class="table-light sticky-top">
+                    <tr><th>Élève (Copie)</th><th>Identifiant ENT trouvé</th><th>Email final d'envoi</th></tr>
+                  </thead>
+                  <tbody id="matchingTableBody"></tbody>
+                </table>
+              </div>
+            </details>
+
+            <div class="d-flex justify-content-end border-top pt-2">
+              <button class="btn btn-sm fw-bold" id="btn-copy-grades-smtp" style="border:2px solid #5c7fa3; color:#5c7fa3; background:transparent;" data-bs-toggle="tooltip" title="Copie les notes dans le presse-papier pour Pronote.">📋 Copier les notes</button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="pronoteGuideModal" tabindex="-1" aria-labelledby="pronoteGuideModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-primary">
+            <div class="modal-header bg-primary text-white">
+                <h5 id="pronoteGuideModalLabel" class="modal-title">📂 Importer la liste depuis Pronote</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-info d-flex align-items-start mb-3">
+                    <span class="fs-3 me-3">💡</span>
+                    <div>
+                        <strong>Utilisez la version web de Pronote</strong>, elle fournit directement le fichier à importer.
+                    </div>
+                </div>
+                <h6 class="fw-bold text-primary mb-3">Comment exporter depuis Pronote Web :</h6>
+                <ol class="mb-0" style="line-height: 1.8;">
+                    <li class="mb-2">Connectez-vous à <strong>Pronote version Web</strong> (pas le client lourd).</li>
+                    <li class="mb-2">Allez dans <strong>Mes données &gt; CLASSES/ÉLÈVES &gt; Liste des élèves</strong>.</li>
+                    <li class="mb-2">Choisissez votre groupe ou votre classe.</li>
+                    <li class="mb-2">En haut à droite, cliquez sur le bouton <kbd>Copier la liste (format CSV)</kbd>.</li>
+                    <li class="mb-2">Pronote télécharge automatiquement un fichier — c'est ce fichier que vous importez ici.</li>
+                </ol>
+            </div>
+            <div class="modal-footer flex-column gap-2">
+                <button type="button" id="btn-pronote-choose-file" class="btn btn-primary fw-bold w-100" data-bs-dismiss="modal">
+                    📂 Choisir mon fichier Pronote
+                </button>
+                <button type="button" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="aiGuideModal" tabindex="-1" aria-labelledby="aiGuideModalLabel">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-success">
+            <div class="modal-header bg-success text-white">
+                <h5 id="aiGuideModalLabel" class="modal-title">🤖 Assistant IA — Étapes suivantes</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success d-flex align-items-center mb-3">
+                    <span class="fs-2 me-3">✅</span>
+                    <div><strong>Prompt copié !</strong><br>Le texte d'instruction pour l'IA est dans votre presse-papier.</div>
+                </div>
+                <h6 class="fw-bold text-primary mb-2">Comment utiliser l'IA :</h6>
+                <div id="ai-guide-instructions" class="mb-3"></div>
+                <textarea id="ia-response-textarea" class="form-control" rows="5" placeholder="Collez ici la réponse de votre IA (Ctrl+V)…" style="font-family: monospace; font-size: 0.8em; resize: vertical;"></textarea>
+            </div>
+            <div class="modal-footer d-flex gap-2">
+                <button type="button" id="btn-paste-ia-result" class="btn btn-success fw-bold flex-grow-1">✅ Valider et appliquer</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="globalSkillsModal" tabindex="-1" aria-labelledby="globalSkillsModalLabel" style="z-index: 1060;">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 id="globalSkillsModalLabel" class="modal-title">✏️ Dictionnaire des Capacités attendues</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="small text-muted">Corrigez ici le nom d'une capacité attendue pour qu'elle soit renommée partout.</p>
+                <div id="globalSkillsList"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" id="btn-save-global-skills" class="btn btn-primary fw-bold">💾 Appliquer partout</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<input type="file" id="csvFileInput" accept=".csv" style="display:none">
+<input type="file" id="classCsvInput" accept=".csv" style="display:none">
+<input type="file" id="configFileImport" accept=".json" style="display:none">
+
+<!-- Modale de confirmation réutilisable (remplace les confirm() natifs) -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-modal="true" data-bs-backdrop="static" data-bs-keyboard="false" style="z-index: 1070;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Confirmation</h5>
+            </div>
+            <div class="modal-body" id="confirmModalBody"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="confirmModalNo">Annuler</button>
+                <button type="button" class="btn btn-danger" id="confirmModalYes">Confirmer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="nav-buttons fixed-bottom" id="progress-bar-wrapper">
+    <div class="container-fluid px-4">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <div class="global-score-box d-flex flex-column" role="status" aria-live="polite" aria-label="Score total de l'élève">
+                    <span>Total : <span id="scoreWrapper"><span id="finalScoreDisplay"></span> <span id="maxScoreDisplay" style="font-size: 0.85em; opacity: 0.75;"></span></span></span>
+                    <span id="scaledScoreContainer" class="badge bg-warning text-dark mt-1" style="display:none; width:fit-content;">Soit : <span id="scaledScoreDisplay"></span> / 20</span>
+                </div>
+            </div>
+            <div class="col-md-9 d-flex justify-content-end align-items-center">
+                <div class="form-check form-switch mb-0 me-4 bg-light px-3 py-1 rounded border shadow-sm" style="display: inline-block;">
+                    <input class="form-check-input ms-0 me-2" type="checkbox" id="main-toggle-answers" checked style="cursor:pointer;">
+                    <label class="form-check-label fw-bold text-secondary" for="main-toggle-answers" style="cursor:pointer; font-size: 0.9em; padding-top: 2px;" title="Raccourci clavier : Alt + R">💡 Réponses</label>
+                </div>
+                <button id="btn-export-csv" class="btn fw-bold text-white"
+                    style="background-color:#5c7fa3; border-color:#5c7fa3;"
+                    aria-label="Sauvegarder la correction en CSV"
+                    data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Sauvegarde toutes les notes et appréciations dans un fichier à conserver précieusement.">
+                    💾 Sauvegarder Correction
+                </button>
+                <button id="btn-trigger-import" class="btn fw-bold ms-2" style="border:2px solid #5c7fa3; color:#5c7fa3; background:transparent;"
+                    aria-label="Importer une correction depuis un CSV"
+                    data-bs-toggle="tooltip" data-bs-placement="top"
+                    title="Recharge des notes précédemment sauvegardées. Le barème correspondant doit déjà être chargé.">
+                    📥 Importer Correction
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editQuickCommentsModal" tabindex="-1" aria-labelledby="editQuickCommentsModalLabel">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header bg-secondary text-white">
+				<h5 id="editQuickCommentsModalLabel" class="modal-title">✏️ Commentaires rapides</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<textarea id="editQC_textarea" class="form-control" rows="10"></textarea>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+				<button id="btn-save-quick-comments" class="btn btn-primary">💾 Enregistrer</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<template id="template-grading-exo">
+    <div class="card p-3 mb-3">
+        <h4 class="text-primary border-bottom pb-2 grading-exo-title-area">
+            <span class="grading-exo-title"></span>
+            <span class="float-end fw-bold fs-5 grading-exo-total" id="">-- pts</span>
+        </h4>
+        <div class="grading-exo-content"></div>
+    </div>
+</template>
+
+<template id="template-grading-part">
+    <div class="part-header mb-2 fw-bold text-dark border-bottom pb-1" style="font-size: 1.1em; margin-top: 1rem;">
+        <span class="grading-part-name"></span>
+        <span class="float-end text-dark grading-part-total" id="">--</span>
+    </div>
+    <div class="grading-part-content mb-3"></div>
+</template>
+
+<template id="template-grading-question">
+    <div class="mb-2 py-1 grading-question-row" style="border-bottom: 1px dashed #eee;">
+        <div class="row align-items-center grading-question-header mx-0">
+            <div class="col-8">
+                <label class="mb-0 grading-q-label-text"></label>
+            </div>
+            <div class="col-4">
+                <select class="form-select form-select-sm score-input" data-id="" aria-label="Note pour cette question"></select>
+            </div>
+        </div>
+        <div class="answer-hint d-none grading-question-answer" style="margin-top: 0.25rem;">
+            <span class="text-muted small">💡 <span class="fst-italic grading-q-answer-text"></span></span>
+        </div>
+    </div>
+</template>
+
+<script src="js/papaparse.min.js"></script>
+<script type="module" src="js/state.js"></script>
+<script type="module" src="js/engine.js"></script>
+<script type="module" src="js/addons.js"></script>
+<script type="module" src="js/student.js"></script>
+<script type="module" src="js/editor.js"></script>
+<script type="module" src="js/io.js"></script>
+<script type="module" src="js/pdf.js"></script>
+<script type="module">
+    import { init } from './js/events.js';
+    window.onload = init;
+</script>
+</body>
+</html>

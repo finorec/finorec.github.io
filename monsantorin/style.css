@@ -1,0 +1,371 @@
+/* --- BASE ET ARRIÈRE-PLAN --- */
+body { 
+    background-color: #f4f7f9; 
+    background-image: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+    background-attachment: fixed;
+    padding-top: 20px; 
+    padding-bottom: 80px; 
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- EN-TÊTE PRINCIPAL --- */
+#mainTitle {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #1e3a5f;
+}
+
+.app-header {
+    border-bottom: 3px solid #5c7fa3;
+    padding-bottom: 0.75rem;
+    margin-bottom: 1.5rem !important;
+}
+
+/* --- CARTES ET CONTENEURS --- */
+.card { 
+    background-color: #ffffff;
+    margin-bottom: 20px; 
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); 
+    transition: box-shadow 0.2s ease;
+}
+
+.part-header { 
+    background-color: #e9ecef; 
+    font-weight: bold; 
+    padding: 10px; 
+    border-radius: 5px; 
+    margin-top: 15px; 
+    margin-bottom: 10px; 
+    color: #495057; 
+}
+
+/* --- SCROLLBAR PERSONNALISÉE (Liste élèves et navigateur) --- */
+::-webkit-scrollbar { 
+    width: 8px; 
+}
+::-webkit-scrollbar-track { 
+    background: transparent; 
+}
+::-webkit-scrollbar-thumb { 
+    background-color: #cbd5e1; 
+    border-radius: 10px; 
+}
+::-webkit-scrollbar-thumb:hover { 
+    background-color: #94a3b8; 
+}
+
+/* --- NAVIGATION ET BOUTONS FIXES --- */
+.nav-buttons { 
+    position: fixed; bottom: 0; left: 0; width: 100%; 
+    background: white; padding: 15px;
+    border-top: 4px solid transparent;
+    background-clip: padding-box;
+    transition: border-image 0.5s ease; 
+    z-index: 1000; 
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.1); 
+}
+
+.modal-dialog {
+    margin-bottom: 1.75rem;
+}
+
+/* --- BLOCS DE CODE (intitulés et réponses) --- */
+.inline-code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.88em;
+    background-color: #f0f0f0;
+    border: 1px solid #d0d0d0;
+    border-radius: 3px;
+    padding: 0.1em 0.35em;
+    color: #c7254e;
+    white-space: pre;
+}
+.code-block-wrapper {
+    margin: 0.4em 0;
+    border-radius: 5px;
+    overflow: hidden;
+    border: 1px solid #dee2e6;
+}
+.code-lang-label {
+    background-color: #343a40;
+    color: #adb5bd;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.75em;
+    padding: 0.15em 0.75em;
+    letter-spacing: 0.04em;
+    user-select: none;
+}
+.code-block {
+    margin: 0;
+    padding: 0.6em 0.9em;
+    background-color: #f8f9fa;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.87em;
+    line-height: 1.55;
+    overflow-x: auto;
+    white-space: pre;
+    tab-size: 4;
+}
+.code-block code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+    color: #212529;
+}
+
+/* --- ÉLÉMENTS DE NOTATION --- */
+mjx-container { font-size: 1.1em !important; outline: none; }
+
+.global-score-box { font-size: 1.3em; font-weight: bold; }
+.score-incomplete { color: #dc3545; }
+.score-complete { color: #198754; }
+
+select.unanswered { border: 2px solid #dc3545; background-color: #fff8f8; }
+
+/* Focus dynamique sur les champs de note */
+.score-input {
+    transition: all 0.2s ease-in-out;
+}
+.score-input:focus {
+    background-color: #f0f7ff;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.15);
+    transform: scale(1.03);
+    z-index: 10;
+}
+
+/* Question en cours de correction (focus sur la note) */
+.grading-question-header {
+    border-left: 4px solid transparent;
+    transition: border-color 0.2s ease;
+}
+.grading-question-row.grading-question-active .grading-question-header {
+    border-left-color: #0d6efd;
+}
+.grading-question-row.grading-question-active {
+    border-bottom-color: #b6d4fe !important;
+}
+.grading-question-answer {
+    padding-left: calc(var(--bs-gutter-x, 1.5rem) * 0.5);
+}
+.grading-question-row.grading-question-active .grading-q-label-text {
+    font-weight: 600;
+}
+.grading-question-row.grading-question-active .answer-hint.d-none {
+    display: block !important;
+}
+
+/* --- LISTE DES ÉLÈVES (SIDEBAR) --- */
+.student-list-container {
+    max-height: 55vh;
+    overflow-y: auto;
+    position: relative; 
+}
+.sidebar-sticky {
+    position: sticky;
+    top: 20px;
+}
+.list-group-item { 
+    cursor: pointer; 
+    transition: background-color 0.2s ease, padding-left 0.2s ease, color 0.2s ease; 
+}
+.list-group-item:not(.active):hover {
+    background-color: #f8fafc;
+    padding-left: 1.25rem;
+    color: #0d6efd;
+}
+.list-group-item.active {
+    font-weight: bold;
+    border-color: #0d6efd;
+    background-color: #0d6efd;
+    color: white;
+}
+
+/* --- CONFIGURATION DU BARÈME --- */
+.config-card { border-left: 5px solid #0d6efd; margin-bottom: 15px; }
+.config-part { border-left: 4px solid #6c757d; margin-left: 20px; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px; }
+.question-row { background: white; border-bottom: 1px solid #eee; padding: 5px 0; }
+#configModal .config-questions-table {
+    table-layout: fixed;
+    width: 100%;
+}
+#configModal .config-question-label-cell {
+    width: 42%;
+}
+#configModal .config-question-label,
+#configModal .config-question-answer {
+    width: 100%;
+    min-height: 2.75rem;
+    line-height: 1.45;
+}
+#configModal .config-question-actions {
+    display: grid;
+    grid-template-columns: repeat(2, 1.75rem);
+    gap: 0.2rem;
+    justify-content: center;
+}
+#configModal .config-question-actions .btn {
+    width: 1.75rem;
+    padding-left: 0;
+    padding-right: 0;
+}
+.btn-remove { color: #dc3545; cursor: pointer; }
+
+/* --- COMMENTAIRES RAPIDES --- */
+.quick-comment { cursor: pointer; user-select: none; transition: opacity 0.2s; white-space: normal; text-align: left; }
+.quick-comment:hover { opacity: 0.7; }
+
+
+/* --- STYLE DES ANTISÈCHES --- */
+body:not(.show-answers) .answer-hint { display: none !important; }
+.answer-hint {
+    margin-top: 2px;
+    padding-left: 10px;
+    border-left: 3px solid #ffc107;
+    background-color: #fffdf5;
+    font-size: 0.85em;
+    color: #6c757d;
+    border-radius: 0 4px 4px 0;
+    padding-top: 6px;
+    padding-bottom: 6px;
+}
+
+/* --- STYLE DES COMPÉTENCES (BADGES) --- */
+.skill-badge {
+    display: inline-flex; align-items: center;
+    background-color: #e0f2fe; color: #0284c7;
+    font-size: 0.85em; padding: 2px 8px; border-radius: 12px;
+    margin-right: 5px; margin-top: 5px; border: 1px solid #bae6fd;
+}
+.skill-badge-remove {
+    margin-left: 6px; cursor: pointer; color: #0ea5e9; font-weight: bold;
+}
+.skill-badge-remove:hover { color: #dc3545; }
+
+.skill-input-container { display: inline-block; margin-top: 5px; }
+.skill-input {
+    border: 1px dashed #ccc; border-radius: 12px; padding: 2px 10px;
+    font-size: 0.85em; outline: none; width: 140px; background: transparent;
+    transition: width 0.3s ease, border-color 0.2s; 
+}
+.skill-input:focus { 
+    border-color: #0d6efd; background: white; border-style: solid; 
+    width: 380px; 
+}
+.skill-acquis { color: #198754; }
+.skill-encours { color: #d97706; }
+.skill-nonacquis { color: #dc3545; }
+
+/* --- STYLE TIERS TEMPS --- */
+.bg-tiers-temps {
+    background-color: #d4eaf5 !important;
+    border-color: #8bbdd9 !important;
+    color: #1a4a6b !important;
+}
+.list-group-item.list-group-item-info.active {
+    background-color: #5c7fa3 !important;
+    border-color: #5c7fa3 !important;
+    color: white !important;
+}
+
+/* --- STYLE ABSENT --- */
+.bg-absent {
+    background-color: #e9ecef !important;
+    border-color: #adb5bd !important;
+    color: #6c757d !important;
+}
+.list-group-item.list-group-item-secondary.active {
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+    color: white !important;
+}
+
+/* --- ANIMATIONS ET ÉTAT VIDE --- */
+@keyframes pulse-border {
+    0% { box-shadow: 0 0 0 0 rgba(108, 117, 125, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(108, 117, 125, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(108, 117, 125, 0); }
+}
+
+@keyframes pulse-title {
+    0% { box-shadow: 0 0 0 0 rgba(92, 127, 163, 0.55); }
+    70% { box-shadow: 0 0 0 8px rgba(92, 127, 163, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(92, 127, 163, 0); }
+}
+
+.pulse-button {
+    animation: pulse-border 2s infinite;
+}
+
+.title-edit-group {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 0.5rem;
+    padding: 0.15rem 0.35rem;
+}
+
+.pulse-title-group {
+    animation: pulse-title 2s infinite;
+    animation-delay: 1s;
+}
+
+.empty-state-container {
+    text-align: center;
+    padding: 3rem;
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 1rem;
+    color: #6c757d;
+}
+
+/* --- GESTION DES MODALES EMPILÉES --- */
+#helpModal {
+    /* Positionne l'aide au-dessus des modales standards (1055) et sous le dictionnaire des capacités (1060) */
+    z-index: 1058; 
+}
+
+/* --- ACCORDÉON DU MANUEL --- */
+#helpModalBody details {
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 0;
+}
+#helpModalBody details > summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 0.6rem 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    user-select: none;
+}
+#helpModalBody details > summary::-webkit-details-marker { display: none; }
+#helpModalBody details > summary::before {
+    content: "▶";
+    font-size: 0.65em;
+    color: #6c757d;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+}
+#helpModalBody details[open] > summary::before {
+    transform: rotate(90deg);
+}
+#helpModalBody details > summary:hover {
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+#helpModalBody details > .details-body {
+    padding: 0.25rem 1.25rem 0.75rem 1.25rem;
+}
+/* sous-sections (h6) dans la section 7 */
+#helpModalBody details.sub-section {
+    border-bottom: none;
+    border-left: 3px solid #dee2e6;
+    margin: 0.5rem 0;
+}
+#helpModalBody details.sub-section > summary {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.95em;
+}

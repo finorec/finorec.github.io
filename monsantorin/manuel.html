@@ -1,0 +1,161 @@
+<p>Cette application s'adresse aux professeurs dont les DST ont un nombre de points par question bien défini, déterminant la note finale. Elle vous permettra de gagner du temps de correction tout en faisant pour vous des statistiques détaillées et des fiches personnalisées pour vos élèves&nbsp;: ils pourront y voir leur positionnement dans la classe, le détail des points et dans les capacités attendues, lesquelles sont acquises, en cours d'acquisition et non acquises. Par ailleurs, MonSantorin vous facilite la distribution des fiches (PDF) à vos élèves en proposant quatre façons différentes de les donner pour couvrir toutes les situations.
+</p>
+<p><a href="mailto:laurent.briend@ac-creteil.fr">L.B</a></p>
+
+<details>
+  <summary class="h5 text-primary mb-0">1. Le barème et les capacités attendues</summary>
+  <div class="details-body">
+    <p>Le barème se crée dans <strong>✏️ Éditer le barème</strong>. Deux approches sont possibles&nbsp;:</p>
+
+    <p><strong>Approche 1 — Saisie manuelle</strong><br>
+    Ajoutez vos exercices, parties et questions directement dans l'éditeur. Pour chaque question, renseignez son intitulé, son barème et, si vous le souhaitez, ses <em>capacités attendues</em> (les compétences évaluées) ainsi qu'une réponse courte. Les capacités attendues apparaissent sous forme de petits badges cliquables ; appuyez sur <kbd>Entrée</kbd> pour en valider une nouvelle. Le champ s'allonge au clic et propose des suggestions par ordre alphabétique.</p>
+
+    <p><strong>Approche 2 — Génération par IA puis audit</strong><br>
+    Cliquez sur <kbd>✨ Créer barème, capacités &amp; réponses</kbd>&nbsp;: un prompt est copié dans votre presse-papier. Collez-le dans votre IA favorite en <strong>joignant votre sujet</strong> (et éventuellement votre corrigé). L'IA renvoie une structure complète (exercices, questions, points, capacités, réponses). Copiez sa réponse, collez-la dans le champ qui apparaît dans MonSantorin, puis cliquez sur <kbd>✅ Valider et appliquer</kbd>.<br>
+    <em>Vous avez déjà saisi vos exercices à la main ?</em> Utilisez plutôt <kbd>🤖 Ajouter capacités &amp; réponses à un barème existant</kbd>&nbsp;: l'IA respecte vos points et complète uniquement les capacités et réponses.</p>
+
+    <p>Dans les deux cas, vous pouvez affiner le barème à tout moment depuis l'éditeur&nbsp;:</p>
+    <ul>
+        <li>Bouton <strong>✏️ Renommer les capacités</strong>&nbsp;: corrigez une faute ou supprimez massivement une capacité partout à la fois (corbeille 🗑️).</li>
+        <li>Interrupteur <strong>💡 Réponses</strong> (ou <kbd>Alt</kbd> + <kbd>R</kbd>)&nbsp;: masquez ou affichez les réponses courtes à la volée.</li>
+        <li><strong>Bilan automatique&nbsp;:</strong> une fois toutes les questions d'un élève notées, son bilan de capacités est généré et mis à jour automatiquement.</li>
+        <li><strong>Code source dans les intitulés et réponses&nbsp;:</strong> vous pouvez inclure du code informatique dans les libellés de questions et les réponses.<br>
+        <strong>Saisie manuelle&nbsp;:</strong> accents graves pour le code en ligne (<code>`variable`</code>) ou bloc multiligne (<code>```python</code> … <code>```</code>).<br>
+        <strong>Réponses générées par une IA&nbsp;:</strong> le prompt MonSantorin demande les balises dédiées <code>[[python]]…[[/python]]</code>, <code>[[sql]]…[[/sql]]</code>, etc. (sans accents graves, compatibles Gemini). MonSantorin les convertit automatiquement en affichage code.<br>
+        Langages pris en charge&nbsp;: Python, SQL, JavaScript, HTML… Police monospace et indentation préservées dans MonSantorin et les PDF.</li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary class="h5 text-primary mb-0">2. Gestion des élèves</summary>
+  <div class="details-body">
+    <ul>
+        <li><strong>Import depuis Pronote&nbsp;:</strong> Cliquez sur <strong>📂 Importer la liste Pronote des élèves</strong>. Une fenêtre vous guidera pas à pas. En résumé&nbsp;: dans la <strong>version web de Pronote</strong>, allez dans <em>Mes données &gt; CLASSES/ÉLÈVES &gt; Liste des élèves</em>, choisissez votre groupe, puis cliquez en haut à droite sur <kbd>Copier la liste (format CSV)</kbd>. Importez ensuite le fichier téléchargé dans MonSantorin.</li>
+        <li><strong>Ajout manuel&nbsp;:</strong> Utilisez le bouton <strong>+ Nouvel élève</strong> situé à la fin de la liste des copies (à gauche) pour ajouter une copie vide.</li>
+        <li><strong>Élève absent&nbsp;:</strong> Cliquez sur le bouton <strong>🚫 ABS</strong> sur la fiche de l'élève pour le marquer comme absent. Il apparaît en grisé dans la liste. Un élève absent est exclu des statistiques de classe, ignoré lors de la génération du ZIP et de la communication des notes. Aucun PDF ne lui est généré. Cliquer à nouveau sur le bouton retire le statut absent.</li>
+        <li><strong>Supprimer un élève&nbsp;:</strong> Utilisez le bouton <strong>🗑️</strong> sur la fiche de l'élève.</li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary class="h5 text-primary mb-0">3. Notation</summary>
+  <div class="details-body">
+    <p>Utilisez les flèches <kbd>↑</kbd> <kbd>↓</kbd> pour passer d'une question à l'autre et les flèches <kbd>←</kbd> <kbd>→</kbd> pour baisser ou augmenter la note — ou les menus déroulants si vous préférez la souris. Tapez les premières lettres du nom d'un élève ou cliquez sur son nom dans la liste pour accéder directement à sa page de notation.</p>
+  </div>
+</details>
+
+<details>
+  <summary class="h5 text-primary mb-0">4. Sauvegarde des notes</summary>
+  <div class="details-body">
+    <p>Une fois la correction terminée, cliquez sur le bouton jaune <strong>💾 Sauvegarder Correction</strong> en bas. Cela génère un fichier contenant toutes les notes et appréciations, à conserver précieusement.</p>
+  </div>
+</details>
+
+<details>
+  <summary class="h5 text-primary mb-0">5. Fiche de notation individuelle</summary>
+  <div class="details-body">
+    <p>Cliquez sur le bouton noir <strong>📄 PDF (Individuel)</strong> pour les élèves qui demandent le détail de leur note.</p>
+    <p>Vous pouvez également télécharger <strong>toutes les fiches d'un coup</strong> via le bouton <strong>📦 Télécharger les PDF de la classe</strong>. Le fichier généré est une archive ZIP à décompresser avant de communiquer les fiches aux élèves.</p>
+    <div class="alert alert-info py-2 small mt-2">
+        💡 <strong>Astuces d'exportation&nbsp;:</strong> Depuis le bouton <strong>⚙️ Paramètres</strong> (en haut de page), vous pouvez&nbsp;:<br>
+        - Masquer le bloc "Appréciation" sur les PDF.<br>
+        - Générer un <strong>PDF global de toute la classe</strong>.<br>
+        - Activer une <strong>page blanche automatique</strong> pour le recto-verso (utile pour l'impression).<br>
+        - Ajouter un <strong>Graphique de réussite</strong> individuel.
+    </div>
+  </div>
+</details>
+
+<details>
+  <summary class="h5 text-primary mb-0">6. Distribution des copies (Nuage ou Monlycee.net)</summary>
+  <div class="details-body">
+    <p>MonSantorin propose quatre méthodes pour distribuer les fiches PDF aux élèves et à leurs familles&nbsp;:</p>
+    <ul>
+        <li><strong>Nuage (Dossier unique & Mots de passe)&nbsp;:</strong> un seul lien public pour toute la classe, chaque copie verrouillée par un mot de passe PDF personnel (script Python requis).</li>
+        <li><strong>PDF chiffrés — diffusion manuelle&nbsp;:</strong> MonSantorin chiffre les copies dans le navigateur&nbsp;; vous les diffusez vous-même (Nuage, Pronote, messagerie…). Aucun Python.</li>
+        <li><strong>Nuage (Liens individuels)&nbsp;:</strong> un lien de téléchargement unique et anonyme par élève (script Python requis).</li>
+        <li><strong>Monlycee.net&nbsp;:</strong> envoi direct par mail sur la messagerie monlycee.net (lycées Île-de-France uniquement), élèves et parents en option (script Python requis).</li>
+    </ul>
+    <p><strong>Choisissez votre méthode dans ⚙️ Paramètres</strong> (section « Mode de communication ») avant d'ouvrir la modale <strong>📧 Communication</strong>. Les modes Nuage automatique et monlycee.net nécessitent Python sur votre ordinateur&nbsp;; le mode « diffusion manuelle » fonctionne entièrement dans le navigateur.</p>
+
+    <details class="sub-section">
+      <summary id="guide-webdav" class="fw-bold text-warning" style="color: #d97706 !important;">A. Nuage Apps Éducation — Dossier public sécurisé par mots de passe</summary>
+      <div class="details-body">
+        <p>Vous ne donnez qu'<strong>un seul lien</strong> à toute la classe. Chaque PDF est chiffré avec un mot de passe personnel calculé à partir du nom de l'élève.</p>
+        <div class="alert alert-warning py-3 small mb-3">
+            <strong class="text-dark d-block border-bottom pb-1 mb-2">🛠️ Configuration (première utilisation uniquement)&nbsp;:</strong>
+            <ul class="mb-0 ps-3" style="line-height: 1.6;">
+                <li class="mb-2"><strong>URL WebDAV&nbsp;:</strong> Dans votre Nuage, cliquez sur <strong>Paramètres de Fichiers</strong> (en bas à gauche) et copiez l'adresse WebDAV (du type <code>https://nuageXX.apps.education.fr/remote.php/dav/files/votre.identifiant/</code>). Renseignez-la dans <strong>⚙️ Paramètres</strong> (section « Stockage WebDAV »).</li>
+                <li class="mb-2"><strong>Clé secrète de l'établissement&nbsp;:</strong> Renseignez-la dans <strong>⚙️ Paramètres</strong> (section « Mots de passe PDF »). La même clé doit être utilisée par tous les professeurs de l'établissement.</li>
+                <li class="mb-2"><strong>Mot de passe d'application Nuage&nbsp;:</strong> Dans votre Nuage > icône profil > Paramètres > Sécurité > bas de page > créez un mot de passe d'application nommé "MonSantorin".</li>
+            </ul>
+        </div>
+        <p class="small text-muted"><strong>Homonymes&nbsp;:</strong> deux élèves portant exactement le même nom auront le même mot de passe PDF. Ce cas reste rare dans une même classe.</p>
+      </div>
+    </details>
+
+    <details class="sub-section">
+      <summary class="fw-bold text-info">B. PDF chiffrés — diffusion manuelle (sans Python)</summary>
+      <div class="details-body">
+        <p>MonSantorin génère une archive ZIP de copies PDF, chacune verrouillée par le mot de passe personnel de l'élève (calculé à partir de son nom et de la clé établissement). Vous diffusez ensuite les fichiers et les mots de passe comme vous le souhaitez.</p>
+        <div class="alert alert-warning py-3 small mb-3">
+            <strong class="text-dark d-block border-bottom pb-1 mb-2">🛠️ Configuration (première utilisation uniquement)&nbsp;:</strong>
+            <ul class="mb-0 ps-3" style="line-height: 1.6;">
+                <li class="mb-2"><strong>Clé secrète de l'établissement&nbsp;:</strong> Renseignez-la dans <strong>⚙️ Paramètres</strong> (section « Mots de passe PDF »). La même clé doit être utilisée par tous les professeurs de l'établissement.</li>
+                <li><strong>Mode de communication&nbsp;:</strong> Sélectionnez « PDF chiffrés — diffusion manuelle (sans Python) » dans <strong>⚙️ Paramètres</strong>.</li>
+            </ul>
+        </div>
+        <p class="small text-muted"><strong>Homonymes&nbsp;:</strong> deux élèves portant exactement le même nom auront le même mot de passe PDF. Ce cas reste rare dans une même classe.</p>
+      </div>
+    </details>
+
+    <details class="sub-section">
+      <summary class="fw-bold text-success">C. Nuage Apps Éducation — Liens de partage individuels</summary>
+      <div class="details-body">
+        <p>Chaque élève reçoit un lien de téléchargement unique et anonyme vers sa copie.</p>
+        <div class="alert alert-warning py-2 small mb-3">
+            <strong>Configuration (première utilisation)&nbsp;:</strong> renseignez l'URL WebDAV et l'identifiant dans <strong>⚙️ Paramètres</strong> (section « Stockage WebDAV »).
+        </div>
+      </div>
+    </details>
+
+    <details class="sub-section">
+      <summary class="fw-bold">D. Messagerie monlycee.net — Envoi par mail direct</summary>
+      <div class="details-body">
+        <p>Réservé aux lycées d'Île-de-France. Les copies sont envoyées directement sur les adresses <code>@monlycee.net</code> des élèves (et de leurs parents en option).</p>
+        <div class="alert alert-warning py-3 small mb-3">
+            <strong class="text-dark d-block border-bottom pb-1 mb-2">🛠️ Configuration (première utilisation uniquement)&nbsp;:</strong>
+            <ul class="mb-0 ps-3" style="line-height: 1.6;">
+                <li class="mb-2"><strong>Base ENT&nbsp;:</strong> Dans <strong>⚙️ Paramètres</strong> (section « Base ENT monlycee.net »), importez le fichier CSV de la base élèves/parents. Ce fichier est à demander à votre référent numérique ou à votre chef d'établissement&nbsp;: sa génération nécessite un accès à l'outil d'administration de la base de données monlycee.net de l'établissement. Champs obligatoires&nbsp;: <code>Type</code>, <code>Nom</code>, <code>Prénom</code>, <code>Identifiant</code>, <code>Parents</code>.</li>
+                <li class="mb-2"><strong>Serveur SMTP&nbsp;:</strong> Dans <strong>⚙️ Paramètres</strong> (section « Serveur SMTP »), le serveur <code>smtps.monlycee.net</code> et le port <code>465</code> sont préremplis. Renseignez votre adresse <code>@monlycee.net</code>.</li>
+                <li><strong>Autorisation SMTP&nbsp;:</strong> Connectez-vous à la messagerie monlycee.net > votre nom > Paramètres > Configuration de mes accès > IMAP & SMTP > <strong>activez le curseur SMTP</strong>.</li>
+            </ul>
+        </div>
+      </div>
+    </details>
+  </div>
+</details>
+
+<details>
+  <summary class="h5 text-primary mb-0">7. Aménagement Tiers-temps (TT)</summary>
+  <div class="details-body">
+    <p>MonSantorin permet de gérer facilement les copies des élèves bénéficiant d'un tiers-temps&nbsp;:</p>
+    <ul>
+        <li><strong>Activation&nbsp;:</strong> Cliquez sur le bouton <strong>⏱️ TT</strong> sur la fiche de l'élève.</li>
+        <li><strong>Calculs automatiques&nbsp;:</strong> Continuez de saisir vos <strong>notes brutes</strong> question par question. MonSantorin se charge de majorer automatiquement de +33 % le total de la copie à l'affichage.</li>
+        <li><strong>Rendu PDF&nbsp;:</strong> La mention "(TT)" est automatiquement masquée sur le PDF de la copie de l'élève, et une mention <em>"Note majorée au titre du tiers-temps"</em> est discrètement ajoutée sous le tableau des scores.</li>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary class="h5 text-danger mb-0">8. Sauvegarde et Restauration (Important !)</summary>
+  <div class="details-body">
+    <ul>
+        <li><strong>Sauvegarder&nbsp;:</strong> Utilisez le bouton jaune <strong>💾 Sauvegarder Correction</strong> pour vos notes et téléchargez le fichier <strong>JSON</strong> de votre barème.</li>
+        <li><strong>Restaurer&nbsp;:</strong> Importez d'abord votre fichier <strong>Barème (JSON)</strong>, puis utilisez le bouton bleu <strong>📥 Importer Correction</strong> sur la page principale pour retrouver vos notes.</li>
+    </ul>
+  </div>
+</details>

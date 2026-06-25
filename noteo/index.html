@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Correcteur de copies</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/dist/tabler-icons.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,sans-serif;font-size:14px;color:#1a1a2e;background:#f4f3fb;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(30,20,80,.55);display:flex;align-items:center;justify-content:center;z-index:100}
+.modal-bg.hidden{display:none}
+.modal{background:#fff;border-radius:20px;width:420px;border:1.5px solid #AFA9EC;max-height:90vh;display:flex;flex-direction:column;overflow:hidden}
+.modal-head{display:flex;align-items:center;gap:12px;flex-shrink:0;padding:20px 24px 14px}
+.modal-head-icon{width:42px;height:42px;border-radius:12px;background:#534AB7;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.modal-head-icon i{font-size:20px;color:#EEEDFE}
+.modal h2{font-size:15px;font-weight:600;color:#1a1a2e;flex:1}
+.modal h2 small{display:block;font-size:12px;font-weight:400;color:#7F77DD;margin-top:2px}
+.modal-body{flex:1;overflow-y:auto;padding:0 24px 8px}
+.mlbl{font-size:12px;color:#534AB7;font-weight:600;display:block;margin-bottom:5px;margin-top:12px}
+.modal input,.modal textarea{width:100%;font-size:13px;padding:8px 11px;border-radius:9px;border:1px solid #AFA9EC;background:#F8F7FF;color:#1a1a2e;font-family:inherit}
+.modal input:focus,.modal textarea:focus{outline:none;border-color:#534AB7;background:#fff}
+.modal textarea{min-height:110px;resize:vertical}
+.modal-row{display:flex;gap:12px}
+.modal-row>div{flex:1}
+.modal-divider{height:1px;background:#E8E6F8;margin:14px 0 4px}
+.modal-foot{display:flex;justify-content:flex-end;padding:12px 24px 20px;border-top:1px solid #E8E6F8;flex-shrink:0}
+.modal-submit{padding:9px 22px;border-radius:10px;border:none;background:#534AB7;color:#EEEDFE;cursor:pointer;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:7px}
+.modal-submit:hover{background:#3C3489}
+
+/* TOPBAR */
+.topbar{background:#534AB7;padding:0 16px;display:flex;align-items:center;gap:12px;height:52px;flex-shrink:0}
+.topbar-logo{width:32px;height:32px;border-radius:8px;background:#7F77DD;display:flex;align-items:center;justify-content:center}
+.topbar-logo i{font-size:18px;color:#EEEDFE}
+.topbar h1{font-size:15px;font-weight:600;color:#EEEDFE;flex:1}
+.topbar-meta{font-size:12px;color:#AFA9EC;padding:3px 10px;background:#3C3489;border-radius:20px}
+.topbar-btn{padding:5px 12px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
+.topbar-icon-btn{width:32px;height:32px;border-radius:8px;border:none;cursor:pointer;background:#3C3489;color:#CECBF6;display:inline-flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:background .15s}
+.topbar-icon-btn:hover{background:#26215C;color:#EEEDFE}
+label.topbar-icon-btn{font-size:16px}
+.topbar-btn.sec{background:#3C3489;color:#CECBF6}
+.topbar-btn.sec:hover{background:#26215C;color:#EEEDFE}
+.topbar-btn.exp{background:#1D9E75;color:#E1F5EE}
+.topbar-btn.exp:hover{background:#0F6E56}
+
+/* LAYOUT */
+.body{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:215px;background:#fff;border-right:1px solid #E8E6F8;display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.sidebar-head{padding:12px;background:#EEEDFE}
+.sidebar-head label{font-size:10px;font-weight:700;color:#534AB7;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:6px}
+.sidebar-head input{width:100%;font-size:13px;padding:5px 8px;border-radius:8px;border:1px solid #AFA9EC;background:#fff;color:#1a1a2e;font-family:inherit}
+.eleves-scroll{flex:1;overflow-y:auto;padding:8px}
+.eleve-card{padding:8px 10px;border-radius:10px;cursor:pointer;margin-bottom:4px;border:1px solid transparent;display:flex;align-items:center;gap:8px;transition:background .1s}
+.eleve-card:hover{background:#EEEDFE;border-color:#AFA9EC}
+.eleve-card.active{background:#534AB7;border-color:#534AB7}
+.eleve-avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:#EEEDFE;color:#534AB7}
+.eleve-card.active .eleve-avatar{background:#3C3489;color:#CECBF6}
+.eleve-name{flex:1;font-size:13px;color:#1a1a2e}
+.eleve-card.active .eleve-name{color:#EEEDFE}
+.eleve-badge{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:600}
+.badge-done{background:#EAF3DE;color:#3B6D11}
+.badge-todo{background:#FAEEDA;color:#854F0B}
+.eleve-card.active .eleve-badge{background:#3C3489;color:#CECBF6}
+.eleve-card[draggable=true]{cursor:grab}
+.eleve-card[draggable=true]:active{cursor:grabbing}
+.eleve-card.drag-over{border-color:#534AB7;background:#EEEDFE;transform:translateY(2px)}
+.eleve-card.dragging{opacity:0.4}
+.drag-handle{color:#AFA9EC;font-size:14px;flex-shrink:0;cursor:grab;padding:0 2px;line-height:1}
+
+/* VIEWER */
+.viewer{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#e8e6f0}
+
+/* NAV BAR */
+.nav-bar{padding:8px 14px;background:#534AB7;display:none;align-items:center;justify-content:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.nav-btn{width:34px;height:34px;border-radius:9px;border:none;background:#7F77DD;color:#EEEDFE;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px}
+.nav-btn:hover{background:#3C3489}
+.nav-btn:disabled{opacity:.4;cursor:not-allowed}
+.nav-center{display:flex;align-items:center;gap:8px;background:#3C3489;border-radius:10px;padding:5px 12px}
+.nav-center i{color:#AFA9EC;font-size:15px}
+.nav-page-input{width:40px;font-size:14px;font-weight:600;text-align:center;background:transparent;border:none;color:#EEEDFE;font-family:inherit}
+.nav-page-input:focus{outline:none}
+.nav-sep{font-size:13px;color:#AFA9EC}
+.nav-total{font-size:14px;font-weight:600;color:#AFA9EC}
+.nav-zoom{display:flex;align-items:center;gap:5px}
+.zoom-btn{width:28px;height:28px;border-radius:7px;border:none;background:#7F77DD;color:#EEEDFE;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px}
+.zoom-btn:hover{background:#3C3489}
+.zoom-lbl{font-size:12px;color:#AFA9EC;min-width:38px;text-align:center}
+
+/* BARRE OUTILS ANNOTATIONS */
+.annot-bar{padding:7px 14px;background:#3C3489;display:none;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;border-top:1px solid #534AB7}
+.tool-btn{height:30px;padding:0 11px;border-radius:8px;border:none;background:#534AB7;color:#CECBF6;cursor:pointer;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.tool-btn:hover{background:#7F77DD;color:#EEEDFE}
+.tool-btn.active{background:#EF9F27;color:#412402}
+.tool-sep{width:1px;height:22px;background:#534AB7;flex-shrink:0}
+.color-swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;flex-shrink:0}
+.color-swatch.picked{border-color:#EEEDFE;transform:scale(1.15)}
+.size-lbl{font-size:11px;color:#AFA9EC;white-space:nowrap}
+.size-inp{width:42px;padding:2px 5px;border-radius:6px;border:none;background:#534AB7;color:#EEEDFE;font-size:12px;text-align:center;font-family:inherit}
+.annot-close{margin-left:auto;height:28px;padding:0 10px;border-radius:7px;border:none;background:#712B13;color:#FAECE7;cursor:pointer;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:4px}
+.annot-close:hover{background:#993C1D}
+
+/* PDF ZONE */
+.pdf-zone{flex:1;overflow-x:hidden;overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:20px;gap:16px}
+.page-block{position:relative;display:inline-block;flex-shrink:0}
+.page-block canvas.pdf-cv{display:block;border-radius:8px;border:1px solid #d0cde8;background:#fff}
+.page-block canvas.ann-cv{position:absolute;top:0;left:0;border-radius:8px;cursor:default}
+.page-label{position:absolute;top:-22px;left:0;font-size:11px;font-weight:600;color:#7F77DD;background:#EEEDFE;padding:2px 8px;border-radius:6px;pointer-events:none}
+
+/* UPLOAD */
+.upload-zone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:40px;text-align:center;width:100%}
+.upload-icon-wrap{width:72px;height:72px;border-radius:20px;background:#EEEDFE;display:flex;align-items:center;justify-content:center}
+.upload-icon-wrap i{font-size:32px;color:#534AB7}
+.upload-zone h2{font-size:16px;font-weight:600;color:#1a1a2e}
+.upload-zone p{font-size:13px;color:#888}
+.upload-btn-label{padding:10px 22px;border-radius:10px;background:#534AB7;color:#EEEDFE;cursor:pointer;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:8px}
+.upload-btn-label:hover{background:#3C3489}
+.upload-btn-label input{display:none}
+
+/* PANEL */
+.panel{width:258px;border-left:1px solid #E8E6F8;background:#fff;display:flex;flex-direction:column;overflow-y:auto;flex-shrink:0}
+.panel-tabs{display:flex;border-bottom:1px solid #E8E6F8;background:#EEEDFE;flex-shrink:0}
+.ptab{flex:1;padding:9px 4px;font-size:12px;text-align:center;cursor:pointer;border:none;background:none;color:#7F77DD;font-weight:400;border-bottom:2px solid transparent;font-family:inherit}
+.ptab.on{color:#26215C;border-bottom-color:#534AB7;font-weight:600;background:#fff}
+.psec{padding:12px 14px;border-bottom:1px solid #F0EEF8}
+.psec-title{font-size:10px;font-weight:700;color:#7F77DD;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.psec-title i{font-size:14px}
+
+/* BARÈME */
+.exo-block{margin-bottom:8px;border-radius:10px;overflow:hidden;border:1px solid #AFA9EC}
+.exo-header{display:flex;align-items:center;gap:8px;padding:7px 10px;background:#EEEDFE;cursor:pointer;user-select:none}
+.exo-header:hover{background:#d8d5f8}
+.exo-chevron{font-size:13px;color:#534AB7;transition:transform .2s;flex-shrink:0}
+.exo-chevron.open{transform:rotate(90deg)}
+.exo-name{flex:1;font-size:13px;font-weight:600;color:#26215C}
+.exo-subtotal{font-size:12px;color:#534AB7;font-weight:600;white-space:nowrap}
+.exo-body{display:none;padding:6px 8px;background:#fff}
+.exo-body.open{display:block}
+.q-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;padding:6px 8px;border-radius:8px;background:#F8F7FF;border:1px solid #E8E6F8}
+.q-label{flex:1;font-size:12px;color:#26215C;font-weight:500}
+.q-input{width:46px;padding:3px 5px;border-radius:6px;border:1px solid #AFA9EC;background:#fff;color:#26215C;font-size:13px;text-align:center;font-weight:600;font-family:inherit}
+.q-max{font-size:11px;color:#7F77DD}
+.note-display{text-align:center;padding:14px;background:#534AB7;border-radius:12px;margin-bottom:10px}
+.note-num{font-size:32px;font-weight:700;color:#EEEDFE;line-height:1}
+.note-denom{font-size:14px;color:#AFA9EC;margin-top:2px}
+.note-bar-wrap{height:6px;background:#3C3489;border-radius:3px;margin-top:8px;overflow:hidden}
+.note-bar-fill{height:100%;background:#9FE1CB;border-radius:3px;transition:width .3s}
+textarea.appr{width:100%;min-height:75px;font-size:13px;padding:8px;border-radius:10px;border:1px solid #d0cde8;background:#F8F7FF;color:#1a1a2e;resize:vertical;font-family:inherit}
+.page-range{display:flex;align-items:center;gap:7px}
+.page-range input{width:52px;padding:4px 6px;border-radius:7px;border:1px solid #d0cde8;background:#F8F7FF;color:#1a1a2e;font-size:13px;text-align:center;font-family:inherit}
+.page-range span{font-size:12px;color:#888}
+.go-btn{padding:4px 9px;border-radius:7px;border:1px solid #AFA9EC;background:#EEEDFE;color:#534AB7;cursor:pointer;font-size:12px}
+.go-btn:hover{background:#d8d5f8}
+.q-input.error{border-color:#E24B4A!important;background:#FCEBEB!important;color:#E24B4A!important}
+.q-row.error{background:#FCEBEB;border-color:#E24B4A}
+.q-max.error{color:#E24B4A;font-weight:700}
+.exo-subtotal.error{color:#E24B4A!important}
+
+/* DROPDOWN NOTE */
+.note-dropdown{position:fixed;z-index:500;background:#fff;border:1.5px solid #AFA9EC;border-radius:12px;padding:6px;box-shadow:0 8px 24px rgba(83,74,183,.18);display:none;flex-direction:column;gap:3px;min-width:80px}
+.note-dropdown.open{display:flex}
+.note-opt{padding:5px 12px;border-radius:7px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:500;color:#1a1a2e;text-align:center;font-family:inherit;transition:background .1s}
+.note-opt:hover{background:#EEEDFE;color:#534AB7}
+.note-opt.active{background:#534AB7;color:#EEEDFE;font-weight:700}
+.note-display.error{background:#712B13}
+.note-display.error .note-num{color:#FAECE7}
+.note-display.error .note-denom{color:#F5C4B3}
+.note-display.error .note-bar-wrap{background:#993C1D}
+.note-display.error .note-bar-fill{background:#E24B4A}
+.note-impossible{font-size:11px;color:#FAECE7;margin-top:4px;display:none;align-items:center;gap:4px}
+.note-display.error .note-impossible{display:flex;justify-content:center}
+
+/* ANNOTATIONS LISTE */
+.ann-item{background:#F8F7FF;border-radius:9px;padding:7px 9px;margin-bottom:5px;border:1px solid #E8E6F8;display:flex;align-items:center;gap:7px;cursor:pointer}
+.ann-item:hover{border-color:#AFA9EC}
+.ann-item.selected{border-color:#534AB7;background:#EEEDFE}
+.ann-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.ann-label{flex:1;font-size:12px;color:#1a1a2e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ann-page{font-size:11px;color:#888;flex-shrink:0}
+.ann-del{background:none;border:none;color:#e24b4b;cursor:pointer;font-size:14px;flex-shrink:0;padding:0}
+.open-annot-btn{width:100%;padding:8px;border-radius:8px;border:none;background:#534AB7;color:#EEEDFE;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;margin-top:6px}
+.open-annot-btn:hover{background:#3C3489}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.scard{border-radius:10px;padding:10px 12px;border:1px solid #E8E6F8}
+.scard.purple{background:#EEEDFE;border-color:#AFA9EC}
+.scard.teal{background:#E1F5EE;border-color:#9FE1CB}
+.scard.amber{background:#FAEEDA;border-color:#FAC775}
+.scard.coral{background:#FAECE7;border-color:#F5C4B3}
+.scard .sv{font-size:20px;font-weight:700}
+.scard.purple .sv{color:#26215C}
+.scard.teal .sv{color:#085041}
+.scard.amber .sv{color:#412402}
+.scard.coral .sv{color:#4A1B0C}
+.scard .sl{font-size:11px;margin-top:1px}
+.scard.purple .sl{color:#534AB7}
+.scard.teal .sl{color:#0F6E56}
+.scard.amber .sl{color:#854F0B}
+.scard.coral .sl{color:#993C1D}
+.dist-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.dist-lbl{font-size:11px;color:#888;width:40px;flex-shrink:0}
+.dist-track{flex:1;height:8px;background:#EEEDFE;border-radius:4px;overflow:hidden}
+.dist-fill{height:100%;border-radius:4px;background:#7F77DD}
+.dist-count{font-size:11px;color:#888;width:16px;text-align:right}
+
+/* ÉDITEUR BARÈME MODALE */
+.exo-editor{margin-top:6px}
+.exo-editor-block{background:#F8F7FF;border-radius:10px;padding:10px;margin-bottom:8px;border:1px solid #AFA9EC}
+.exo-editor-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.exo-editor-head input{flex:1;font-size:13px;padding:5px 8px;border-radius:7px;border:1px solid #AFA9EC;background:#fff;color:#1a1a2e;font-family:inherit}
+.exo-del-btn{width:26px;height:26px;border-radius:6px;border:none;background:#FAECE7;color:#993C1D;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.exo-del-btn:hover{background:#F5C4B3}
+.q-editor-row{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.q-editor-row input.q-name{flex:1;font-size:12px;padding:4px 7px;border-radius:6px;border:1px solid #d0cde8;background:#fff;color:#1a1a2e;font-family:inherit}
+.q-editor-row input.q-pts{width:52px;font-size:12px;padding:4px 7px;border-radius:6px;border:1px solid #d0cde8;background:#fff;color:#1a1a2e;text-align:center;font-family:inherit}
+.q-editor-row .q-del{width:22px;height:22px;border-radius:5px;border:none;background:#FAECE7;color:#993C1D;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.add-q-btn{font-size:11px;padding:3px 8px;border-radius:6px;border:1px dashed #AFA9EC;background:transparent;color:#534AB7;cursor:pointer;font-family:inherit}
+.add-q-btn:hover{background:#EEEDFE}
+.add-exo-btn{width:100%;padding:7px;border-radius:8px;border:1px dashed #AFA9EC;background:transparent;color:#534AB7;cursor:pointer;font-size:13px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit;margin-top:4px}
+.add-exo-btn:hover{background:#EEEDFE}
+
+/* OVERLAY TEXTE ANNOTATION */
+#text-input-overlay{position:fixed;display:none;z-index:200}
+#text-input-overlay textarea{font-family:inherit;background:rgba(255,255,255,.92);border:2px solid #534AB7;border-radius:6px;resize:none;padding:4px 7px;font-size:14px;outline:none;min-width:120px;min-height:30px}
+
+/* MODALE PAGES */
+.pages-modal-bg{position:fixed;inset:0;background:rgba(30,20,80,.55);display:flex;align-items:center;justify-content:center;z-index:150}
+.pages-modal-bg.hidden{display:none}
+.pages-modal{background:#fff;border-radius:16px;width:480px;max-height:85vh;display:flex;flex-direction:column;border:1.5px solid #AFA9EC}
+.pages-modal-head{padding:16px 20px 12px;border-bottom:1px solid #E8E6F8;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.pages-modal-head-icon{width:36px;height:36px;border-radius:9px;background:#534AB7;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pages-modal-head-icon i{font-size:17px;color:#EEEDFE}
+.pages-modal-head h3{font-size:15px;font-weight:600;color:#1a1a2e;flex:1}
+.pages-modal-head small{display:block;font-size:11px;font-weight:400;color:#7F77DD;margin-top:1px}
+.pages-modal-body{flex:1;overflow-y:auto;padding:12px 20px}
+.pages-table{width:100%;border-collapse:collapse}
+.pages-table th{font-size:11px;font-weight:700;color:#7F77DD;text-transform:uppercase;letter-spacing:.05em;padding:4px 8px;text-align:left}
+.pages-table td{padding:4px 8px;border-bottom:1px solid #F0EEF8;vertical-align:middle}
+.pages-table tr:last-child td{border-bottom:none}
+.pages-table tr.active-row td{background:#EEEDFE}
+.pages-inp{width:52px;padding:3px 6px;border-radius:7px;border:1px solid #d0cde8;background:#F8F7FF;color:#1a1a2e;font-size:13px;text-align:center;font-family:inherit}
+.pages-inp:focus{outline:none;border-color:#534AB7;background:#fff}
+.pages-sep{font-size:12px;color:#888;padding:0 4px}
+.pages-nb{font-size:11px;color:#AFA9EC;padding-left:4px}
+.pages-modal-foot{padding:12px 20px;border-top:1px solid #E8E6F8;display:flex;gap:8px;align-items:center;flex-shrink:0}
+.pages-auto-btn{padding:6px 12px;border-radius:8px;border:1px solid #AFA9EC;background:#EEEDFE;color:#534AB7;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
+.pages-auto-btn:hover{background:#d8d5f8}
+.pages-ok-btn{margin-left:auto;padding:8px 20px;border-radius:9px;border:none;background:#534AB7;color:#EEEDFE;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
+.pages-ok-btn:hover{background:#3C3489}
+.pages-info{font-size:11px;color:#888}
+</style>
+</head>
+<body>
+
+<!-- MODALE ASSIGNATION DES PAGES -->
+<div class="pages-modal-bg hidden" id="pages-modal">
+  <div class="pages-modal">
+    <div class="pages-modal-head">
+      <div class="pages-modal-head-icon"><i class="ti ti-file-text"></i></div>
+      <h3>Pages par élève<small>Définissez les pages de chaque copie dans le PDF</small></h3>
+    </div>
+    <div class="pages-modal-body">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 12px;background:#EEEDFE;border-radius:10px;border:1px solid #AFA9EC">
+        <label style="font-size:12px;font-weight:600;color:#534AB7;white-space:nowrap"><i class="ti ti-copy" style="vertical-align:-1px;margin-right:3px"></i>Pages par élève (sujet) :</label>
+        <input id="pm-ppp" type="number" min="1" max="99" style="width:60px;padding:4px 8px;border-radius:7px;border:1px solid #AFA9EC;background:#fff;color:#1a1a2e;font-size:13px;text-align:center;font-family:inherit" oninput="S.pagesParEleve=parseInt(this.value)||S.pagesParEleve"/>
+        <button class="pages-auto-btn" onclick="autoPagesModal()" style="margin-left:0"><i class="ti ti-wand"></i> Recalculer tout</button>
+      </div>
+      <table class="pages-table">
+        <thead>
+          <tr>
+            <th>Élève</th>
+            <th>Page de</th>
+            <th>à</th>
+            <th>Nb pages</th>
+          </tr>
+        </thead>
+        <tbody id="pages-table-body"></tbody>
+      </table>
+    </div>
+    <div class="pages-modal-foot">
+      <span class="pages-info" id="pages-pdf-info"></span>
+      <button class="pages-ok-btn" onclick="applyPagesModal()"><i class="ti ti-check"></i> Valider</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE ÉDITION BARÈME -->
+<div class="modal-bg hidden" id="bareme-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-icon"><i class="ti ti-list-check"></i></div>
+      <h2>Modifier le barème<small>Les notes déjà saisies sont conservées si les questions restent les mêmes</small></h2>
+    </div>
+    <div class="modal-body">
+      <div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:9px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#412402;display:flex;gap:8px;align-items:flex-start">
+        <i class="ti ti-alert-triangle" style="flex-shrink:0;margin-top:1px"></i>
+        <span>Modifier le maximum d'une question ou supprimer une question efface les notes correspondantes.</span>
+      </div>
+      <div class="modal-row">
+        <div><span class="mlbl">Note sur</span><input id="bm-max" type="number" value="20" min="1"/></div>
+      </div>
+      <div class="modal-divider"></div>
+      <span class="mlbl"><i class="ti ti-list-check" style="vertical-align:-1px;margin-right:3px"></i>Exercices et questions</span>
+      <div class="exo-editor" id="bareme-editor"></div>
+      <button class="add-exo-btn" onclick="addExoBlockTo('bareme-editor')"><i class="ti ti-plus"></i> Ajouter un exercice</button>
+    </div>
+    <div class="modal-foot" style="gap:8px">
+      <button onclick="document.getElementById('bareme-modal').classList.add('hidden')" style="padding:8px 16px;border-radius:9px;border:1px solid #AFA9EC;background:#EEEDFE;color:#534AB7;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit">Annuler</button>
+      <button class="modal-submit" onclick="applyEditBareme()"><i class="ti ti-check"></i> Valider</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE ÉDITION ÉLÈVES -->
+<div class="modal-bg hidden" id="eleves-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-icon"><i class="ti ti-users"></i></div>
+      <h2>Modifier la liste des élèves<small>Un élève par ligne · L'ordre peut être modifié par glisser-déposer</small></h2>
+    </div>
+    <div class="modal-body">
+      <div style="background:#FAEEDA;border:1px solid #FAC775;border-radius:9px;padding:8px 12px;margin-bottom:10px;font-size:12px;color:#412402;display:flex;gap:8px;align-items:flex-start">
+        <i class="ti ti-alert-triangle" style="flex-shrink:0;margin-top:1px"></i>
+        <span>Les notes et annotations existantes sont conservées. Si vous supprimez un élève, ses données seront perdues. Si vous ajoutez des élèves, ils seront insérés à la fin.</span>
+      </div>
+      <textarea id="eleves-edit-area" style="width:100%;min-height:200px;resize:vertical;font-family:inherit;font-size:13px;padding:8px 11px;border-radius:9px;border:1px solid #AFA9EC;background:#F8F7FF;color:#1a1a2e;line-height:1.6"></textarea>
+    </div>
+    <div class="modal-foot" style="gap:8px">
+      <button onclick="document.getElementById('eleves-modal').classList.add('hidden')" style="padding:8px 16px;border-radius:9px;border:1px solid #AFA9EC;background:#EEEDFE;color:#534AB7;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit">Annuler</button>
+      <button class="modal-submit" onclick="applyEditEleves()"><i class="ti ti-check"></i> Valider</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODALE NOUVELLE SESSION -->
+<div class="modal-bg hidden" id="modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-icon"><i class="ti ti-notebook"></i></div>
+      <h2>Nouvelle session de correction<small>Remplissez les informations pour démarrer</small></h2>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button onclick="downloadTemplate()" title="Télécharger un modèle de fichier de session" style="width:32px;height:32px;border-radius:8px;border:1px solid #AFA9EC;background:#EEEDFE;color:#534AB7;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px"><i class="ti ti-download"></i></button>
+        <label title="Importer un fichier de session (.txt)" style="width:32px;height:32px;border-radius:8px;border:1px solid #1D9E75;background:#E1F5EE;color:#085041;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px">
+          <i class="ti ti-upload"></i>
+          <input type="file" accept=".txt" style="display:none" onchange="importSessionFile(this)"/>
+        </label>
+      </div>
+    </div>
+    <div class="modal-body">
+      <span class="mlbl">Matière</span><input id="m-mat" value="Mathématiques"/>
+      <span class="mlbl">Classe</span><input id="m-cls" value="Terminale B"/>
+      <div class="modal-row">
+        <div><span class="mlbl">Note sur</span><input id="m-max" type="number" value="20" min="1"/></div>
+        <div><span class="mlbl">Pages par élève</span><input id="m-ppp" type="number" value="2" min="1"/></div>
+      </div>
+      <div class="modal-divider"></div>
+      <span class="mlbl"><i class="ti ti-list-check" style="vertical-align:-1px;margin-right:3px"></i>Barème — exercices et questions</span>
+      <div class="exo-editor" id="exo-editor"></div>
+      <button class="add-exo-btn" onclick="addExoBlock()"><i class="ti ti-plus"></i> Ajouter un exercice</button>
+      <div class="modal-divider"></div>
+      <span class="mlbl"><i class="ti ti-users" style="vertical-align:-1px;margin-right:3px"></i>Élèves — un par ligne</span>
+      <textarea id="m-elv">Martin Alice
+Dupont Lucas
+Bernard Emma
+Moreau Nathan
+Petit Léa
+Rousseau Hugo
+Lambert Chloé
+Simon Tom</textarea>
+      <p id="import-status" style="font-size:11px;margin-top:4px;display:none"></p>
+    </div>
+    <div class="modal-foot" style="gap:8px">
+      <button id="modal-cancel-btn" onclick="cancelModal()" style="padding:9px 18px;border-radius:10px;border:1px solid #AFA9EC;background:#EEEDFE;color:#534AB7;cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;display:none;align-items:center;gap:6px"><i class="ti ti-x"></i> Annuler</button>
+      <button class="modal-submit" onclick="createSession()"><i class="ti ti-rocket"></i> Créer la session</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <!-- Logo + nom app -->
+  <div style="display:flex;align-items:center;gap:9px;flex-shrink:0">
+    <div class="topbar-logo"><i class="ti ti-school"></i></div>
+    <span style="font-size:17px;font-weight:700;color:#EEEDFE;letter-spacing:-.5px">Noteo</span>
+  </div>
+
+  <!-- Séparateur -->
+  <div style="width:1px;height:28px;background:rgba(255,255,255,.15);flex-shrink:0;margin:0 6px"></div>
+
+  <!-- Titre session (cliquable) -->
+  <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px" id="title-view">
+    <h1 id="session-title" style="cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px;font-weight:500;color:#EEEDFE;opacity:.9" title="Cliquer pour modifier" onclick="startEditTitle()">Aucune session</h1>
+    <button onclick="startEditTitle()" title="Modifier la matière et la classe" style="width:22px;height:22px;border-radius:6px;border:none;background:rgba(255,255,255,.12);color:#CECBF6;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0"><i class="ti ti-pencil"></i></button>
+  </div>
+  <div style="flex:1;min-width:0;display:none;align-items:center;gap:6px" id="title-edit">
+    <input id="edit-mat" placeholder="Matière" style="flex:1;font-size:13px;font-weight:600;padding:4px 8px;border-radius:7px;border:none;background:rgba(255,255,255,.2);color:#EEEDFE;font-family:inherit;min-width:0" onkeydown="titleKeydown(event)"/>
+    <span style="color:#AFA9EC;font-size:13px">—</span>
+    <input id="edit-cls" placeholder="Classe" style="flex:1;font-size:13px;font-weight:600;padding:4px 8px;border-radius:7px;border:none;background:rgba(255,255,255,.2);color:#EEEDFE;font-family:inherit;min-width:0" onkeydown="titleKeydown(event)"/>
+    <button onclick="applyEditTitle()" title="Valider" style="width:26px;height:26px;border-radius:7px;border:none;background:#1D9E75;color:#E1F5EE;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0"><i class="ti ti-check"></i></button>
+    <button onclick="cancelEditTitle()" title="Annuler" style="width:26px;height:26px;border-radius:7px;border:none;background:rgba(255,255,255,.15);color:#EEEDFE;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0"><i class="ti ti-x"></i></button>
+  </div>
+
+  <!-- Meta + indicateur sauvegarde -->
+  <span class="topbar-meta" id="session-meta" style="flex-shrink:0">Aucune session</span>
+  <span id="save-indicator" style="font-size:11px;color:#9FE1CB;display:none;align-items:center;gap:4px;flex-shrink:0"><i class="ti ti-device-floppy"></i> Sauvegardé</span>
+
+  <!-- Séparateur -->
+  <div style="width:1px;height:28px;background:rgba(255,255,255,.15);flex-shrink:0;margin:0 4px"></div>
+
+  <!-- Actions session -->
+  <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+    <button class="topbar-btn sec" onclick="openModal()" title="Nouvelle session"><i class="ti ti-plus"></i><span class="tb-lbl">Session</span></button>
+    <button class="topbar-icon-btn" onclick="exportJSON()" title="Sauvegarder la session"><i class="ti ti-device-floppy"></i></button>
+    <label class="topbar-icon-btn" title="Charger une session" style="cursor:pointer">
+      <i class="ti ti-folder-open"></i>
+      <input type="file" accept=".json" style="display:none" onchange="importJSON(this)"/>
+    </label>
+  </div>
+
+  <!-- Séparateur -->
+  <div style="width:1px;height:28px;background:rgba(255,255,255,.15);flex-shrink:0;margin:0 4px"></div>
+
+  <!-- Export -->
+  <button class="topbar-btn exp" onclick="exportCSV()" title="Exporter les notes en CSV"><i class="ti ti-download"></i><span class="tb-lbl">Export CSV</span></button>
+</div>
+
+<div class="body">
+  <!-- SIDEBAR ÉLÈVES -->
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <label style="margin:0"><i class="ti ti-users" style="vertical-align:-1px"></i> Élèves</label>
+        <button onclick="openEditEleves()" title="Modifier la liste des élèves" style="width:22px;height:22px;border-radius:6px;border:none;background:#d8d5f8;color:#534AB7;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px"><i class="ti ti-pencil"></i></button>
+      </div>
+      <input type="text" id="search-elv" placeholder="Rechercher..." oninput="renderList()"/>
+    </div>
+    <div class="eleves-scroll" id="elv-list">
+      <p style="font-size:12px;color:#888;text-align:center;margin-top:20px">Créez une session pour commencer</p>
+    </div>
+  </div>
+
+  <!-- ZONE PDF -->
+  <div class="viewer">
+    <div class="nav-bar" id="nav-bar">
+      <!-- Navigation élève -->
+      <button class="nav-btn" id="btn-elv-prev" onclick="prevEleve()" title="Élève précédent" disabled><i class="ti ti-user-up"></i></button>
+      <div class="nav-center" style="min-width:140px;flex-direction:column;gap:1px;padding:4px 14px">
+        <span id="nav-eleve-name" style="font-size:12px;font-weight:700;color:#EEEDFE;white-space:nowrap">—</span>
+        <span id="nav-eleve-pages" style="font-size:11px;color:#AFA9EC;white-space:nowrap">pages —</span>
+      </div>
+      <button class="nav-btn" id="btn-elv-next" onclick="nextEleve()" title="Élève suivant"><i class="ti ti-user-down"></i></button>
+      <div class="tool-sep" style="height:28px;background:#7F77DD;margin:0 4px"></div>
+      <!-- Navigation page -->
+      <button class="nav-btn" id="btn-prev" onclick="prevPage()" disabled title="Page précédente"><i class="ti ti-chevron-left"></i></button>
+      <div class="nav-center">
+        <i class="ti ti-file-text"></i>
+        <input class="nav-page-input" id="nav-page-input" type="number" min="1" value="1" onchange="goToInputPage()"/>
+        <span class="nav-sep">/</span>
+        <span class="nav-total" id="nav-total">1</span>
+      </div>
+      <button class="nav-btn" id="btn-next" onclick="nextPage()" title="Page suivante"><i class="ti ti-chevron-right"></i></button>
+      <!-- Zoom -->
+      <div class="nav-zoom">
+        <button class="zoom-btn" onclick="zoomIn(-0.25)" title="Dézoomer"><i class="ti ti-minus"></i></button>
+        <span class="zoom-lbl" id="zoom-lbl">130%</span>
+        <button class="zoom-btn" onclick="zoomIn(0.25)" title="Zoomer"><i class="ti ti-plus"></i></button>
+        <button class="zoom-btn" onclick="resetZoom()" title="Réinitialiser le zoom" style="width:auto;padding:0 8px;font-size:11px;font-weight:600">↺</button>
+      </div>
+      <button class="tool-btn" id="open-annot-bar-btn" onclick="toggleAnnotBar()"><i class="ti ti-edit"></i> Annoter</button>
+      <button class="tool-btn" onclick="openPagesModal()" title="Définir les pages par élève" style="background:#3C3489;color:#CECBF6"><i class="ti ti-file-text"></i> Pages</button>
+      <button class="tool-btn" id="export-pdf-btn" onclick="exportAnnotatedPDF()" title="Télécharger le PDF avec les annotations" style="background:#1D9E75;color:#E1F5EE;display:none"><i class="ti ti-file-download"></i> Exporter PDF</button>
+    </div>
+
+    <div class="annot-bar" id="annot-bar">
+      <button class="tool-btn" id="tool-select" onclick="setTool('select')" title="Sélectionner / déplacer"><i class="ti ti-cursor-text"></i> Sélection</button>
+      <button class="tool-btn" id="tool-draw" onclick="setTool('draw')" title="Dessin libre"><i class="ti ti-pencil"></i> Dessin</button>
+      <button class="tool-btn" id="tool-line" onclick="setTool('line')" title="Trait droit"><i class="ti ti-minus"></i> Trait</button>
+      <button class="tool-btn" id="tool-text" onclick="setTool('text')" title="Texte"><i class="ti ti-typography"></i> Texte</button>
+      <div class="tool-sep"></div>
+      <span class="size-lbl">Couleur</span>
+      <span class="color-swatch picked" style="background:#E24B4A" data-c="#E24B4A" onclick="pickColor(this)" title="Rouge"></span>
+      <span class="color-swatch" style="background:#534AB7" data-c="#534AB7" onclick="pickColor(this)" title="Violet"></span>
+      <span class="color-swatch" style="background:#1D9E75" data-c="#1D9E75" onclick="pickColor(this)" title="Vert"></span>
+      <span class="color-swatch" style="background:#EF9F27" data-c="#EF9F27" onclick="pickColor(this)" title="Orange"></span>
+      <span class="color-swatch" style="background:#1a1a2e" data-c="#1a1a2e" onclick="pickColor(this)" title="Noir"></span>
+      <input type="color" id="custom-color" value="#E24B4A" oninput="customColor(this)" title="Couleur personnalisée" style="width:22px;height:22px;border-radius:50%;border:2px solid #AFA9EC;cursor:pointer;padding:0;background:none"/>
+      <div class="tool-sep"></div>
+      <span class="size-lbl">Taille</span>
+      <input class="size-inp" id="stroke-size" type="number" min="1" max="20" value="3"/>
+      <div class="tool-sep"></div>
+      <button class="tool-btn" id="del-sel-btn" onclick="deleteSelected()" style="background:#712B13;color:#FAECE7;display:none"><i class="ti ti-trash"></i> Supprimer</button>
+      <button class="annot-close" onclick="toggleAnnotBar()"><i class="ti ti-x"></i> Fermer</button>
+    </div>
+
+    <div class="pdf-zone" id="pdf-zone">
+      <div class="upload-zone" id="upload-zone">
+        <div class="upload-icon-wrap"><i class="ti ti-file-upload"></i></div>
+        <h2>Importer le PDF des copies</h2>
+        <p>Toutes les copies dans un seul fichier PDF</p>
+        <p id="upload-hint" style="font-size:12px;color:#534AB7;font-weight:600;background:#EEEDFE;padding:4px 12px;border-radius:20px;display:none"></p>
+        <label class="upload-btn-label">
+          <i class="ti ti-upload"></i> Choisir un fichier
+          <input type="file" id="pdf-file-input" accept=".pdf" onchange="loadPDF(this)"/>
+        </label>
+      </div>
+      <div id="pages-container" style="display:none;flex-direction:column;align-items:center;gap:16px;width:100%"></div>
+      <div id="text-input-overlay"><textarea id="text-inp" rows="2" cols="20"></textarea></div>
+    </div>
+  </div>
+
+  <!-- PANEL DROIT -->
+  <div class="panel">
+    <div class="panel-tabs">
+      <button class="ptab on" onclick="switchTab('cor',this)"><i class="ti ti-pencil"></i> Corriger</button>
+      <button class="ptab" onclick="switchTab('ann',this)"><i class="ti ti-notes"></i> Annotations</button>
+      <button class="ptab" onclick="switchTab('stat',this)"><i class="ti ti-chart-bar"></i> Stats</button>
+    </div>
+
+    <div id="tab-cor">
+      <div class="psec">
+        <div class="psec-title"><i class="ti ti-list-check"></i> Barème
+          <button onclick="openEditBareme()" title="Modifier le barème" style="margin-left:auto;width:22px;height:22px;border-radius:6px;border:none;background:#EEEDFE;color:#534AB7;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px"><i class="ti ti-pencil"></i></button>
+        </div>
+        <div id="bareme-rows"></div>
+      </div>
+      <div class="psec">
+        <div class="psec-title"><i class="ti ti-award"></i> Note finale</div>
+        <div class="note-display" id="note-display">
+          <div class="note-num" id="note-num">—</div>
+          <div class="note-denom" id="note-denom">sur 20</div>
+          <div class="note-bar-wrap"><div class="note-bar-fill" id="note-bar" style="width:0%"></div></div>
+          <div class="note-impossible" id="note-impossible"><i class="ti ti-alert-triangle"></i> Note impossible</div>
+        </div>
+      </div>
+      <div class="psec">
+        <div class="psec-title"><i class="ti ti-message-circle"></i> Appréciation</div>
+        <textarea class="appr" id="appr" placeholder="Commentaire général..." oninput="saveCur()"></textarea>
+      </div>
+      <input type="hidden" id="pg-deb"/>
+      <input type="hidden" id="pg-fin"/>
+    </div>
+
+    <div id="tab-ann" style="display:none">
+      <div class="psec">
+        <div class="psec-title"><i class="ti ti-layers"></i> Annotations</div>
+        <div id="ann-list"><p style="font-size:12px;color:#888">Aucune annotation</p></div>
+        <button class="open-annot-btn" onclick="openAnnotBarFromPanel()"><i class="ti ti-edit"></i> Ouvrir les outils d'annotation</button>
+      </div>
+    </div>
+
+    <div id="tab-stat" style="display:none">
+      <div class="psec">
+        <div class="psec-title"><i class="ti ti-chart-bar"></i> Statistiques de classe</div>
+        <div class="stat-grid" id="stat-grid"><p style="font-size:12px;color:#888;grid-column:span 2">Aucune note saisie</p></div>
+        <div id="dist"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<!-- DROPDOWN NOTE (unique, déplacé par JS) -->
+<div id="note-dropdown" class="note-dropdown" role="listbox"></div>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+/* ===== ÉTAT GLOBAL ===== */
+let S={mat:'',cls:'',max:20,pagesParEleve:2,exercices:[],qs:[],eleves:[],cur:0,pdf:null,page:1,scale:1.3};
+let T={tool:'select',color:'#E24B4A',size:3,drawing:false,startX:0,startY:0,currentPath:[],selectedId:null,dragOffX:0,dragOffY:0,dragging:false,dragPage:null,drawPage:null,annotBarOpen:false};
+let annotIdCounter=0;
+function newId(){return++annotIdCounter;}
+
+/* ===== ÉDITION BARÈME ===== */
+function openEditBareme(){
+  if(!S.eleves.length){alert('Créez d\'abord une session.');return;}
+  // Pré-remplir l'éditeur avec le barème actuel
+  exoCounter=0;
+  document.getElementById('bareme-editor').innerHTML='';
+  S.exercices.forEach(ex=>addExoBlock(ex.name,ex.questions,'bareme-editor'));
+  document.getElementById('bm-max').value=S.max;
+  document.getElementById('bareme-modal').classList.remove('hidden');
+}
+
+function applyEditBareme(){
+  const newMax=parseInt(document.getElementById('bm-max').value)||S.max;
+  const newExercices=readExoEditorFrom('bareme-editor');
+  if(!newExercices.length){alert('Le barème ne peut pas être vide.');return;}
+  const newQs=newExercices.flatMap((ex,ei)=>ex.questions.map((q,qi)=>({label:q.label,max:q.max,exoIdx:ei,qIdx:qi})));
+  // Préserver les notes dont la question (même label, même max) existe toujours
+  S.eleves.forEach(e=>{
+    const newNotes=newQs.map(nq=>{
+      const oldIdx=S.qs.findIndex(oq=>oq.label===nq.label&&oq.max===nq.max&&oq.exoIdx===nq.exoIdx);
+      return oldIdx>=0?e.notes[oldIdx]:'';
+    });
+    e.notes=newNotes;
+  });
+  S.max=newMax;
+  S.exercices=newExercices;
+  S.qs=newQs;
+  document.getElementById('note-denom').textContent='sur '+S.max;
+  document.getElementById('bareme-modal').classList.add('hidden');
+  buildBareme();updateNote();autoSave();
+}
+
+/* ===== ÉDITION LISTE ÉLÈVES ===== */
+function openEditEleves(){
+  if(!S.eleves.length){alert('Créez d\'abord une session.');return;}
+  document.getElementById('eleves-edit-area').value=S.eleves.map(e=>e.name).join('\n');
+  document.getElementById('eleves-modal').classList.remove('hidden');
+  document.getElementById('eleves-edit-area').focus();
+}
+
+function applyEditEleves(){
+  saveCur();
+  const newNames=document.getElementById('eleves-edit-area').value
+    .split('\n').map(l=>l.trim()).filter(Boolean);
+  if(!newNames.length){alert('La liste ne peut pas être vide.');return;}
+  // Reconstruire le tableau en préservant les données existantes
+  const oldByName=Object.fromEntries(S.eleves.map(e=>[e.name,e]));
+  S.eleves=newNames.map((name,i)=>{
+    if(oldByName[name]){
+      // Préserver les données de l'élève existant
+      const ex=oldByName[name];
+      // Recalculer les pages
+      const debut=i*S.pagesParEleve+1;
+      return{...ex,name,pgD:ex.pgD||String(debut),pgF:ex.pgF||String(debut+S.pagesParEleve-1)};
+    }
+    // Nouvel élève
+    const debut=i*S.pagesParEleve+1;
+    return{name,notes:S.qs.map(()=>''),appr:'',pgD:String(debut),pgF:String(debut+S.pagesParEleve-1),shapes:[]};
+  });
+  // Ajuster S.cur si hors limites
+  S.cur=Math.min(S.cur,S.eleves.length-1);
+  document.getElementById('eleves-modal').classList.add('hidden');
+  document.getElementById('session-meta').textContent=S.eleves.length+' élèves · '+S.pagesParEleve+' p./élève';
+  renderList();selEleve(S.cur);autoSave();
+}
+
+/* ===== MODALE ===== */
+function openModal(){
+  document.getElementById('modal').classList.remove('hidden');
+  // Afficher le bouton Annuler seulement si une session existe déjà
+  const cancelBtn=document.getElementById('modal-cancel-btn');
+  cancelBtn.style.display=S.eleves.length?'inline-flex':'none';
+}
+function cancelModal(){
+  document.getElementById('modal').classList.add('hidden');
+}
+
+/* ===== ÉDITEUR BARÈME ===== */
+let exoCounter=0;
+
+function addExoBlock(name,questions,containerId){
+  const id=++exoCounter;
+  const ed=document.getElementById(containerId||'exo-editor');
+  const div=document.createElement('div');
+  div.className='exo-editor-block';
+  div.innerHTML=`<div class="exo-editor-head">
+    <input class="exo-name-inp" placeholder="Nom de l'exercice" value="${name||'Exercice '+id}"/>
+    <button class="exo-del-btn" onclick="this.closest('.exo-editor-block').remove()" title="Supprimer"><i class="ti ti-trash"></i></button>
+  </div>
+  <div class="q-editor-list"></div>
+  <button class="add-q-btn" onclick="addQRow(this.previousElementSibling)"><i class="ti ti-plus"></i> Ajouter une question</button>`;
+  ed.appendChild(div);
+  const list=div.querySelector('.q-editor-list');
+  if(questions&&questions.length){questions.forEach(q=>addQRow(list,q.label,q.max));}
+  else{addQRow(list,'Q1',4);addQRow(list,'Q2',3);addQRow(list,'Q3',3);}
+}
+
+function addExoBlockTo(containerId){addExoBlock(null,null,containerId);}
+
+function readExoEditorFrom(containerId){
+  const exercices=[];
+  document.querySelectorAll(`#${containerId} .exo-editor-block`).forEach(b=>{
+    const name=b.querySelector('.exo-name-inp').value.trim()||'Exercice';
+    const questions=[];
+    b.querySelectorAll('.q-editor-row').forEach(r=>{
+      const lbl=r.querySelector('.q-name').value.trim()||'Q?';
+      const max=parseFloat(r.querySelector('.q-pts').value)||0;
+      questions.push({label:lbl,max});
+    });
+    if(questions.length)exercices.push({name,questions,open:true});
+  });
+  return exercices;
+}
+
+function addQRow(list,name,pts){
+  const row=document.createElement('div');
+  row.className='q-editor-row';
+  row.innerHTML=`<input class="q-name" placeholder="Q1" value="${name||''}"/>
+    <input class="q-pts" type="number" min="0" step="0.5" placeholder="pts" value="${pts||''}"/>
+    <button class="q-del" onclick="this.parentElement.remove()" title="Supprimer"><i class="ti ti-x"></i></button>`;
+  list.appendChild(row);
+}
+
+function readExoEditor(){
+  const exercices=[];
+  document.querySelectorAll('.exo-editor-block').forEach(b=>{
+    const name=b.querySelector('.exo-name-inp').value.trim()||'Exercice';
+    const questions=[];
+    b.querySelectorAll('.q-editor-row').forEach(r=>{
+      const lbl=r.querySelector('.q-name').value.trim()||'Q?';
+      const max=parseFloat(r.querySelector('.q-pts').value)||0;
+      questions.push({label:lbl,max});
+    });
+    if(questions.length)exercices.push({name,questions,open:true});
+  });
+  return exercices;
+}
+
+/* ===== SESSION ===== */
+function createSession(){
+  S.mat=document.getElementById('m-mat').value||'Matière';
+  S.cls=document.getElementById('m-cls').value||'Classe';
+  S.max=parseInt(document.getElementById('m-max').value)||20;
+  S.pagesParEleve=parseInt(document.getElementById('m-ppp').value)||2;
+  S.exercices=readExoEditor();
+  S.qs=S.exercices.flatMap((ex,ei)=>ex.questions.map((q,qi)=>({label:q.label,max:q.max,exoIdx:ei,qIdx:qi})));
+  S.eleves=document.getElementById('m-elv').value.trim().split('\n').filter(Boolean).map((n,i)=>{
+    const debut=i*S.pagesParEleve+1;
+    return{name:n.trim(),notes:S.qs.map(()=>''),appr:'',pgD:String(debut),pgF:String(debut+S.pagesParEleve-1),shapes:[]};
+  });
+  document.getElementById('session-title').textContent=S.mat+' — '+S.cls;
+  document.getElementById('session-meta').textContent=S.eleves.length+' élèves · '+S.pagesParEleve+' p./élève';
+  document.getElementById('note-denom').textContent='sur '+S.max;
+  document.getElementById('modal').classList.add('hidden');
+  // Réinitialiser la zone PDF
+  S.pdf=null; S.page=1;
+  const pdfInput=document.getElementById('pdf-file-input');
+  if(pdfInput)pdfInput.value='';
+  document.getElementById('pages-container').innerHTML='';
+  document.getElementById('pages-container').style.display='none';
+  document.getElementById('upload-zone').style.display='flex';
+  document.getElementById('nav-bar').style.display='none';
+  document.getElementById('export-pdf-btn').style.display='none';
+  document.getElementById('annot-bar').style.display='none';
+  T.annotBarOpen=false;
+  document.getElementById('open-annot-bar-btn').className='tool-btn';
+  const hint=document.getElementById('upload-hint');
+  hint.textContent=`${S.eleves.length} élèves × ${S.pagesParEleve} pages = ${S.eleves.length*S.pagesParEleve} pages attendues`;
+  hint.style.display='inline-block';
+  renderList(); selEleve(0);
+  autoSave();
+}
+
+function initials(n){return n.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();}
+
+function isNT(v){return typeof v==='string'&&v.trim().toUpperCase()==='N';}
+function noteVal(v){return isNT(v)?0:(parseFloat(v)||0);}
+
+function getNote(i){
+  const e=S.eleves[i];if(!e)return null;
+  const s=e.notes.reduce((a,n)=>a+noteVal(n),0);
+  return e.notes.some(n=>n!=='')?s:null;
+}
+
+/* ===== LISTE ÉLÈVES + DRAG & DROP ===== */
+function renderList(){
+  const q=(document.getElementById('search-elv').value||'').toLowerCase();
+  const c=document.getElementById('elv-list');c.innerHTML='';
+  S.eleves.forEach((e,i)=>{
+    if(q&&!e.name.toLowerCase().includes(q))return;
+    const note=getNote(i);const done=note!==null;
+    const d=document.createElement('div');
+    d.className='eleve-card'+(i===S.cur?' active':'');
+    d.draggable=!q;
+    d.dataset.idx=i;
+    d.innerHTML=`<span class="drag-handle" title="Glisser pour réordonner">⠿</span>
+      <div class="eleve-avatar">${initials(e.name)}</div>
+      <span class="eleve-name">${e.name}</span>
+      <span class="eleve-badge ${i===S.cur?'':done?'badge-done':'badge-todo'}">${done?note.toFixed(1):'—'}</span>`;
+    d.addEventListener('click',ev=>{if(!ev.target.classList.contains('drag-handle'))selEleve(i);});
+    d.addEventListener('dragstart',ev=>{ev.dataTransfer.effectAllowed='move';ev.dataTransfer.setData('text/plain',i);setTimeout(()=>d.classList.add('dragging'),0);});
+    d.addEventListener('dragend',()=>{d.classList.remove('dragging');document.querySelectorAll('.eleve-card').forEach(el=>el.classList.remove('drag-over'));});
+    d.addEventListener('dragover',ev=>{ev.preventDefault();ev.dataTransfer.dropEffect='move';document.querySelectorAll('.eleve-card').forEach(el=>el.classList.remove('drag-over'));d.classList.add('drag-over');});
+    d.addEventListener('dragleave',()=>d.classList.remove('drag-over'));
+    d.addEventListener('drop',ev=>{
+      ev.preventDefault();d.classList.remove('drag-over');
+      const from=parseInt(ev.dataTransfer.getData('text/plain'));
+      const to=parseInt(d.dataset.idx);
+      if(from===to)return;
+      saveCur();
+      const moved=S.eleves.splice(from,1)[0];
+      S.eleves.splice(to,0,moved);
+      if(S.cur===from)S.cur=to;
+      else if(from<S.cur&&to>=S.cur)S.cur--;
+      else if(from>S.cur&&to<=S.cur)S.cur++;
+      S.eleves.forEach((elv,idx)=>{elv.pgD=String(idx*S.pagesParEleve+1);elv.pgF=String(idx*S.pagesParEleve+S.pagesParEleve);});
+      renderList();updateNavEleveUI();
+    });
+    c.appendChild(d);
+  });
+}
+
+function selEleve(i){
+  if(S.cur!==i)saveCur();
+  S.cur=i;const e=S.eleves[i];
+  document.getElementById('appr').value=e.appr||'';
+  document.getElementById('pg-deb').value=e.pgD||'';
+  document.getElementById('pg-fin').value=e.pgF||'';
+  T.selectedId=null;
+  buildBareme();renderList();renderAnnList();updateNavEleveUI();
+  if(S.pdf)renderElevePages();
+}
+
+function updateNavEleveUI(){
+  if(!S.eleves.length)return;
+  const e=S.eleves[S.cur];
+  document.getElementById('nav-eleve-name').textContent=e.name;
+  document.getElementById('nav-eleve-pages').textContent=`pages ${e.pgD||'?'} – ${e.pgF||'?'}`;
+  document.getElementById('btn-elv-prev').disabled=S.cur<=0;
+  document.getElementById('btn-elv-next').disabled=S.cur>=S.eleves.length-1;
+}
+
+function prevEleve(){if(S.cur>0)selEleve(S.cur-1);}
+function nextEleve(){if(S.cur<S.eleves.length-1)selEleve(S.cur+1);}
+
+function saveCur(){
+  const e=S.eleves[S.cur];if(!e)return;
+  e.appr=document.getElementById('appr').value;
+  const newD=document.getElementById('pg-deb').value;
+  const newF=document.getElementById('pg-fin').value;
+  if(newD)e.pgD=newD;
+  if(newF)e.pgF=newF;
+  S.qs.forEach((_,qi)=>{const inp=document.getElementById('bq-'+qi);if(inp)e.notes[qi]=inp.value;});
+  updateNote();renderList();
+  if(document.getElementById('tab-stat').style.display!=='none')renderStats();
+  autoSave();
+}
+
+/* ===== DROPDOWN NOTE ===== */
+let _dropdownInp=null, _dropdownMax=0;
+
+function openNoteDropdown(inp, max){
+  closeNoteDropdown();
+  _dropdownInp=inp; _dropdownMax=max;
+  const dd=document.getElementById('note-dropdown');
+  const currentVal=inp.value.trim();
+  // Générer les options par quart de point
+  const opts=[];
+  for(let v=0;v<=max;v+=0.25){
+    opts.push(Math.round(v*100)/100);
+  }
+  // Construire le contenu
+  dd.innerHTML='';
+  // Option NT en premier
+  const ntOpt=document.createElement('button');
+  ntOpt.className='note-opt'+(currentVal.toUpperCase()==='N'?' active':'');
+  ntOpt.textContent='Non traité';
+  ntOpt.onclick=()=>selectNoteOpt('N',max);
+  dd.appendChild(ntOpt);
+  // Options numériques
+  opts.forEach(v=>{
+    const btn=document.createElement('button');
+    btn.className='note-opt'+(currentVal===String(v)||parseFloat(currentVal)===v?' active':'');
+    btn.textContent=v%1===0?v.toFixed(0):v.toFixed(v*4%1===0?2:2).replace(/\.?0+$/,'');
+    btn.onclick=()=>selectNoteOpt(String(v),max);
+    dd.appendChild(btn);
+  });
+  // Positionner le dropdown sous le champ
+  const r=inp.getBoundingClientRect();
+  const ddH=Math.min(opts.length*31+50, window.innerHeight*0.6);
+  const top=r.bottom+4+ddH>window.innerHeight?r.top-ddH-4:r.bottom+4;
+  dd.style.top=top+'px';
+  dd.style.left=Math.min(r.left,window.innerWidth-100)+'px';
+  dd.style.maxHeight=Math.min(ddH,280)+'px';
+  dd.style.overflowY='auto';
+  dd.classList.add('open');
+  // Fermer au clic extérieur
+  setTimeout(()=>document.addEventListener('click',_closeOnOutside),0);
+}
+
+function _closeOnOutside(ev){
+  const dd=document.getElementById('note-dropdown');
+  if(!dd.contains(ev.target)&&ev.target!==_dropdownInp){closeNoteDropdown();}
+}
+
+function closeNoteDropdown(){
+  document.getElementById('note-dropdown').classList.remove('open');
+  document.removeEventListener('click',_closeOnOutside);
+  _dropdownInp=null;
+}
+
+function selectNoteOpt(val, max){
+  if(!_dropdownInp)return;
+  _dropdownInp.value=val.toUpperCase()==='N'?'N':val;
+  validateQ(_dropdownInp,max);
+  saveCur();
+  closeNoteDropdown();
+}
+
+/* ===== ÉDITION TITRE EN PLACE ===== */
+function startEditTitle(){
+  if(!S.eleves.length)return;
+  document.getElementById('edit-mat').value=S.mat;
+  document.getElementById('edit-cls').value=S.cls;
+  document.getElementById('title-view').style.display='none';
+  document.getElementById('title-edit').style.display='flex';
+  document.getElementById('edit-mat').focus();
+  document.getElementById('edit-mat').select();
+}
+function applyEditTitle(){
+  const mat=document.getElementById('edit-mat').value.trim()||S.mat;
+  const cls=document.getElementById('edit-cls').value.trim()||S.cls;
+  S.mat=mat; S.cls=cls;
+  document.getElementById('session-title').textContent=mat+' — '+cls;
+  document.getElementById('title-view').style.display='flex';
+  document.getElementById('title-edit').style.display='none';
+  autoSave();
+}
+function cancelEditTitle(){
+  document.getElementById('title-view').style.display='flex';
+  document.getElementById('title-edit').style.display='none';
+}
+function titleKeydown(ev){
+  if(ev.key==='Enter')applyEditTitle();
+  if(ev.key==='Escape')cancelEditTitle();
+}
+
+/* ===== MODALE ASSIGNATION DES PAGES ===== */
+function openPagesModal(){
+  if(!S.eleves.length){alert('Créez d\'abord une session.');return;}
+  const tbody=document.getElementById('pages-table-body');
+  tbody.innerHTML='';
+  S.eleves.forEach((e,i)=>{
+    const nb=(parseInt(e.pgD)&&parseInt(e.pgF))?Math.max(0,parseInt(e.pgF)-parseInt(e.pgD)+1):'?';
+    const row=document.createElement('tr');
+    if(i===S.cur)row.className='active-row';
+    row.innerHTML=`<td style="font-size:13px;font-weight:${i===S.cur?'600':'400'};color:#1a1a2e">${e.name}</td>
+      <td><input class="pages-inp" id="pm-deb-${i}" type="number" min="1" value="${e.pgD||''}" oninput="updatePagesModalNb(${i})"/></td>
+      <td class="pages-sep">à <input class="pages-inp" id="pm-fin-${i}" type="number" min="1" value="${e.pgF||''}" oninput="updatePagesModalNb(${i})"/></td>
+      <td class="pages-nb" id="pm-nb-${i}">${nb} p.</td>`;
+    tbody.appendChild(row);
+  });
+  const n=S.pdf?S.pdf.numPages:'?';
+  document.getElementById('pages-pdf-info').textContent=`PDF : ${n} page${n>1?'s':''}`;
+  document.getElementById('pm-ppp').value=S.pagesParEleve;
+  document.getElementById('pages-modal').classList.remove('hidden');
+}
+
+function updatePagesModalNb(i){
+  const d=parseInt(document.getElementById('pm-deb-'+i).value)||0;
+  const f=parseInt(document.getElementById('pm-fin-'+i).value)||0;
+  const nb=(d&&f&&f>=d)?f-d+1:0;
+  document.getElementById('pm-nb-'+i).textContent=nb>0?nb+' p.':'—';
+}
+
+function autoPagesModal(){
+  // Recalculer automatiquement en chaîne : premier élève page 1, chaque élève commence où le précédent finit +1
+  // Utilise la valeur actuelle de pagesParEleve comme base, mais l'utilisateur peut avoir modifié les champs
+  let nextPage=1;
+  S.eleves.forEach((_,i)=>{
+    const d=nextPage;
+    const f=d+S.pagesParEleve-1;
+    document.getElementById('pm-deb-'+i).value=d;
+    document.getElementById('pm-fin-'+i).value=f;
+    updatePagesModalNb(i);
+    nextPage=f+1;
+  });
+}
+
+function applyPagesModal(){
+  // Mettre à jour pagesParEleve depuis le champ
+  const newPpp=parseInt(document.getElementById('pm-ppp').value);
+  if(newPpp>0) S.pagesParEleve=newPpp;
+  S.eleves.forEach((e,i)=>{
+    const d=document.getElementById('pm-deb-'+i).value;
+    const f=document.getElementById('pm-fin-'+i).value;
+    if(d)e.pgD=d;
+    if(f)e.pgF=f;
+  });
+  document.getElementById('pages-modal').classList.add('hidden');
+  // Mettre à jour l'affichage topbar
+  document.getElementById('session-meta').textContent=S.eleves.length+' élèves · '+S.pagesParEleve+' p./élève';
+  // Mettre à jour les champs cachés de l'élève courant
+  const cur=S.eleves[S.cur];
+  document.getElementById('pg-deb').value=cur.pgD||'';
+  document.getElementById('pg-fin').value=cur.pgF||'';
+  updateNavEleveUI();
+  autoSave();
+  if(S.pdf)renderElevePages();
+}
+
+function validateQ(inp, max){
+  const raw=inp.value.trim();
+  const nt=raw.toUpperCase()==='N';
+  const v=parseFloat(raw);
+  const isError=!nt&&raw!==''&&!isNaN(v)&&(v>max||v<0);
+  const row=inp.closest('.q-row');
+  const qmax=inp.nextElementSibling;
+  inp.classList.remove('error'); row.classList.remove('error'); qmax.classList.remove('error');
+  if(isError){
+    inp.classList.add('error'); row.classList.add('error'); qmax.classList.add('error');
+    qmax.title='Valeur hors barème';
+    if(!qmax.textContent.startsWith('⚠'))qmax.textContent='⚠/'+max;
+  } else {
+    qmax.title=''; qmax.textContent='/'+max;
+  }
+}
+
+
+function toggleExo(ei){S.exercices[ei].open=!S.exercices[ei].open;buildBareme();}
+
+function buildBareme(){
+  const e=S.eleves[S.cur];const c=document.getElementById('bareme-rows');c.innerHTML='';
+  if(!S.exercices||!S.exercices.length)return;
+  let flatIdx=0;
+  S.exercices.forEach((ex,ei)=>{
+    const start=flatIdx;
+    const exoNotes=e?ex.questions.map((_,qi)=>noteVal(e.notes[start+qi])):[];
+    const exoTotal=exoNotes.reduce((a,b)=>a+b,0);
+    const exoMax=ex.questions.reduce((a,q)=>a+q.max,0);
+    const hasNote=e&&ex.questions.some((_,qi)=>e.notes[start+qi]!=='');
+    // Détecter si au moins une question de l'exercice dépasse son max
+    const exoHasError=e&&ex.questions.some((q,qi)=>{
+      const raw=e.notes[start+qi];
+      if(isNT(raw))return false;
+      const v=parseFloat(raw);
+      return !isNaN(v)&&raw!==''&&(v>q.max||v<0);
+    });
+    const header=document.createElement('div');
+    header.className='exo-block';
+    header.innerHTML=`<div class="exo-header" onclick="toggleExo(${ei})">
+        <i class="ti ti-chevron-right exo-chevron${ex.open?' open':''}"></i>
+        <span class="exo-name">${ex.name}</span>
+        <span class="exo-subtotal${exoHasError?' error':''}">${hasNote?exoTotal.toFixed(1):'—'} / ${exoMax}</span>
+      </div>
+      <div class="exo-body${ex.open?' open':''}"></div>`;
+    c.appendChild(header);
+    const body=header.querySelector('.exo-body');
+    ex.questions.forEach((q,qi)=>{
+      const absIdx=flatIdx;
+      const raw=e?e.notes[absIdx]:'';
+      const nt=isNT(raw);
+      const val=nt?NaN:parseFloat(raw);
+      const isError=!nt&&raw!==''&&!isNaN(val)&&(val>q.max||val<0);
+      const row=document.createElement('div');
+      row.className='q-row'+(isError?' error':nt?' nt':'');
+      row.innerHTML=`<span class="q-label">${q.label}</span>
+        <input class="q-input${isError?' error':''}" id="bq-${absIdx}" type="text" inputmode="decimal"
+          value="${nt?'N':raw||''}" placeholder="—" readonly
+          onclick="openNoteDropdown(this,${q.max})"
+          style="width:54px;cursor:pointer"/>
+        <span class="q-max${isError?' error':''}" id="qmax-${absIdx}">${isError?'⚠':''}/${q.max}</span>`;
+      body.appendChild(row);
+      flatIdx++;
+    });
+  });
+  updateNote();
+}
+
+function updateNote(){
+  const note=getNote(S.cur);
+  const e=S.eleves[S.cur];
+  // Mettre à jour les sous-totaux des exercices dans l'en-tête
+  if(e && S.exercices){
+    let flatIdx=0;
+    S.exercices.forEach((ex,ei)=>{
+      const start=flatIdx;
+      const exoNotes=ex.questions.map((_,qi)=>noteVal(e.notes[start+qi]));
+      const exoTotal=exoNotes.reduce((a,b)=>a+b,0);
+      const exoMax=ex.questions.reduce((a,q)=>a+q.max,0);
+      const hasNote=ex.questions.some((_,qi)=>e.notes[start+qi]!=='');
+      const exoHasError=ex.questions.some((q,qi)=>{
+        const raw=e.notes[start+qi];
+        if(isNT(raw))return false;
+        const v=parseFloat(raw);
+        return !isNaN(v)&&raw!==''&&(v>q.max||v<0);
+      });
+      // Mettre à jour le span sous-total dans le DOM
+      const header=document.querySelector(`#bareme-rows .exo-block:nth-child(${ei+1}) .exo-subtotal`);
+      if(header){
+        header.textContent=(hasNote?exoTotal.toFixed(1):'—')+' / '+exoMax;
+        header.className='exo-subtotal'+(exoHasError?' error':'');
+      }
+      flatIdx+=ex.questions.length;
+    });
+  }
+  // Vérifier s'il y a une erreur globale
+  const hasError=e&&S.qs.some((q,qi)=>{
+    const raw=e.notes[qi];
+    if(isNT(raw))return false;
+    const v=parseFloat(raw);
+    return raw!==''&&!isNaN(v)&&(v>q.max||v<0);
+  });
+  const display=document.getElementById('note-display');
+  if(hasError){
+    display.classList.add('error');
+  }else{
+    display.classList.remove('error');
+  }
+  document.getElementById('note-num').textContent=note!==null?note.toFixed(1):'—';
+  document.getElementById('note-bar').style.width=(note!==null&&!hasError?Math.min(100,Math.round(note/S.max*100)):hasError?100:0)+'%';
+}
+
+/* ===== PDF ===== */
+function updateNavUI(){
+  if(!S.pdf)return;
+  const n=S.pdf.numPages;
+  document.getElementById('nav-total').textContent=n;
+  document.getElementById('nav-page-input').max=n;
+  const e=S.eleves[S.cur];
+  const debut=e?parseInt(e.pgD)||1:1;
+  document.getElementById('nav-page-input').value=debut;
+  document.getElementById('btn-prev').disabled=debut<=1;
+  document.getElementById('btn-next').disabled=debut>=n;
+}
+
+function loadPDF(inp){
+  const f=inp.files[0];if(!f)return;
+  // Réinitialiser l'input pour permettre de recharger le même fichier
+  inp.value='';
+  const r=new FileReader();
+  r.onload=async ev=>{
+    S.pdf=await pdfjsLib.getDocument({data:new Uint8Array(ev.target.result)}).promise;
+    document.getElementById('upload-zone').style.display='none';
+    const pc=document.getElementById('pages-container');
+    pc.style.display='flex';pc.style.flexDirection='column';pc.style.alignItems='center';pc.style.width='100%';
+    document.getElementById('nav-bar').style.display='flex';
+    document.getElementById('export-pdf-btn').style.display='inline-flex';
+    const n=S.pdf.numPages;
+    const calc=S.eleves.length?` (${S.eleves.length}×${S.pagesParEleve}=${S.eleves.length*S.pagesParEleve} p. att.)`:'';
+    document.getElementById('session-meta').textContent=(S.eleves.length?S.eleves.length+' élèves · ':'')+n+' pages PDF'+calc;
+    updateNavEleveUI();
+    await renderElevePages();
+  };
+  r.readAsArrayBuffer(f);
+}
+
+async function renderElevePages(){
+  if(!S.pdf)return;
+  const e=S.eleves[S.cur];if(!e)return;
+  const debut=parseInt(e.pgD)||1;
+  const fin=Math.min(parseInt(e.pgF)||debut,S.pdf.numPages);
+  const container=document.getElementById('pages-container');
+  container.innerHTML='';
+  for(let pg=debut;pg<=fin;pg++){
+    const block=document.createElement('div');
+    block.className='page-block';block.dataset.page=pg;
+    const lbl=document.createElement('div');lbl.className='page-label';lbl.textContent='Page '+pg;
+    block.appendChild(lbl);
+    const pdfCv=document.createElement('canvas');pdfCv.className='pdf-cv';block.appendChild(pdfCv);
+    const annCv=document.createElement('canvas');annCv.className='ann-cv';block.appendChild(annCv);
+    container.appendChild(block);
+    const pdfPage=await S.pdf.getPage(pg);
+    const vp=pdfPage.getViewport({scale:S.scale});
+    pdfCv.width=vp.width;pdfCv.height=vp.height;
+    await pdfPage.render({canvasContext:pdfCv.getContext('2d'),viewport:vp}).promise;
+    annCv.width=vp.width;annCv.height=vp.height;
+    updateAnnotCursor(annCv);
+    attachPageEvents(annCv,pg);
+    redrawPage(pg);
+  }
+  updateNavUI();
+}
+
+async function renderSinglePage(pg){
+  const container=document.getElementById('pages-container');
+  container.innerHTML='';
+  const block=document.createElement('div');block.className='page-block';block.dataset.page=pg;
+  const lbl=document.createElement('div');lbl.className='page-label';lbl.textContent='Page '+pg+' (hors copie)';block.appendChild(lbl);
+  const pdfCv=document.createElement('canvas');pdfCv.className='pdf-cv';block.appendChild(pdfCv);
+  const annCv=document.createElement('canvas');annCv.className='ann-cv';block.appendChild(annCv);
+  container.appendChild(block);
+  const pdfPage=await S.pdf.getPage(pg);
+  const vp=pdfPage.getViewport({scale:S.scale});
+  pdfCv.width=vp.width;pdfCv.height=vp.height;
+  await pdfPage.render({canvasContext:pdfCv.getContext('2d'),viewport:vp}).promise;
+  annCv.width=vp.width;annCv.height=vp.height;
+  updateAnnotCursor(annCv);attachPageEvents(annCv,pg);redrawPage(pg);
+}
+
+function zoomIn(d){S.scale=Math.max(0.5,Math.min(2.5,S.scale+d));document.getElementById('zoom-lbl').textContent=Math.round(S.scale*100)+'%';if(S.pdf)renderElevePages();}
+function resetZoom(){S.scale=1.3;document.getElementById('zoom-lbl').textContent='130%';if(S.pdf)renderElevePages();}
+function goPage(){if(S.pdf)renderElevePages();}
+
+/* Trouve et sélectionne l'élève dont la copie contient la page pg */
+function selectEleveForPage(pg){
+  const idx=S.eleves.findIndex(e=>{
+    const d=parseInt(e.pgD)||0;
+    const f=parseInt(e.pgF)||0;
+    return d>0 && f>0 && pg>=d && pg<=f;
+  });
+  if(idx>=0 && idx!==S.cur){
+    saveCur();
+    S.cur=idx;
+    const e=S.eleves[idx];
+    document.getElementById('appr').value=e.appr||'';
+    document.getElementById('pg-deb').value=e.pgD||'';
+    document.getElementById('pg-fin').value=e.pgF||'';
+    buildBareme();renderList();renderAnnList();updateNavEleveUI();
+  }
+}
+
+function prevPage(){
+  if(!S.pdf)return;
+  const inp=document.getElementById('nav-page-input');
+  const cur=parseInt(inp.value)||1;if(cur<=1)return;
+  const t=cur-1;inp.value=t;
+  document.getElementById('btn-prev').disabled=t<=1;
+  document.getElementById('btn-next').disabled=t>=S.pdf.numPages;
+  selectEleveForPage(t);
+  const block=document.querySelector(`.page-block[data-page="${t}"]`);
+  if(block)block.scrollIntoView({behavior:'smooth',block:'start'});else renderSinglePage(t);
+}
+function nextPage(){
+  if(!S.pdf)return;
+  const inp=document.getElementById('nav-page-input');
+  const cur=parseInt(inp.value)||1;if(cur>=S.pdf.numPages)return;
+  const t=cur+1;inp.value=t;
+  document.getElementById('btn-prev').disabled=t<=1;
+  document.getElementById('btn-next').disabled=t>=S.pdf.numPages;
+  selectEleveForPage(t);
+  const block=document.querySelector(`.page-block[data-page="${t}"]`);
+  if(block)block.scrollIntoView({behavior:'smooth',block:'start'});else renderSinglePage(t);
+}
+function goToInputPage(){
+  if(!S.pdf)return;
+  const v=parseInt(document.getElementById('nav-page-input').value);
+  if(v<1||v>S.pdf.numPages)return;
+  document.getElementById('btn-prev').disabled=v<=1;
+  document.getElementById('btn-next').disabled=v>=S.pdf.numPages;
+  selectEleveForPage(v);
+  const block=document.querySelector(`.page-block[data-page="${v}"]`);
+  if(block)block.scrollIntoView({behavior:'smooth',block:'start'});else renderSinglePage(v);
+}
+
+/* ===== ANNOTATIONS ===== */
+function updateAnnotCursor(ac){
+  if(!T.annotBarOpen){ac.className='ann-cv';return;}
+  const c={select:'default',draw:'crosshair',line:'crosshair',text:'text'};
+  ac.style.cursor=c[T.tool]||'default';
+}
+function updateCursor(){document.querySelectorAll('.ann-cv').forEach(ac=>updateAnnotCursor(ac));}
+
+function toggleAnnotBar(){
+  T.annotBarOpen=!T.annotBarOpen;
+  document.getElementById('annot-bar').style.display=T.annotBarOpen?'flex':'none';
+  document.getElementById('open-annot-bar-btn').className='tool-btn'+(T.annotBarOpen?' active':'');
+  updateCursor();
+}
+function openAnnotBarFromPanel(){if(!T.annotBarOpen)toggleAnnotBar();switchTab('ann',document.querySelector('.ptab.on'));}
+
+function setTool(name){
+  T.tool=name;T.selectedId=null;T.drawing=false;T.dragging=false;
+  document.getElementById('del-sel-btn').style.display='none';
+  ['select','draw','line','text'].forEach(t=>{const b=document.getElementById('tool-'+t);if(b)b.className='tool-btn'+(t===name?' active':'');});
+  updateCursor();redraw();
+}
+function pickColor(el){document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('picked'));el.classList.add('picked');T.color=el.dataset.c;document.getElementById('custom-color').value=T.color;}
+function customColor(inp){T.color=inp.value;document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('picked'));}
+
+function redraw(){document.querySelectorAll('.page-block').forEach(b=>redrawPage(parseInt(b.dataset.page)));}
+
+function redrawPage(pg){
+  const block=document.querySelector(`.page-block[data-page="${pg}"]`);if(!block)return;
+  const ac=block.querySelector('.ann-cv');if(!ac||!ac.width)return;
+  const ctx=ac.getContext('2d');ctx.clearRect(0,0,ac.width,ac.height);
+  const e=S.eleves[S.cur];if(!e)return;
+  e.shapes.filter(s=>s.page===pg).forEach(s=>drawShapeOn(ctx,ac.width,ac.height,s,s.id===T.selectedId));
+}
+
+function drawShapeOn(ctx,W,H,s,selected){
+  ctx.save();
+  ctx.strokeStyle=s.color;ctx.fillStyle=s.color;
+  ctx.lineWidth=Math.max(1,s.size*(W/500));ctx.lineCap='round';ctx.lineJoin='round';
+  if(s.type==='draw'){
+    if(!s.data||s.data.length<2){ctx.restore();return;}
+    ctx.beginPath();ctx.moveTo(s.data[0].x*W,s.data[0].y*H);
+    for(let i=1;i<s.data.length;i++)ctx.lineTo(s.data[i].x*W,s.data[i].y*H);
+    ctx.stroke();
+  }else if(s.type==='line'){
+    ctx.beginPath();ctx.moveTo(s.data.x1*W,s.data.y1*H);ctx.lineTo(s.data.x2*W,s.data.y2*H);ctx.stroke();
+  }else if(s.type==='text'){
+    const fs=Math.max(10,s.size*5*(W/500));ctx.font=`${fs}px system-ui`;
+    const lines=s.data.txt.split('\n');const lh=fs*1.25;
+    const maxW=Math.max(...lines.map(l=>ctx.measureText(l).width));
+    const px=s.data.x*W,py=s.data.y*H;
+    ctx.fillStyle='rgba(255,255,255,0.8)';ctx.fillRect(px-3,py-fs,maxW+8,lh*lines.length+4);
+    ctx.fillStyle=s.color;lines.forEach((l,i)=>ctx.fillText(l,px,py+i*lh));
+  }
+  if(selected){
+    const b=getBoundsPx(s,W,H);
+    ctx.save();ctx.strokeStyle='#534AB7';ctx.lineWidth=2;ctx.setLineDash([5,3]);
+    ctx.strokeRect(b.x-6,b.y-6,b.w+12,b.h+12);ctx.setLineDash([]);
+    ctx.fillStyle='#E24B4A';ctx.beginPath();ctx.arc(b.x+b.w+6,b.y-6,9,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.moveTo(b.x+b.w+2,b.y-10);ctx.lineTo(b.x+b.w+10,b.y-2);
+    ctx.moveTo(b.x+b.w+10,b.y-10);ctx.lineTo(b.x+b.w+2,b.y-2);ctx.stroke();
+    ctx.restore();
+  }
+  ctx.restore();
+}
+
+function getBoundsPx(s,W,H){
+  if(s.type==='draw'){const xs=s.data.map(p=>p.x*W),ys=s.data.map(p=>p.y*H);return{x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs)||10,h:Math.max(...ys)-Math.min(...ys)||10};}
+  if(s.type==='line'){return{x:Math.min(s.data.x1,s.data.x2)*W,y:Math.min(s.data.y1,s.data.y2)*H,w:Math.abs(s.data.x2-s.data.x1)*W||10,h:Math.abs(s.data.y2-s.data.y1)*H||10};}
+  const fs=Math.max(10,s.size*5*(W/500));return{x:s.data.x*W,y:s.data.y*H-fs,w:80,h:fs};
+}
+function getBounds(s){
+  if(s.type==='draw'){const xs=s.data.map(p=>p.x),ys=s.data.map(p=>p.y);return{x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs)||0.01,h:Math.max(...ys)-Math.min(...ys)||0.01};}
+  if(s.type==='line'){return{x:Math.min(s.data.x1,s.data.x2),y:Math.min(s.data.y1,s.data.y2),w:Math.abs(s.data.x2-s.data.x1)||0.01,h:Math.abs(s.data.y2-s.data.y1)||0.01};}
+  return{x:s.data?s.data.x:0,y:s.data?s.data.y-0.05:0,w:0.15,h:0.05};
+}
+function hitTest(s,nx,ny){const b=getBounds(s);const p=0.015;return nx>=b.x-p&&nx<=b.x+b.w+p&&ny>=b.y-p&&ny<=b.y+b.h+p;}
+function hitDeleteBtn(s,nx,ny,W,H){const b=getBoundsPx(s,W,H);const bx=(b.x+b.w+6)/W,by=(b.y-6)/H;return Math.hypot((nx-bx)*W,(ny-by)*H)<14;}
+function coordsFor(ev,ac){const r=ac.getBoundingClientRect();return{x:(ev.clientX-r.left)/r.width,y:(ev.clientY-r.top)/r.height};}
+
+function attachPageEvents(annCv,pg){
+  function onDown(ev){
+    if(!T.annotBarOpen)return;
+    const{x,y}=coordsFor(ev,annCv);S.page=pg;
+    const eleve=S.eleves[S.cur];if(!eleve)return;
+    const shapes=eleve.shapes.filter(s=>s.page===pg);
+    if(T.tool==='select'){
+      if(T.selectedId!==null){const sel=shapes.find(s=>s.id===T.selectedId);if(sel&&hitDeleteBtn(sel,x,y,annCv.width,annCv.height)){deleteSelected();return;}}
+      let hit=null;for(let i=shapes.length-1;i>=0;i--)if(hitTest(shapes[i],x,y)){hit=shapes[i];break;}
+      if(hit){T.selectedId=hit.id;const b=getBounds(hit);T.dragOffX=x-b.x;T.dragOffY=y-b.y;T.dragging=true;T.dragPage=pg;document.getElementById('del-sel-btn').style.display='inline-flex';}
+      else{T.selectedId=null;document.getElementById('del-sel-btn').style.display='none';}
+      redraw();return;
+    }
+    if(T.tool==='draw'){T.drawing=true;T.currentPath=[{x,y}];T.drawPage=pg;return;}
+    if(T.tool==='line'){T.drawing=true;T.startX=x;T.startY=y;T.drawPage=pg;return;}
+    if(T.tool==='text'){showTextInput(x,y,annCv,pg);return;}
+  }
+  function onMove(ev){
+    if(!T.annotBarOpen)return;
+    const{x,y}=coordsFor(ev,annCv);const W=annCv.width,H=annCv.height;
+    if(T.tool==='select'&&T.dragging&&T.selectedId!==null&&T.dragPage===pg){
+      const eleve=S.eleves[S.cur];if(!eleve)return;
+      const shape=eleve.shapes.find(s=>s.id===T.selectedId);if(!shape)return;
+      const b=getBounds(shape);moveShape(shape,x-T.dragOffX-b.x,y-T.dragOffY-b.y);
+      redrawPage(pg);return;
+    }
+    if(T.tool==='draw'&&T.drawing&&T.drawPage===pg){
+      T.currentPath.push({x,y});redrawPage(pg);
+      const ctx=annCv.getContext('2d');ctx.strokeStyle=T.color;
+      ctx.lineWidth=Math.max(1,(parseInt(document.getElementById('stroke-size').value)||3)*(W/500));
+      ctx.lineCap='round';ctx.lineJoin='round';
+      ctx.beginPath();ctx.moveTo(T.currentPath[0].x*W,T.currentPath[0].y*H);
+      T.currentPath.forEach(p=>ctx.lineTo(p.x*W,p.y*H));ctx.stroke();return;
+    }
+    if(T.tool==='line'&&T.drawing&&T.drawPage===pg){
+      redrawPage(pg);const ctx=annCv.getContext('2d');ctx.strokeStyle=T.color;
+      ctx.lineWidth=Math.max(1,(parseInt(document.getElementById('stroke-size').value)||3)*(W/500));
+      ctx.lineCap='round';ctx.beginPath();ctx.moveTo(T.startX*W,T.startY*H);ctx.lineTo(x*W,y*H);ctx.stroke();return;
+    }
+  }
+  function onUp(ev){
+    if(!T.annotBarOpen)return;
+    const{x,y}=coordsFor(ev,annCv);const sz=parseInt(document.getElementById('stroke-size').value)||3;
+    if(T.dragging&&T.dragPage===pg){T.dragging=false;redrawPage(pg);renderAnnList();return;}
+    if(T.tool==='draw'&&T.drawing&&T.drawPage===pg){
+      T.drawing=false;
+      if(T.currentPath.length>1)pushShape({type:'draw',page:pg,color:T.color,size:sz,data:[...T.currentPath],id:newId()});
+      T.currentPath=[];redrawPage(pg);renderAnnList();return;
+    }
+    if(T.tool==='line'&&T.drawing&&T.drawPage===pg){
+      T.drawing=false;
+      if(Math.hypot(x-T.startX,y-T.startY)>0.005)pushShape({type:'line',page:pg,color:T.color,size:sz,data:{x1:T.startX,y1:T.startY,x2:x,y2:y},id:newId()});
+      redrawPage(pg);renderAnnList();return;
+    }
+  }
+  function touch(e){const t=e.touches[0]||e.changedTouches[0];return{clientX:t.clientX,clientY:t.clientY};}
+  annCv.addEventListener('mousedown',onDown);
+  annCv.addEventListener('mousemove',onMove);
+  annCv.addEventListener('mouseup',onUp);
+  annCv.addEventListener('touchstart',e=>{e.preventDefault();onDown(touch(e));},{passive:false});
+  annCv.addEventListener('touchmove',e=>{e.preventDefault();onMove(touch(e));},{passive:false});
+  annCv.addEventListener('touchend',e=>{e.preventDefault();onUp(touch(e));},{passive:false});
+}
+
+function moveShape(s,dx,dy){
+  if(s.type==='draw')s.data=s.data.map(p=>({x:p.x+dx,y:p.y+dy}));
+  else if(s.type==='line'){s.data.x1+=dx;s.data.y1+=dy;s.data.x2+=dx;s.data.y2+=dy;}
+  else if(s.type==='text'){s.data.x+=dx;s.data.y+=dy;}
+}
+function pushShape(s){const e=S.eleves[S.cur];if(e)e.shapes.push(s);}
+function deleteSelected(){
+  if(T.selectedId===null)return;const e=S.eleves[S.cur];if(!e)return;
+  e.shapes=e.shapes.filter(s=>s.id!==T.selectedId);T.selectedId=null;
+  document.getElementById('del-sel-btn').style.display='none';redraw();renderAnnList();
+}
+
+function showTextInput(nx,ny,ac,pg){
+  const overlay=document.getElementById('text-input-overlay');
+  const ta=document.getElementById('text-inp');
+  const r=ac.getBoundingClientRect();
+  overlay.style.left=(r.left+nx*r.width)+'px';overlay.style.top=(r.top+ny*r.height)+'px';
+  overlay.style.display='block';ta.value='';ta.style.color=T.color;
+  const sz=parseInt(document.getElementById('stroke-size').value)||3;
+  ta.style.fontSize=Math.max(12,sz*4)+'px';ta.focus();
+  ta.onkeydown=ev=>{
+    if(ev.key==='Escape'){overlay.style.display='none';return;}
+    if(ev.key==='Enter'&&!ev.shiftKey){
+      ev.preventDefault();const txt=ta.value.trim();
+      if(txt)pushShape({type:'text',page:pg,color:T.color,size:sz,data:{x:nx,y:ny,txt},id:newId()});
+      overlay.style.display='none';redrawPage(pg);renderAnnList();
+    }
+  };
+}
+
+/* ===== LISTE ANNOTATIONS ===== */
+function renderAnnList(){
+  const e=S.eleves[S.cur];const c=document.getElementById('ann-list');
+  const shapes=e?e.shapes:[];
+  if(!shapes.length){c.innerHTML='<p style="font-size:12px;color:#888">Aucune annotation</p>';return;}
+  const icons={draw:'<i class="ti ti-pencil"></i>',line:'<i class="ti ti-minus"></i>',text:'<i class="ti ti-typography"></i>'};
+  const labels={draw:'Dessin libre',line:'Trait',text:'Texte'};
+  c.innerHTML=shapes.map(s=>`<div class="ann-item${s.id===T.selectedId?' selected':''}" onclick="selectFromList(${s.id})">
+    <span class="ann-dot" style="background:${s.color}"></span>
+    <span style="margin-right:4px;color:#888;font-size:13px">${icons[s.type]||''}</span>
+    <span class="ann-label">${labels[s.type]||s.type}${s.type==='text'?' : '+s.data.txt:''}</span>
+    <span class="ann-page">p.${s.page}</span>
+    <button class="ann-del" onclick="event.stopPropagation();delShape(${s.id})"><i class="ti ti-x"></i></button>
+  </div>`).join('');
+}
+function selectFromList(id){T.selectedId=id;document.getElementById('del-sel-btn').style.display='inline-flex';setTool('select');if(!T.annotBarOpen)toggleAnnotBar();redraw();renderAnnList();}
+function delShape(id){const e=S.eleves[S.cur];if(!e)return;e.shapes=e.shapes.filter(s=>s.id!==id);if(T.selectedId===id){T.selectedId=null;document.getElementById('del-sel-btn').style.display='none';}redraw();renderAnnList();}
+
+/* ===== NAVIGATION ONGLETS ===== */
+function switchTab(name,el){
+  ['cor','ann','stat'].forEach(t=>document.getElementById('tab-'+t).style.display=t===name?'block':'none');
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
+  if(name==='stat')renderStats();if(name==='ann')renderAnnList();
+}
+
+/* ===== STATS ===== */
+function renderStats(){
+  const notes=S.eleves.map((_,i)=>getNote(i)).filter(n=>n!==null);
+  const g=document.getElementById('stat-grid');
+  if(!notes.length){g.innerHTML='<p style="font-size:12px;color:#888;grid-column:span 2">Aucune note saisie</p>';document.getElementById('dist').innerHTML='';return;}
+  const moy=notes.reduce((a,b)=>a+b,0)/notes.length;
+  const sorted=[...notes].sort((a,b)=>a-b);
+  const med=sorted[Math.floor(sorted.length/2)];
+  g.innerHTML=`<div class="scard purple"><div class="sv">${moy.toFixed(1)}</div><div class="sl">Moyenne</div></div>
+    <div class="scard teal"><div class="sv">${med.toFixed(1)}</div><div class="sl">Médiane</div></div>
+    <div class="scard coral"><div class="sv">${sorted[sorted.length-1].toFixed(1)}</div><div class="sl">Max</div></div>
+    <div class="scard amber"><div class="sv">${sorted[0].toFixed(1)}</div><div class="sl">Min</div></div>`;
+  const tranches=[[0,5],[5,8],[8,10],[10,12],[12,14],[14,16],[16,20]];
+  let html='<div style="margin-top:4px"><div style="font-size:10px;font-weight:700;color:#7F77DD;text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Distribution</div>';
+  tranches.forEach(([lo,hi])=>{const cnt=notes.filter(n=>n>=lo&&n<hi).length;const pct=notes.length?Math.round(cnt/notes.length*100):0;
+    html+=`<div class="dist-row"><span class="dist-lbl">${lo}–${hi}</span><div class="dist-track"><div class="dist-fill" style="width:${pct}%"></div></div><span class="dist-count">${cnt}</span></div>`;});
+  document.getElementById('dist').innerHTML=html+'</div>';
+}
+
+/* ===== IMPORT / EXPORT TEMPLATE ===== */
+function downloadTemplate(){
+  const lines=['# ============================================================',
+    '# Modèle de session — Correcteur de copies','# Les lignes commençant par # sont ignorées','# ============================================================','',
+    '# --- Informations générales ---','MATIERE: Mathématiques','CLASSE: Terminale B','NOTE_SUR: 20','PAGES_PAR_ELEVE: 2','',
+    '# --- Barème ---','# EXERCICE: Nom  puis  QUESTION: Nom ; points',
+    'EXERCICE: Exercice 1','QUESTION: Q1 ; 4','QUESTION: Q2 ; 3','QUESTION: Q3 ; 3',
+    'EXERCICE: Exercice 2','QUESTION: Q1 ; 3','QUESTION: Q2 ; 4','QUESTION: Q3 ; 3',
+    'EXERCICE: Exercice 3','QUESTION: Q1 ; 3','QUESTION: Q2 ; 3','QUESTION: Q3 ; 2','',
+    '# --- Élèves ---','# ELEVE: NOM Prénom',
+    'ELEVE: Dupont Alice','ELEVE: Martin Lucas','ELEVE: Bernard Emma','ELEVE: Moreau Nathan',
+    'ELEVE: Petit Léa','ELEVE: Rousseau Hugo','ELEVE: Lambert Chloé','ELEVE: Simon Tom'].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines],{type:'text/plain;charset=utf-8'}));a.download='modele_session.txt';a.click();
+}
+
+function importSessionFile(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const lines=ev.target.result.split(/\r?\n/).map(l=>l.trim()).filter(l=>l&&!l.startsWith('#'));
+    let mat='',cls='',max='20',ppp='2';const exercices=[];const eleves=[];let curExo=null;
+    for(const line of lines){
+      const ci=line.indexOf(':');if(ci<0)continue;
+      const key=line.slice(0,ci).trim().toUpperCase();const val=line.slice(ci+1).trim();
+      if(key==='MATIERE')mat=val;
+      else if(key==='CLASSE')cls=val;
+      else if(key==='NOTE_SUR')max=val;
+      else if(key==='PAGES_PAR_ELEVE')ppp=val;
+      else if(key==='EXERCICE'){curExo={name:val,questions:[]};exercices.push(curExo);}
+      else if(key==='QUESTION'&&curExo){const p=val.split(';');curExo.questions.push({label:p[0].trim(),max:parseFloat(p[1])||0});}
+      else if(key==='ELEVE')eleves.push(val);
+    }
+    if(!eleves.length&&!exercices.length){showImportStatus('Aucune donnée reconnue.',false);return;}
+    if(mat)document.getElementById('m-mat').value=mat;
+    if(cls)document.getElementById('m-cls').value=cls;
+    if(max)document.getElementById('m-max').value=max;
+    if(ppp)document.getElementById('m-ppp').value=ppp;
+    if(exercices.length){exoCounter=0;document.getElementById('exo-editor').innerHTML='';exercices.forEach(ex=>addExoBlock(ex.name,ex.questions));}
+    if(eleves.length)document.getElementById('m-elv').value=eleves.join('\n');
+    const parts=[];if(mat||cls)parts.push((mat+' '+cls).trim());if(exercices.length)parts.push(exercices.length+' exercice'+(exercices.length>1?'s':''));if(eleves.length)parts.push(eleves.length+' élève'+(eleves.length>1?'s':''));
+    showImportStatus('✓ Importé : '+parts.join(', ')+'.',true);input.value='';
+  };
+  reader.readAsText(file,'UTF-8');
+}
+function showImportStatus(msg,ok){const el=document.getElementById('import-status');el.textContent=msg;el.style.color=ok?'#1D9E75':'#E24B4A';el.style.display='block';setTimeout(()=>el.style.display='none',4000);}
+
+/* ===== SAUVEGARDE SESSION ===== */
+const LS_KEY = 'correcteur_session_v1';
+let autoSaveTimer = null;
+
+function sessionToJSON() {
+  // On ne sauvegarde pas S.pdf (objet non sérialisable), ni S.scale/cur (état UI)
+  return JSON.stringify({
+    mat: S.mat, cls: S.cls, max: S.max, pagesParEleve: S.pagesParEleve,
+    exercices: S.exercices, qs: S.qs,
+    eleves: S.eleves.map(e => ({
+      name: e.name, notes: e.notes, appr: e.appr,
+      pgD: e.pgD, pgF: e.pgF,
+      shapes: e.shapes
+    })),
+    cur: S.cur,
+    savedAt: new Date().toISOString()
+  });
+}
+
+function restoreFromJSON(data) {
+  S.mat = data.mat || '';
+  S.cls = data.cls || '';
+  S.max = data.max || 20;
+  S.pagesParEleve = data.pagesParEleve || 2;
+  S.exercices = data.exercices || [];
+  S.qs = data.qs || [];
+  S.eleves = (data.eleves || []).map(e => ({
+    name: e.name, notes: e.notes || [], appr: e.appr || '',
+    pgD: e.pgD || '', pgF: e.pgF || '',
+    shapes: (e.shapes || []).map(s => ({...s, id: newId()}))
+  }));
+  S.cur = Math.min(data.cur || 0, S.eleves.length - 1);
+}
+
+function applyRestoredSession() {
+  document.getElementById('session-title').textContent = S.mat + ' — ' + S.cls;
+  document.getElementById('session-meta').textContent = S.eleves.length + ' élèves · ' + S.pagesParEleve + ' p./élève';
+  document.getElementById('note-denom').textContent = 'sur ' + S.max;
+  // Réinitialiser zone PDF
+  S.pdf = null; S.page = 1;
+  document.getElementById('pages-container').innerHTML = '';
+  document.getElementById('pages-container').style.display = 'none';
+  document.getElementById('upload-zone').style.display = 'flex';
+  document.getElementById('nav-bar').style.display = 'none';
+  document.getElementById('export-pdf-btn').style.display = 'none';
+  document.getElementById('annot-bar').style.display = 'none';
+  T.annotBarOpen = false;
+  document.getElementById('open-annot-bar-btn').className = 'tool-btn';
+  const hint = document.getElementById('upload-hint');
+  hint.textContent = `${S.eleves.length} élèves × ${S.pagesParEleve} pages = ${S.eleves.length * S.pagesParEleve} pages attendues`;
+  hint.style.display = 'inline-block';
+  renderList();
+  if (S.eleves.length) selEleve(S.cur);
+}
+
+function autoSave() {
+  if (!S.eleves.length) return;
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem(LS_KEY, sessionToJSON());
+      showSaveIndicator();
+    } catch(e) {
+      console.warn('localStorage indisponible :', e);
+    }
+  }, 800); // débounce 800ms
+}
+
+function showSaveIndicator() {
+  const el = document.getElementById('save-indicator');
+  el.style.display = 'inline-flex';
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => { el.style.display = 'none'; }, 2500);
+}
+
+function exportJSON() {
+  if (!S.eleves.length) { alert('Créez d\'abord une session.'); return; }
+  saveCur();
+  const blob = new Blob([sessionToJSON()], { type: 'application/json;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `session_${S.mat}_${S.cls}_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function importJSON(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      if (!data.eleves || !data.exercices) throw new Error('Format invalide');
+      restoreFromJSON(data);
+      applyRestoredSession();
+      // Sauvegarder immédiatement dans localStorage
+      try { localStorage.setItem(LS_KEY, sessionToJSON()); } catch(e) {}
+      showSaveIndicator();
+    } catch(e) {
+      alert('Erreur lors du chargement : ' + e.message);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file, 'UTF-8');
+}
+
+function loadAutoSave() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    if (!data.eleves || !data.eleves.length) return false;
+    const date = data.savedAt ? new Date(data.savedAt).toLocaleString('fr-FR') : 'inconnue';
+    const ok = confirm(
+      `Une session sauvegardée a été trouvée :\n` +
+      `${data.mat} — ${data.cls}\n` +
+      `${data.eleves.length} élève(s) · Sauvegardée le ${date}\n\n` +
+      `Voulez-vous la restaurer ?`
+    );
+    if (!ok) return false;
+    restoreFromJSON(data);
+    applyRestoredSession();
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+/* ===== EXPORT CSV ===== */
+function exportCSV(){
+  if(!S.eleves.length){alert('Créez d\'abord une session.');return;}
+  const headers=['Élève'];S.exercices.forEach(ex=>ex.questions.forEach(q=>headers.push(ex.name+' – '+q.label)));headers.push('Total','/'+S.max,'Appréciation');
+  let csv=headers.join(';')+'\n';
+  S.eleves.forEach((_,i)=>{const e=S.eleves[i];const note=getNote(i);csv+=[e.name,...e.notes.map(n=>isNT(n)?'NT':n||''),note!==null?note.toFixed(1):'',S.max,e.appr.replace(/;/g,',').replace(/\n/g,' ')].join(';')+'\n';});
+  const notes=S.eleves.map((_,i)=>getNote(i)).filter(n=>n!==null);
+  if(notes.length){const moy=(notes.reduce((a,b)=>a+b,0)/notes.length).toFixed(2);csv+=`\nMoyenne;${moy}\nCorrigées;${notes.length}/${S.eleves.length}`;}
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));a.download=`notes_${S.mat}_${S.cls}.csv`;a.click();
+}
+
+/* ===== EXPORT PDF ANNOTÉ ===== */
+async function exportAnnotatedPDF(){
+  if(!S.pdf){alert('Aucun PDF chargé.');return;}
+  const btn=document.getElementById('export-pdf-btn');btn.textContent='⏳ Génération…';btn.disabled=true;
+  try{
+    const{PDFDocument}=PDFLib;const outDoc=await PDFDocument.create();
+    const offPdf=document.createElement('canvas');const offAnn=document.createElement('canvas');
+    for(let p=1;p<=S.pdf.numPages;p++){
+      const page=await S.pdf.getPage(p);const vp=page.getViewport({scale:2.0});
+      offPdf.width=vp.width;offPdf.height=vp.height;
+      await page.render({canvasContext:offPdf.getContext('2d'),viewport:vp}).promise;
+      offAnn.width=vp.width;offAnn.height=vp.height;
+      const ctx=offAnn.getContext('2d');ctx.clearRect(0,0,offAnn.width,offAnn.height);
+      S.eleves.forEach(eleve=>eleve.shapes.filter(s=>s.page===p).forEach(s=>drawShapeOn(ctx,offAnn.width,offAnn.height,s,false)));
+      const merged=document.createElement('canvas');merged.width=vp.width;merged.height=vp.height;
+      const mCtx=merged.getContext('2d');mCtx.drawImage(offPdf,0,0);mCtx.drawImage(offAnn,0,0);
+      const pngBytes=await fetch(merged.toDataURL('image/png')).then(r=>r.arrayBuffer());
+      const pngImage=await outDoc.embedPng(pngBytes);
+      const origVp=page.getViewport({scale:1});const newPage=outDoc.addPage([origVp.width,origVp.height]);
+      newPage.drawImage(pngImage,{x:0,y:0,width:origVp.width,height:origVp.height});
+    }
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([await outDoc.save()],{type:'application/pdf'}));
+    a.download=`copies_annotees_${S.mat}_${S.cls}.pdf`;a.click();
+  }catch(err){console.error(err);alert('Erreur : '+err.message);}
+  btn.innerHTML='<i class="ti ti-file-download"></i> Exporter PDF';btn.disabled=false;
+}
+
+/* ===== INIT ===== */
+document.addEventListener('DOMContentLoaded',()=>{
+  // Tenter de restaurer une session sauvegardée
+  const restored = loadAutoSave();
+  // Initialiser l'éditeur de barème seulement si aucune session restaurée
+  if (!restored) {
+    exoCounter=0;
+    addExoBlock('Exercice 1',[{label:'Q1',max:4},{label:'Q2',max:3},{label:'Q3',max:3}]);
+    addExoBlock('Exercice 2',[{label:'Q1',max:3},{label:'Q2',max:4},{label:'Q3',max:3}]);
+    addExoBlock('Exercice 3',[{label:'Q1',max:3},{label:'Q2',max:3},{label:'Q3',max:2}]);
+    // Ouvrir la modale uniquement si aucune session n'existe
+    openModal();
+  } else {
+    // Pré-remplir l'éditeur de barème avec la session restaurée
+    exoCounter=0;
+    document.getElementById('exo-editor').innerHTML='';
+    S.exercices.forEach(ex=>addExoBlock(ex.name,ex.questions));
+    // Pré-remplir la modale
+    document.getElementById('m-mat').value=S.mat;
+    document.getElementById('m-cls').value=S.cls;
+    document.getElementById('m-max').value=S.max;
+    document.getElementById('m-ppp').value=S.pagesParEleve;
+    document.getElementById('m-elv').value=S.eleves.map(e=>e.name).join('\n');
+  }
+});
+</script>
+</body>
+</html>

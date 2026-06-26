@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Consolidation DHG — Online</title>
+<script src="xlsx.min.js"></script>
+<script src="jszip.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #f5f4f0; color: #1a1a18; min-height: 100vh; padding: 2rem 1rem; }
+.container { max-width: 900px; margin: 0 auto; }
+header { margin-bottom: 2rem; }
+header h1 { font-size: 22px; font-weight: 500; letter-spacing: -0.3px; }
+header p { font-size: 14px; color: #6b6b67; margin-top: 4px; line-height: 1.5; }
+.step-card { background: #fff; border: 0.5px solid #d9d8d2; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+.step-label { font-size: 12px; font-weight: 500; color: #6b6b67; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+.step-title { font-size: 16px; font-weight: 500; margin-bottom: 10px; }
+.step-desc { font-size: 13px; color: #6b6b67; line-height: 1.55; margin-bottom: 14px; }
+
+.file-input-wrapper { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+input[type="file"] { display: none; }
+.btn-pick { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 13px; font-weight: 500; border: 0.5px solid #aaa9a2; border-radius: 8px; background: #fff; cursor: pointer; transition: background 0.12s; color: #1a1a18; }
+.btn-pick:hover { background: #f5f4f0; }
+.file-status { font-size: 13px; color: #6b6b67; }
+.file-status.ok { color: #3B6D11; }
+.file-status.warn { color: #BA7517; }
+.btn-run { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; font-size: 14px; font-weight: 500; border-radius: 8px; border: none; background: #1a1a18; color: #fff; cursor: pointer; transition: opacity 0.12s; margin-top: 12px; }
+.btn-run:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-run:not(:disabled):hover { opacity: 0.82; }
+.log-box { background: #f5f4f0; border: 0.5px solid #d9d8d2; border-radius: 8px; padding: 12px 14px; font-size: 12.5px; font-family: monospace; line-height: 1.7; max-height: 260px; overflow-y: auto; margin-top: 14px; color: #3d3d3a; }
+.log-ok { color: #3B6D11; } .log-warn { color: #BA7517; } .log-err { color: #993C1D; }
+.results-section { margin-top: 1.5rem; }
+.results-section h2 { font-size: 16px; font-weight: 500; margin-bottom: 12px; }
+.summary-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+.summary-card { background: #f5f4f0; border-radius: 8px; padding: 12px 14px; }
+.summary-card .sc-label { font-size: 12px; color: #6b6b67; margin-bottom: 4px; }
+.summary-card .sc-value { font-size: 20px; font-weight: 500; }
+.data-table-wrap { overflow-x: auto; border: 0.5px solid #d9d8d2; border-radius: 10px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { background: #f5f4f0; padding: 8px 10px; text-align: left; font-weight: 500; color: #6b6b67; border-bottom: 0.5px solid #d9d8d2; white-space: nowrap; }
+td { padding: 7px 10px; border-bottom: 0.5px solid #ebebea; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #faf9f7; }
+td.num { text-align: right; } td.name { font-weight: 500; }
+.btn-export { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; font-size: 14px; font-weight: 500; border-radius: 8px; border: 0.5px solid #aaa9a2; background: #fff; cursor: pointer; color: #1a1a18; transition: background 0.12s; margin-top: 1rem; }
+.btn-export:hover { background: #f5f4f0; }
+.hidden { display: none; }
+.progress-bar-wrap { height: 4px; background: #e8e7e2; border-radius: 2px; margin-top: 10px; overflow: hidden; }
+.progress-bar { height: 100%; background: #3B6D11; border-radius: 2px; transition: width 0.3s; }
+.section-divider { font-size: 11px; font-weight: 500; color: #aaa9a2; text-transform: uppercase; letter-spacing: 0.5px; margin: 14px 0 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Consolidation DHG — Online</h1>
+    <p>Version avec liens OneDrive — les fichiers sont téléchargés automatiquement depuis les liens de partage.</p>
+  </header>
+
+  <!-- Étape 1 : fichiers configurés -->
+  <div class="step-card">
+    <div class="step-label">Étape 1</div>
+    <div class="step-title">Fichiers configurés</div>
+    <p class="step-desc">Les liens OneDrive sont pré-configurés. Tous les fichiers seront téléchargés automatiquement.</p>
+    <div class="matiere-grid" id="matiere-grid"></div>
+  </div>
+
+  <!-- Étape 2 : lancer -->
+  <div class="step-card">
+    <div class="step-label">Étape 2</div>
+    <div class="step-title">Lancer la consolidation</div>
+    <p class="step-desc">Les 15 fichiers matières et le fichier récapitulatif sont téléchargés depuis SharePoint puis traités — styles, couleurs et bordures préservés.</p>
+    <button class="btn-run" id="btn-run">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Télécharger et consolider
+    </button>
+    <div class="progress-bar-wrap hidden" id="progress-wrap">
+      <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+    </div>
+    <div class="log-box hidden" id="log-box"></div>
+  </div>
+
+  <div class="results-section hidden" id="results-section">
+    <h2>Résultats</h2>
+    <div class="summary-grid" id="summary-grid"></div>
+    <div class="data-table-wrap">
+      <table>
+        <thead><tr><th>Matière</th><th>Pondération</th><th>Lignes copiées</th><th>Statut</th></tr></thead>
+        <tbody id="results-tbody"></tbody>
+      </table>
+    </div>
+    <button class="btn-export" id="btn-export">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Télécharger Calcul DHG v1 mis à jour
+    </button>
+  </div>
+</div>
+
+<script>
+const MATIERES = [
+  { nom:'ALLEMAND', ligneFinCopier:90,  colDebut:'C',  colC:'C',  colD:'D',  url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQB6VGpP007HRb8t3lnKVlbqAUXi-OYlk2ltyy0mycisLr4?e=JwkxJK' },
+  { nom:'ANGLAIS',  ligneFinCopier:92,  colDebut:'F',  colC:'F',  colD:'G',  url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQAmXgT8UV9LTIaXFDHPPDWlAYnVzisbaWcsLR8oj3sbEDg?e=xLxbA6' },
+  { nom:'ARTSPLA',  ligneFinCopier:90,  colDebut:'I',  colC:'I',  colD:'J',  url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQBqLXkudN_PTr4M_UDYRPZvAcxLvSnhclPbFj8r3CKtW4A?e=ybEyJO' },
+  { nom:'ECOGEST',  ligneFinCopier:104, colDebut:'L',  colC:'L',  colD:'M',  url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQDGNNaxcUHiSp_cRRorPgWCAeP5C0kqTIdoAeCAMg_Lu3c?e=qGiZME' },
+  { nom:'EPS',      ligneFinCopier:93,  colDebut:'O',  colC:'O',  colD:'P',  url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQAko-qUPkaiRIY0oFm7KL51AVHd_Coz1A7nRbbUq12qDs0?e=a4aXAY' },
+  { nom:'ESPAGNOL', ligneFinCopier:90,  colDebut:'R',  colC:'R',  colD:'S',  url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQDxX_xa9JLTTqPUibDCmmXTAQM7VeIPuiFIlLv6rYTDr50?e=DvW0Ah' },
+  { nom:'HG',       ligneFinCopier:90,  colDebut:'U',  colC:'U',  colD:'V',  url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQDZ23Pl31irS4TjltDOh8lFAYt-4tsHjE_0ouUGV7VqBjM?e=znsNvl' },
+  { nom:'ITALIEN',  ligneFinCopier:90,  colDebut:'X',  colC:'X',  colD:'Y',  url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQC6XRq-Ze05QoYJAG8WfwOBAZxFyf0sjrA-j8lh2ThNetY?e=hYrjUJ' },
+  { nom:'LETTRES',  ligneFinCopier:92,  colDebut:'AA', colC:'AA', colD:'AB', url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQBW9tKSibQFTLQBqLn9lzFKAbY8DBTDSY0olpt-xO7raqE?e=nyOVf6' },
+  { nom:'MATHS',    ligneFinCopier:90,  colDebut:'AD', colC:'AD', colD:'AE', url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQB-LtaK2UktSa19n4LyloMJAd8tmiIDJJuOcBPAD1ZWad4?e=zdRHJD' },
+  { nom:'PC',       ligneFinCopier:90,  colDebut:'AG', colC:'AG', colD:'AH', url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQDYXnMQWqxcRJ8AqH08U22rAcKpwGXDy1bkdxk9sC3rfrY?e=BPatMM' },
+  { nom:'PHILO',    ligneFinCopier:90,  colDebut:'AJ', colC:'AJ', colD:'AK', url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQA0hK-Rr4ggT6RXaPpGIR0SAblpzftIt7w6Ihq2fXsM3SE?e=UAcpfx' },
+  { nom:'SES',      ligneFinCopier:90,  colDebut:'AM', colC:'AM', colD:'AN', url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQBa7-_9m4GXTpiQnXae-c3FAe-qu5jfeECduhX6HwxKIzM?e=obh5nD' },
+  { nom:'SII',      ligneFinCopier:104, colDebut:'AP', colC:'AP', colD:'AQ', url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQCtleDlyKHtSbybzLlWaHZxAeSNQjfxZ_7wv0X67c3KNHQ?e=LBzLPe' },
+  { nom:'SVT',      ligneFinCopier:90,  colDebut:'AS', colC:'AS', colD:'AT', url:'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQAfGKjJBx8iRI5V3k0F9p64AXcMlHNjrkR7iKV9ivUFHZ8?e=af41Z4' },
+];
+const URL_RECAP = 'https://acamiensfr0-my.sharepoint.com/:x:/g/personal/frederic_ceroni_ac-amiens_fr/IQBN16VWOL_LSaVKr_WTnx4eAXy6kKa5hsUQEBa89TLdGcE?e=B8rOI5';
+const COL_DEBUT_ALL = ['C','F','I','L','O','R','U','X','AA','AD','AG','AJ','AM','AP','AS','AV','AW'];
+
+let exportBlob = null;
+let resultats = [];
+
+// ── Afficher la grille des matières configurées ──────────────────────────────
+function renderGrid() {
+  const grid = document.getElementById('matiere-grid');
+  grid.innerHTML = '';
+  MATIERES.forEach(m => {
+    const chip = document.createElement('div');
+    chip.className = 'matiere-chip loaded';
+    chip.id = 'chip-' + m.nom;
+    chip.innerHTML = `<span class="chip-dot"></span>${m.nom}`;
+    grid.appendChild(chip);
+  });
+}
+renderGrid();
+
+function setChipStatus(nom, status) {
+  const chip = document.getElementById('chip-' + nom);
+  if (!chip) return;
+  chip.className = 'matiere-chip ' + status;
+}
+
+// ── Conversion lien OneDrive → lien de téléchargement direct ────────────────
+function toDownloadUrl(shareUrl) {
+  shareUrl = shareUrl.trim();
+
+  // Déjà un lien direct avec download=1
+  if (shareUrl.includes('download=1')) return shareUrl;
+
+  // Lien court 1drv.ms → on ajoute download=1 en paramètre
+  // Ces liens redirigent, le navigateur suivra la redirection
+  if (shareUrl.includes('1drv.ms')) {
+    return shareUrl + (shareUrl.includes('?') ? '&' : '?') + 'download=1';
+  }
+
+  // Lien SharePoint/OneDrive long :
+  // https://xxx.sharepoint.com/:x:/g/personal/.../XXXXX?e=YYYY
+  // → remplacer par https://xxx.sharepoint.com/.../_layouts/15/download.aspx?...
+  // Méthode simple : ajouter &download=1 ou remplacer l'action
+  if (shareUrl.includes('sharepoint.com') || shareUrl.includes('onedrive.live.com')) {
+    // Transformer le lien de partage en lien de téléchargement
+    // Format SharePoint : remplacer /:x:/g/ par le téléchargement direct
+    const dlUrl = shareUrl
+      .replace(/\/:x:\/[gr]\//, '/') // supprimer l'indicateur de type
+      .replace(/\/:b:\/[gr]\//, '/')
+      .replace(/\/:w:\/[gr]\//, '/');
+    return shareUrl + (shareUrl.includes('?') ? '&' : '?') + 'download=1';
+  }
+
+  // Fallback : ajouter download=1
+  return shareUrl + (shareUrl.includes('?') ? '&' : '?') + 'download=1';
+}
+
+// ── Téléchargement d'un fichier ───────────────────────────────────────────────
+async function fetchFile(shareUrl, nom) {
+  const dlUrl = toDownloadUrl(shareUrl);
+  const response = await fetch(dlUrl, { mode: 'cors' });
+  if (!response.ok) throw new Error(`HTTP ${response.status} pour ${nom}`);
+  return response.arrayBuffer();
+}
+
+// ── Utilitaires ───────────────────────────────────────────────────────────────
+function xmlEsc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function readCell(wb, sheetIdx, col, row) {
+  const ws = wb.Sheets[wb.SheetNames[sheetIdx]];
+  if (!ws) return null;
+  const cell = ws[col + row];
+  return (cell && cell.v !== undefined) ? cell.v : null;
+}
+function readRecapCell(wb, sheetName, col, row) {
+  const ws = wb.Sheets[sheetName];
+  if (!ws) return null;
+  const cell = ws[col + row];
+  return (cell && cell.v !== undefined) ? cell.v : null;
+}
+
+// ── Patch XML ────────────────────────────────────────────────────────────────
+function makeCell(ref, sAttr, val, isNum) {
+  if (val === null || val === undefined || val === '') return `<c r="${ref}"${sAttr}/>`;
+  if (isNum) return `<c r="${ref}"${sAttr} t="n"><v>${val}</v></c>`;
+  return `<c r="${ref}"${sAttr} t="inlineStr"><is><t>${xmlEsc(String(val))}</t></is></c>`;
+}
+
+function patchSheetXml(sheetXml, newValues) {
+  function getStyle(attrs) {
+    const m = attrs.match(/\bs="(\d+)"/);
+    return m ? ` s="${m[1]}"` : '';
+  }
+  function tryPatch(attrs, ref) {
+    if (!newValues.has(ref)) return null;
+    const { val, isNum } = newValues.get(ref);
+    return makeCell(ref, getStyle(attrs), val, isNum);
+  }
+  // 1. Cellules auto-fermantes
+  sheetXml = sheetXml.replace(/<c(\s[^>]*)\s*\/>/g, (match, attrs) => {
+    const m = attrs.match(/r="([A-Z]+\d+)"/);
+    if (!m) return match;
+    const p = tryPatch(attrs, m[1]);
+    return p !== null ? p : match;
+  });
+  // 2. Cellules avec contenu — lookbehind pour ne pas avaler les auto-fermantes résiduelles
+  sheetXml = sheetXml.replace(/<c(\s[^>]*)(?<!\/)>([\s\S]*?)<\/c>/g, (match, attrs, inner) => {
+    const m = attrs.match(/r="([A-Z]+\d+)"/);
+    if (!m) return match;
+    const p = tryPatch(attrs, m[1]);
+    return p !== null ? p : match;
+  });
+  return sheetXml;
+}
+
+async function buildOutputZip(recapBuf, newValues) {
+  const zip = await JSZip.loadAsync(recapBuf);
+  const wbXml  = await zip.file('xl/workbook.xml').async('string');
+  const relsXml = await zip.file('xl/_rels/workbook.xml.rels').async('string');
+
+  let targetRid = null;
+  const sheetRe = /<sheet([^>]*)>/g; let sm;
+  while ((sm = sheetRe.exec(wbXml)) !== null) {
+    const a = sm[1];
+    const nm = a.match(/name="([^"]*)"/), rm = a.match(/r:id="([^"]*)"/);
+    if (nm && nm[1] === 'AVEC_REPARTITIONS' && rm) { targetRid = rm[1]; break; }
+  }
+  if (!targetRid) throw new Error("Onglet 'AVEC_REPARTITIONS' introuvable");
+
+  let targetFile = null;
+  const relRe = /<Relationship([^>]*)\/>/g; let rrm;
+  while ((rrm = relRe.exec(relsXml)) !== null) {
+    const a = rrm[1];
+    if (a.includes(`Id="${targetRid}"`)) {
+      const tm = a.match(/Target="([^"]*)"/);
+      if (tm) { targetFile = tm[1].replace(/^\//, ''); break; }
+    }
+  }
+  if (!targetFile) throw new Error("Fichier de feuille introuvable dans les rels");
+
+  const candidates = [
+    targetFile,
+    targetFile.replace(/^\//, ''),
+    'xl/' + targetFile.replace(/^\\/?(xl\\/)?/, ''),
+    targetFile.replace(/^xl\//, ''),
+  ];
+  let sheetZipFile = null;
+  for (const c of candidates) {
+    const f = zip.file(c);
+    if (f) { sheetZipFile = f; break; }
+  }
+  if (!sheetZipFile) {
+    const allFiles = Object.keys(zip.files).filter(n => n.includes('sheet')).join(', ');
+    throw new Error(`Fichier "${targetFile}" introuvable. Disponibles : ${allFiles}`);
+  }
+
+  const sheetXml = await sheetZipFile.async('string');
+  const patched  = patchSheetXml(sheetXml, newValues);
+  zip.file(sheetZipFile.name, patched);
+
+  return zip.generateAsync({ type: 'arraybuffer', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+}
+
+// ── UI ────────────────────────────────────────────────────────────────────────
+function log(msg, type='') {
+  const box = document.getElementById('log-box');
+  box.classList.remove('hidden');
+  const d = document.createElement('div');
+  if (type) d.className = 'log-' + type;
+  d.textContent = msg;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+}
+
+// ── Traitement principal ──────────────────────────────────────────────────────
+document.getElementById('btn-run').addEventListener('click', async function() {
+  this.disabled = true;
+  resultats = []; exportBlob = null;
+  document.getElementById('log-box').innerHTML = '';
+  document.getElementById('log-box').classList.remove('hidden');
+  document.getElementById('results-section').classList.add('hidden');
+  document.getElementById('progress-wrap').classList.remove('hidden');
+  document.getElementById('progress-bar').style.width = '0%';
+
+  const newValues = new Map();
+  const total = MATIERES.length + 2; // +recap +proposition
+  let step = 0;
+
+  // 1. Télécharger et lire le fichier récapitulatif
+  log('Téléchargement du fichier récapitulatif...');
+  let recapBuf, recapBufOrig;
+  try {
+    recapBuf = await fetchFile(URL_RECAP, 'Calcul DHG');
+    recapBufOrig = recapBuf.slice(0);
+    log('  ✓ Récapitulatif téléchargé', 'ok');
+  } catch(e) {
+    log('  ✗ Erreur récapitulatif : ' + e.message, 'err');
+    this.disabled = false; return;
+  }
+  step++;
+  document.getElementById('progress-bar').style.width = Math.round(step/total*90) + '%';
+
+  // 2. Télécharger et lire chaque matière
+  log('Téléchargement des fichiers matières...');
+  for (let i = 0; i < MATIERES.length; i++) {
+    const m = MATIERES[i];
+    log(`Traitement de ${m.nom}...`);
+    setChipStatus(m.nom, 'loading');
+
+    let buf;
+    try {
+      buf = await fetchFile(m.url, m.nom);
+      setChipStatus(m.nom, 'loaded');
+    } catch(e) {
+      setChipStatus(m.nom, 'missing');
+      log(`  ✗ Erreur téléchargement : ${e.message}`, 'err');
+      resultats.push({ nom: m.nom, ponderation: 'N/A', lignes: 0, statut: 'Erreur' });
+      step++;
+      document.getElementById('progress-bar').style.width = Math.round(step/total*90) + '%';
+      await new Promise(r => setTimeout(r, 0));
+      continue;
+    }
+
+    const wb = XLSX.read(buf, { type: 'array' });
+    const sheetIdx = wb.SheetNames.length > 1 ? 1 : 0;
+    const ligneM = m.ligneFinCopier + 8;
+    const ponderation = readCell(wb, sheetIdx, 'M', ligneM);
+    log(`  Pondération M${ligneM} : ${ponderation ?? 'vide'}`, ponderation !== null ? 'ok' : 'warn');
+
+    for (let row = 5; row <= m.ligneFinCopier; row++) {
+      const valC = readCell(wb, sheetIdx, 'C', row);
+      const valD = readCell(wb, sheetIdx, 'D', row);
+      newValues.set(m.colC + row, { val: valC, isNum: typeof valC === 'number' });
+      newValues.set(m.colD + row, { val: valD, isNum: typeof valD === 'number' });
+    }
+    newValues.set(m.colDebut + '109', { val: ponderation, isNum: typeof ponderation === 'number' });
+
+    resultats.push({ nom: m.nom, ponderation, lignes: m.ligneFinCopier - 4, statut: 'OK' });
+    log(`  ✓ ${m.ligneFinCopier - 4} lignes lues`, 'ok');
+    step++;
+    document.getElementById('progress-bar').style.width = Math.round(step/total*90) + '%';
+    await new Promise(r => setTimeout(r, 0));
+  }
+
+  // 3. Lignes 106-107 depuis PROPOSITION
+  const wbOrig = XLSX.read(recapBufOrig, { type: 'array' });
+  if (wbOrig.Sheets['PROPOSITION']) {
+    log('Copie des lignes 106-107 depuis PROPOSITION...');
+    for (const col of COL_DEBUT_ALL) {
+      const v106 = readRecapCell(wbOrig, 'PROPOSITION', col, 106);
+      const v107 = readRecapCell(wbOrig, 'PROPOSITION', col, 107);
+      newValues.set(col+'106', { val: v106, isNum: typeof v106 === 'number' });
+      newValues.set(col+'107', { val: v107, isNum: typeof v107 === 'number' });
+    }
+    log('  ✓ Lignes 106-107 prêtes', 'ok');
+  } else {
+    log("  ⚠ Onglet 'PROPOSITION' introuvable", 'warn');
+  }
+
+  // 4. Patch ZIP et export
+  document.getElementById('progress-bar').style.width = '92%';
+  log('Injection des valeurs (styles préservés)...');
+  try {
+    const outBuf = await buildOutputZip(recapBuf, newValues);
+    exportBlob = new Blob([outBuf], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    document.getElementById('progress-bar').style.width = '100%';
+    const nbOk = resultats.filter(r => r.statut === 'OK').length;
+    log(`Terminé. ${nbOk}/${MATIERES.length} matières traitées.`, nbOk === MATIERES.length ? 'ok' : 'warn');
+    renderResults();
+  } catch(e) {
+    log('Erreur : ' + e.message, 'err');
+    console.error(e);
+  }
+  this.disabled = false;
+});
+
+function renderResults() {
+  document.getElementById('results-section').classList.remove('hidden');
+  const nbOk = resultats.filter(r => r.statut==='OK').length;
+  const totalLignes = resultats.reduce((s,r) => s+r.lignes, 0);
+  document.getElementById('summary-grid').innerHTML = `
+    <div class="summary-card"><div class="sc-label">Matières traitées</div><div class="sc-value">${nbOk} / ${MATIERES.length}</div></div>
+    <div class="summary-card"><div class="sc-label">Lignes copiées</div><div class="sc-value">${totalLignes.toLocaleString('fr')}</div></div>
+    <div class="summary-card"><div class="sc-label">Statut</div><div class="sc-value" style="font-size:15px;color:${nbOk===15?'#3B6D11':'#993C1D'}">${nbOk===15?'Complet':'Incomplet'}</div></div>
+  `;
+  const tbody = document.getElementById('results-tbody');
+  tbody.innerHTML = '';
+  resultats.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td class="name">${r.nom}</td>
+      <td class="num">${r.ponderation !== null && r.ponderation !== 'N/A' ? Number(r.ponderation).toLocaleString('fr') : (r.ponderation ?? '—')}</td>
+      <td class="num">${r.lignes}</td>
+      <td style="color:${r.statut==='OK'?'#3B6D11':'#993C1D'};font-weight:500">${r.statut}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+document.getElementById('btn-export').addEventListener('click', function() {
+  if (!exportBlob) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(exportBlob);
+  a.download = 'Calcul_DHG_v1_mis_a_jour.xlsx';
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+</script>
+</body>
+</html>

@@ -67,6 +67,13 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(100, 116, 139, 0.5);
         }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.25s ease-out forwards;
+        }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-full flex flex-col font-sans transition-colors duration-200">
@@ -81,7 +88,7 @@
                     <h1 class="font-extrabold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-sky-600 to-indigo-600 dark:from-sky-400 dark:to-indigo-400 bg-clip-text text-transparent">
                         Physique-Chimie <span class="text-xs px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 font-bold border border-sky-300 dark:border-sky-800 uppercase tracking-wide">1ère et Tale STI2D</span>
                     </h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Entraînement et perfectionnement aux conversions des multiples & sous-multiples</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Entraînement et perfectionnement aux conversions des multiples & sous-multiples</p>
                 </div>
             </div>
 
@@ -95,6 +102,247 @@
     </header>
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- Configuration de l'Exercice -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-slate-200 dark:border-slate-800 pb-6">
+                
+                <!-- Choix du Niveau -->
+                <div class="flex-1 space-y-3">
+                    <label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center">
+                        <i class="fa-solid fa-layer-group mr-2 text-sky-500"></i> 1. Choisissez le niveau de difficulté
+                    </label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <button data-level="1" class="level-btn relative p-3.5 rounded-xl border-2 text-left transition-all duration-200 border-sky-500 bg-sky-50/50 dark:bg-sky-950/30 text-sky-900 dark:text-sky-200">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-sm">Niveau 1</span>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">Facile</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Uniquement vers l'unité de base (ex: 5,2 kV &rarr; 5200 V, 450 mA &rarr; 0,45 A)</p>
+                        </button>
+
+                        <button data-level="2" class="level-btn relative p-3.5 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-sm">Niveau 2</span>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold">Moyen</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Entre préfixes avec saut modéré (ex: mA &rarr; kA, MHz &rarr; GHz)</p>
+                        </button>
+
+                        <button data-level="3" class="level-btn relative p-3.5 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-sm">Niveau 3</span>
+                                <span class="text-xs px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold">Avancé</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Toutes conversions (téra à pico, sauts amples de 10<sup>12</sup>)</p>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Choix du Mode & Options -->
+                <div class="w-full lg:w-80 space-y-3">
+                    <label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center">
+                        <i class="fa-solid fa-gamepad mr-2 text-indigo-500"></i> 2. Mode d'exercice
+                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button data-mode="free" id="btn-mode-free" class="mode-btn p-3.5 rounded-xl border-2 text-center transition-all duration-200 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-900 dark:text-indigo-200">
+                            <i class="fa-solid fa-keyboard mb-1 text-lg block"></i>
+                            <span class="font-bold text-xs">Saisie Libre</span>
+                        </button>
+                        <button data-mode="qcm" id="btn-mode-qcm" class="mode-btn p-3.5 rounded-xl border-2 text-center transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700">
+                            <i class="fa-solid fa-list-check mb-1 text-lg block"></i>
+                            <span class="font-bold text-xs">Mode QCM</span>
+                        </button>
+                    </div>
+
+                    <!-- Option Écriture Scientifique -->
+                    <div id="scientific-option-wrapper" class="pt-2">
+                        <label for="scientific-toggle" id="scientific-option-label" class="flex items-center cursor-pointer space-x-3 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                            <input type="checkbox" id="scientific-toggle" class="sr-only peer">
+                            <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-sky-600 peer-disabled:opacity-50 relative"></div>
+                            <div class="flex-1">
+                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block peer-disabled:text-slate-400">Exiger l'écriture scientifique</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 block leading-tight">Format : <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-sky-600 dark:text-sky-300 font-mono">a&times;10^n</code> avec <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-sky-600 dark:text-sky-300 font-mono">1&le;|a|&lt;10</code></span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+            </div>
+
+            <!-- Dashboard Statistiques -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
+                    <span class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center">
+                        <i class="fa-solid fa-chart-pie mr-2 text-sky-500"></i> Statistiques de session
+                    </span>
+                    <button id="reset-stats-btn" class="text-xs text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 font-medium transition-colors flex items-center space-x-1">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Réinitialiser les scores</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center space-x-3">
+                        <div class="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                            <i class="fa-solid fa-circle-check text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Réussies</div>
+                            <div id="stat-correct" class="text-lg font-extrabold text-slate-800 dark:text-slate-100">0</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center space-x-3">
+                        <div class="p-2.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                            <i class="fa-solid fa-fire text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Série en cours</div>
+                            <div id="stat-streak" class="text-lg font-extrabold text-amber-600 dark:text-amber-400">0 🔥</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center space-x-3">
+                        <div class="p-2.5 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                            <i class="fa-solid fa-chart-line text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Taux de succès</div>
+                            <div id="stat-rate" class="text-lg font-extrabold text-slate-800 dark:text-slate-100">0%</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center space-x-3">
+                        <div class="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+                            <i class="fa-solid fa-hashtag text-xl"></i>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Total faites</div>
+                            <div id="stat-total" class="text-lg font-extrabold text-slate-800 dark:text-slate-100">0</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Zone d'Exercice -->
+        <section id="exercise-card" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
+                <span id="grandeur-badge" class="px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 font-semibold text-xs border border-sky-300 dark:border-sky-800">
+                    Grandeur : Chargement...
+                </span>
+                <button id="hint-btn" class="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium flex items-center space-x-1.5 bg-amber-50 dark:bg-amber-950/40 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-800/50 transition-all hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <span>Besoin d'un indice ?</span>
+                </button>
+            </div>
+
+            <!-- Contexte STI2D / Quotidien -->
+            <p id="question-context" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 italic">
+                Contexte : ...
+            </p>
+
+            <!-- Énoncé / Question -->
+            <div class="text-center py-6 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800">
+                <div id="question-text" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-800 dark:text-slate-100 font-mono">
+                    <!-- Chargement question -->
+                </div>
+            </div>
+
+            <!-- Mode Saisie Libre -->
+            <div id="free-input-container" class="space-y-4">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-grow">
+                        <input type="text" id="user-answer" placeholder="Entrez votre réponse (ex: 5200, 5.2e3, 5,2x10^3)" 
+                               class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-mono focus:border-sky-500 dark:focus:border-sky-400 focus:outline-none transition-colors">
+                    </div>
+                    <button id="submit-btn" class="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold shadow-md shadow-sky-500/20 active:scale-95 transition-all flex items-center justify-center space-x-2 min-w-[140px]">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        <span>Valider</span>
+                    </button>
+                </div>
+
+                <!-- Raccourcis clavier -->
+                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <span class="font-semibold">Saisie rapide :</span>
+                    <button type="button" data-insert="x10^" class="key-shortcut px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono border border-slate-300 dark:border-slate-700 font-bold transition-colors">
+                        &times;10^
+                    </button>
+                    <button type="button" data-insert="e" class="key-shortcut px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono border border-slate-300 dark:border-slate-700 font-bold transition-colors">
+                        e (ex: 5.2e3)
+                    </button>
+                    <button type="button" data-insert="," class="key-shortcut px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono border border-slate-300 dark:border-slate-700 font-bold transition-colors">
+                        , (virgule)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mode QCM -->
+            <div id="qcm-container" class="hidden space-y-4">
+                <label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
+                    Sélectionnez la bonne réponse :
+                </label>
+                <div id="qcm-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <!-- Dynamic QCM buttons -->
+                </div>
+            </div>
+
+            <!-- Boîte d'indice -->
+            <div id="hint-box" class="hidden p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs sm:text-sm text-amber-900 dark:text-amber-200 space-y-1 animate-fade-in">
+                <div class="font-bold flex items-center space-x-2">
+                    <i class="fa-solid fa-lightbulb text-amber-500"></i>
+                    <span>Indice de méthode :</span>
+                </div>
+                <div id="hint-text" class="leading-relaxed"></div>
+            </div>
+
+            <!-- Carte de feedback -->
+            <div id="feedback-card" class="hidden p-5 rounded-xl border space-y-4 transition-all duration-300 animate-fade-in">
+                <div id="feedback-header" class="flex items-center space-x-3 font-bold text-lg"></div>
+                <div id="feedback-explanation" class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 space-y-2 leading-relaxed"></div>
+                <div class="pt-2 flex justify-between items-center">
+                    <span class="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline flex items-center">
+                        <i class="fa-solid fa-keyboard mr-1.5"></i> Astuce : Touche <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">&rarr;</kbd> pour question suivante
+                    </span>
+                    <button id="next-btn" class="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center space-x-2 hover:scale-105 active:scale-95 ml-auto">
+                        <span>Question suivante</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Historique des Erreurs -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                <h3 class="font-bold text-slate-800 dark:text-slate-200 text-sm flex items-center">
+                    <i class="fa-solid fa-clock-rotate-left mr-2 text-indigo-500"></i> Historique des erreurs
+                </h3>
+                <button id="clear-history-btn" class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                    Effacer l'historique
+                </button>
+            </div>
+
+            <div id="history-empty" class="text-center py-6 text-slate-400 dark:text-slate-500 text-xs italic">
+                Aucune erreur enregistrée pour le moment. Continuez ainsi !
+            </div>
+
+            <div id="history-table-wrapper" class="hidden overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                <table class="w-full text-left text-xs sm:text-sm">
+                    <thead class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 uppercase text-[10px] font-bold">
+                        <tr>
+                            <th class="px-4 py-2.5">Question</th>
+                            <th class="px-4 py-2.5">Votre Réponse</th>
+                            <th class="px-4 py-2.5">Réponse Attendue</th>
+                            <th class="px-4 py-2.5">Niveau</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-list" class="divide-y divide-slate-200 dark:divide-slate-800 font-mono">
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
         <!-- Fiche Mémo & Rappel de Cours -->
         <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-all">
@@ -236,231 +484,6 @@
             </div>
         </section>
 
-        <!-- Configuration de l'Exercice -->
-        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-slate-200 dark:border-slate-800 pb-6">
-                
-                <!-- Choix du Niveau -->
-                <div class="flex-1 space-y-3">
-                    <label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center">
-                        <i class="fa-solid fa-layer-group mr-2 text-sky-500"></i> 1. Choisissez le niveau de difficulté
-                    </label>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <button data-level="1" class="level-btn relative p-3.5 rounded-xl border-2 text-left transition-all duration-200 border-sky-500 bg-sky-50/50 dark:bg-sky-950/30 text-sky-900 dark:text-sky-200">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="font-bold text-sm">Niveau 1</span>
-                                <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">Facile</span>
-                            </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Uniquement vers l'unité de base (ex: 5,2 kV &rarr; 5200 V, 450 mA &rarr; 0,45 A)</p>
-                        </button>
-
-                        <button data-level="2" class="level-btn relative p-3.5 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="font-bold text-sm">Niveau 2</span>
-                                <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold">Moyen</span>
-                            </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Entre préfixes avec saut modéré (ex: mA &rarr; kA, MHz &rarr; GHz)</p>
-                        </button>
-
-                        <button data-level="3" class="level-btn relative p-3.5 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="font-bold text-sm">Niveau 3</span>
-                                <span class="text-xs px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold">Avancé</span>
-                            </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Toutes conversions (téra à pico, sauts amples de 10<sup>12</sup>)</p>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Choix du Mode -->
-                <div class="w-full lg:w-80 space-y-3">
-                    <label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center">
-                        <i class="fa-solid fa-gamepad mr-2 text-indigo-500"></i> 2. Mode d'exercice
-                    </label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button data-mode="free" class="mode-btn p-3.5 rounded-xl border-2 text-center transition-all duration-200 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-900 dark:text-indigo-200">
-                            <i class="fa-solid fa-keyboard mb-1 text-lg block"></i>
-                            <span class="font-bold text-xs">Saisie Libre</span>
-                        </button>
-                        <button data-mode="qcm" class="mode-btn p-3.5 rounded-xl border-2 text-center transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700">
-                            <i class="fa-solid fa-list-check mb-1 text-lg block"></i>
-                            <span class="font-bold text-xs">Mode QCM</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Dashboard Statistiques -->
-            <div class="space-y-3">
-                <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2">
-                    <span class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center">
-                        <i class="fa-solid fa-chart-pie mr-2 text-sky-500"></i> Statistiques de session
-                    </span>
-                    <button id="reset-stats-btn" class="text-xs text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 font-medium transition-colors flex items-center space-x-1">
-                        <i class="fa-solid fa-rotate-right"></i>
-                        <span>Réinitialiser les scores</span>
-                    </button>
-                </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center space-x-3">
-                        <div class="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                            <i class="fa-solid fa-circle-check text-xl"></i>
-                        </div>
-                        <div>
-                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Réussies</div>
-                            <div id="stat-correct" class="text-lg font-extrabold text-slate-800 dark:text-slate-100">0</div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center space-x-3">
-                        <div class="p-2.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                            <i class="fa-solid fa-fire text-xl"></i>
-                        </div>
-                        <div>
-                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Série en cours</div>
-                            <div id="stat-streak" class="text-lg font-extrabold text-amber-600 dark:text-amber-400">0 🔥</div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center space-x-3">
-                        <div class="p-2.5 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
-                            <i class="fa-solid fa-chart-line text-xl"></i>
-                        </div>
-                        <div>
-                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Taux de succès</div>
-                            <div id="stat-rate" class="text-lg font-extrabold text-slate-800 dark:text-slate-100">0%</div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-50 dark:bg-slate-800/50 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center space-x-3">
-                        <div class="p-2.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                            <i class="fa-solid fa-hashtag text-xl"></i>
-                        </div>
-                        <div>
-                            <div class="text-xs text-slate-500 dark:text-slate-400 font-medium">Total faites</div>
-                            <div id="stat-total" class="text-lg font-extrabold text-slate-800 dark:text-slate-100">0</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Zone d'Exercice -->
-        <section id="exercise-card" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
-            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
-                <span id="grandeur-badge" class="px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 font-semibold text-xs border border-sky-300 dark:border-sky-800">
-                    Grandeur : Chargement...
-                </span>
-                <button id="hint-btn" class="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium flex items-center space-x-1.5 bg-amber-50 dark:bg-amber-950/40 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-800/50 transition-colors">
-                    <i class="fa-solid fa-lightbulb"></i>
-                    <span>Besoin d'un indice ?</span>
-                </button>
-            </div>
-
-            <!-- Contexte STI2D / Quotidien -->
-            <p id="question-context" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 italic">
-                Contexte : ...
-            </p>
-
-            <!-- Énoncé / Question -->
-            <div class="text-center py-6 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800">
-                <div id="question-text" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-800 dark:text-slate-100 font-mono">
-                    <!-- Chargement question -->
-                </div>
-            </div>
-
-            <!-- Mode Saisie Libre -->
-            <div id="free-input-container" class="space-y-4">
-                <div class="flex flex-col sm:flex-row gap-3">
-                    <div class="relative flex-grow">
-                        <input type="text" id="user-answer" placeholder="Entrez votre réponse (ex: 5200, 5.2e3, 5,2x10^3)" 
-                               class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-mono focus:border-sky-500 dark:focus:border-sky-400 focus:outline-none transition-colors">
-                    </div>
-                    <button id="submit-btn" class="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold shadow-md shadow-sky-500/20 active:scale-95 transition-all flex items-center justify-center space-x-2 min-w-[140px]">
-                        <i class="fa-solid fa-paper-plane"></i>
-                        <span>Valider</span>
-                    </button>
-                </div>
-
-                <!-- Raccourcis clavier -->
-                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                    <span class="font-semibold">Saisie rapide :</span>
-                    <button type="button" data-insert="x10^" class="key-shortcut px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono border border-slate-300 dark:border-slate-700 font-bold transition-colors">
-                        &times;10^
-                    </button>
-                    <button type="button" data-insert="e" class="key-shortcut px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono border border-slate-300 dark:border-slate-700 font-bold transition-colors">
-                        e (ex: 5.2e3)
-                    </button>
-                    <button type="button" data-insert="," class="key-shortcut px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono border border-slate-300 dark:border-slate-700 font-bold transition-colors">
-                        , (virgule)
-                    </button>
-                </div>
-            </div>
-
-            <!-- Mode QCM -->
-            <div id="qcm-container" class="hidden space-y-4">
-                <label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400">
-                    Sélectionnez la bonne réponse :
-                </label>
-                <div id="qcm-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <!-- Dynamic QCM buttons -->
-                </div>
-            </div>
-
-            <!-- Boîte d'indice -->
-            <div id="hint-box" class="hidden p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs sm:text-sm text-amber-900 dark:text-amber-200 space-y-1">
-                <div class="font-bold flex items-center space-x-2">
-                    <i class="fa-solid fa-lightbulb text-amber-500"></i>
-                    <span>Indice de méthode :</span>
-                </div>
-                <div id="hint-text" class="leading-relaxed"></div>
-            </div>
-
-            <!-- Carte de feedback -->
-            <div id="feedback-card" class="hidden p-5 rounded-xl border space-y-4 transition-all">
-                <div id="feedback-header" class="flex items-center space-x-3 font-bold text-lg"></div>
-                <div id="feedback-explanation" class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 space-y-2 leading-relaxed"></div>
-                <div class="pt-2 flex justify-end">
-                    <button id="next-btn" class="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center space-x-2">
-                        <span>Question suivante</span>
-                        <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
-        </section>
-
-        <!-- Historique des Erreurs -->
-        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                <h3 class="font-bold text-slate-800 dark:text-slate-200 text-sm flex items-center">
-                    <i class="fa-solid fa-clock-rotate-left mr-2 text-indigo-500"></i> Historique des erreurs
-                </h3>
-                <button id="clear-history-btn" class="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                    Effacer l'historique
-                </button>
-            </div>
-
-            <div id="history-empty" class="text-center py-6 text-slate-400 dark:text-slate-500 text-xs italic">
-                Aucune erreur enregistrée pour le moment. Continuez ainsi !
-            </div>
-
-            <div id="history-table-wrapper" class="hidden overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-                <table class="w-full text-left text-xs sm:text-sm">
-                    <thead class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 uppercase text-[10px] font-bold">
-                        <tr>
-                            <th class="px-4 py-2.5">Question</th>
-                            <th class="px-4 py-2.5">Votre Réponse</th>
-                            <th class="px-4 py-2.5">Réponse Attendue</th>
-                            <th class="px-4 py-2.5">Niveau</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-list" class="divide-y divide-slate-200 dark:divide-slate-800 font-mono">
-                    </tbody>
-                </table>
-            </div>
-        </section>
-
     </main>
 
     <footer class="mt-auto py-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
@@ -486,101 +509,168 @@
             {
                 name: 'Tension Électrique', unitName: 'Volt', symbol: 'V',
                 contexts: [
-                    { text: "Tension en sortie d'un transformateur industriel", startPrefixes: ['k', ''], values: [220, 380, 400, 15] },
-                    { text: "Signal fourni par un capteur de température analogique", startPrefixes: ['m', 'μ'], values: [2.5, 10, 50, 450] },
-                    { text: "Tension d'alimentation d'un microcontrôleur basse consommation", startPrefixes: ['', 'm'], values: [1.8, 2.5, 3.3, 5] },
+                    { text: "Tension en sortie d'un transformateur industriel HT", startPrefixes: ['k'], values: [11, 15, 20, 63, 220, 380] },
+                    { text: "Signal fourni par un capteur de température analogique", startPrefixes: ['m'], values: [2.5, 10, 25, 50, 100, 250, 450] },
+                    { text: "Tension d'alimentation d'un microcontrôleur Arduino / ESP32", startPrefixes: [''], values: [1.8, 3.3, 5.0] },
+                    { text: "Tension de ligne d'un réseau THT (Très Haute Tension)", startPrefixes: ['k'], values: [63, 90, 225, 400] },
+                    { text: "Tension délivrée par un panneau solaire photovoltaïque", startPrefixes: ['m'], values: [500, 600, 700] },
+                    { text: "Tension délivrée par un panneau solaire photovoltaïque", startPrefixes: [''], values: [0.5, 0.6, 0.7, 36, 48] },
+                    { text: "Tension de la batterie de traction d'un véhicule électrique (Li-Ion)", startPrefixes: [''], values: [400, 800] },
                     { text: "Tension secteur domestique standard en France", startPrefixes: [''], values: [230] },
-                    { text: "Tension aux bornes de la batterie déchargée d'un smartphone", startPrefixes: ['m', ''], values: [3400, 3.7] }
+                    { text: "Tension aux bornes d'une pile bouton pour montre (CR2032)", startPrefixes: [''], values: [3.0] },
+                    { text: "Tension aux bornes de la batterie d'un smartphone (en mV)", startPrefixes: ['m'], values: [3200, 3700, 3850, 4200] },
+                    { text: "Tension aux bornes de la batterie d'un smartphone (en V)", startPrefixes: [''], values: [3.2, 3.7, 3.85, 4.2] },
+                    { text: "Tension d'une batterie de voiture thermique au repos", startPrefixes: [''], values: [12.6] }
                 ]
             },
             {
                 name: 'Courant Électrique', unitName: 'Ampère', symbol: 'A',
                 contexts: [
-                    { text: "Courant absorbé par un moteur brushless de drone de loisir", startPrefixes: ['', 'm'], values: [2.5, 5.2, 12, 20] },
-                    { text: "Courant de fuite très faible d'un transistor de puissance bloqué", startPrefixes: ['μ', 'n'], values: [1.5, 12, 47, 150] },
-                    { text: "Courant nominal transitant dans une ligne de transport Haute Tension", startPrefixes: ['k', ''], values: [200, 380, 450, 1.2] },
-                    { text: "Courant traversant une lampe à incandescence domestique de salon", startPrefixes: ['', 'm'], values: [0.43, 260] },
-                    { text: "Courant de charge rapide USB d'une tablette tactile", startPrefixes: ['', 'm'], values: [2.1, 2100] }
+                    { text: "Courant absorbé par un moteur brushless de drone de loisir", startPrefixes: [''], values: [1.5, 2.5, 5.2, 8.0, 12, 20, 35] },
+                    { text: "Courant de fuite d'un transistor de puissance en veille", startPrefixes: ['μ'], values: [0.5, 1.5, 12, 47] },
+                    { text: "Courant de fuite d'un transistor de puissance en veille", startPrefixes: ['n'], values: [100, 150, 500] },
+                    { text: "Courant nominal transitant dans une ligne THT", startPrefixes: ['k'], values: [0.5, 1.2, 1.8, 2.5] },
+                    { text: "Courant d'amorçage d'un démarreur d'automobile", startPrefixes: [''], values: [150, 250, 350] },
+                    { text: "Courant maximal dans une prise de recharge rapide de voiture (Combo CCS)", startPrefixes: [''], values: [125, 250, 350, 500] },
+                    { text: "Courant consommé par une DEL (LED) voyant d'affichage", startPrefixes: ['m'], values: [5, 10, 15, 20] },
+                    { text: "Courant de charge USB rapide d'un smartphone moderne", startPrefixes: [''], values: [1.5, 2.1, 2.4, 3.0] },
+                    { text: "Courant de charge USB rapide d'un smartphone moderne", startPrefixes: ['m'], values: [1500, 2100, 2400, 3000] },
+                    { text: "Courant consommé par une plaque à induction en pleine puissance", startPrefixes: [''], values: [16, 20, 32] },
+                    { text: "Courant traversant une ampoule LED domestique de 10W", startPrefixes: ['m'], values: [43, 45, 50] }
                 ]
             },
             {
                 name: 'Puissance Électrique / Thermique', unitName: 'Watt', symbol: 'W',
                 contexts: [
-                    { text: "Puissance électrique injectée sur le réseau national par un parc éolien", startPrefixes: ['T', 'G', 'M'], values: [1.5, 3.2, 45, 120] },
-                    { text: "Consommation en veille d'un capteur connecté IoT domestique", startPrefixes: ['m', 'μ'], values: [0.15, 0.47, 1.2, 25] },
-                    { text: "Puissance restituée par un hacheur de puissance industriel", startPrefixes: ['k', ''], values: [120, 220, 3.3, 5.2] },
-                    { text: "Puissance nominale consommée par un radiateur soufflant domestique", startPrefixes: ['k', ''], values: [2, 2000] },
-                    { text: "Puissance lumineuse d'une petite veilleuse LED de chambre", startPrefixes: ['m', ''], values: [500, 0.5] }
+                    { text: "Puissance électrique injectée par une éolienne offshore moderne", startPrefixes: ['M'], values: [2.0, 3.2, 6.0, 12, 15] },
+                    { text: "Consommation en veille d'un capteur connecté IoT (Sigfox / LoRaWAN)", startPrefixes: ['m'], values: [0.15, 0.47, 1.2, 10, 25] },
+                    { text: "Puissance restituée par un hacheur de voiture électrique", startPrefixes: ['k'], values: [50, 100, 150, 220] },
+                    { text: "Puissance électrique consommée par un centre de données (Data Center)", startPrefixes: ['M'], values: [1.2, 5.0, 12, 25] },
+                    { text: "Puissance thermique émise par une pompe à chaleur d'une maison passive", startPrefixes: ['k'], values: [3.5, 6.0, 9.0, 12] },
+                    { text: "Puissance d'un moteur de TGV à grande vitesse", startPrefixes: ['M'], values: [8.8, 9.6] },
+                    { text: "Puissance nominale d'un four à micro-ondes", startPrefixes: [''], values: [700, 800, 900, 1000] },
+                    { text: "Puissance d'une bouilloire électrique rapide", startPrefixes: ['k'], values: [1.8, 2.2, 2.4] },
+                    { text: "Puissance d'une bouilloire électrique rapide", startPrefixes: [''], values: [1800, 2200, 2400] },
+                    { text: "Puissance absorbée par une console de jeu vidéo moderne en charge", startPrefixes: [''], values: [160, 200, 220] },
+                    { text: "Puissance d'une ampoule de phare de voiture", startPrefixes: [''], values: [55, 60] }
                 ]
             },
             {
                 name: 'Énergie', unitName: 'Joule', symbol: 'J',
                 contexts: [
-                    { text: "Énergie électrique consommée annuellement par un département français", startPrefixes: ['T', 'G'], values: [1.2, 5.4, 12, 45] },
-                    { text: "Travail mécanique développé par un vérin pneumatique en atelier", startPrefixes: ['', 'k'], values: [12, 50, 120, 450] },
-                    { text: "Énergie perdue en veille par un téléviseur en une journée", startPrefixes: [''], values: [864, 4320] },
-                    { text: "Énergie cinétique d'une trottinette électrique lancée à pleine vitesse", startPrefixes: ['k', ''], values: [2.5, 4500] },
-                    { text: "Énergie chimique libérée par la combustion d'un petit morceau de sucre", startPrefixes: ['k', ''], values: [15, 15000] }
+                    { text: "Énergie électrique annuelle produite par un parc éolien régional", startPrefixes: ['T'], values: [1.2, 2.5, 5.4] },
+                    { text: "Travail mécanique développé par un vérin pneumatique d'usinage", startPrefixes: [''], values: [12, 50, 120, 250, 450] },
+                    { text: "Énergie mécanique restituée lors du freinage d'un tramway", startPrefixes: ['M'], values: [1.5, 3.0, 5.5] },
+                    { text: "Énergie emmagasinée dans la batterie d'un smartphone (exprimée en Joules)", startPrefixes: ['k'], values: [45, 55, 65] },
+                    { text: "Énergie cinétique d'un piéton marchant à 5 km/h", startPrefixes: [''], values: [60, 75, 90] },
+                    { text: "Énergie cinétique d'une trottinette électrique lancée à 25 km/h", startPrefixes: ['k'], values: [1.8, 2.5, 3.2] },
+                    { text: "Énergie cinétique d'une trottinette électrique lancée à 25 km/h", startPrefixes: [''], values: [1800, 2500, 3200] },
+                    { text: "Énergie apportée par la digestion d'une pomme (approx. 80 kcal)", startPrefixes: ['k'], values: [335] },
+                    { text: "Énergie perdue par une box internet laissée allumée un jour entier", startPrefixes: ['k'], values: [864, 1200, 1500] }
                 ]
             },
             {
                 name: 'Fréquence', unitName: 'Hertz', symbol: 'Hz',
                 contexts: [
-                    { text: "Fréquence de hachage de la commande MLI (PWM) d'un variateur", startPrefixes: ['k', ''], values: [1.2, 10, 20, 50] },
-                    { text: "Fréquence de l'horloge interne d'un microprocesseur moderne", startPrefixes: ['G', 'M'], values: [1.2, 2.4, 3.2, 16] },
-                    { text: "Fréquence de la porteuse d'un module radio de communication sans fil", startPrefixes: ['M', 'k'], values: [433, 868, 915, 250] },
-                    { text: "Fréquence du réseau électrique alternatif domestique en Europe", startPrefixes: [''], values: [50] },
-                    { text: "Fréquence d'une note de musique standard (le La 3 du diapason)", startPrefixes: [''], values: [440] }
+                    { text: "Fréquence de hachage PWM d'un variateur de vitesse industriel", startPrefixes: ['k'], values: [1.2, 4.0, 8.0, 10, 16, 20] },
+                    { text: "Fréquence de l'horloge d'un processeur d'ordinateur portable", startPrefixes: ['G'], values: [1.8, 2.4, 3.2, 4.5] },
+                    { text: "Fréquence de rafraîchissement d'un capteur LiDAR de voiture autonome", startPrefixes: [''], values: [10, 20, 50, 100] },
+                    { text: "Fréquence d'un signal radio RFID ou badge d'accès d'immeuble", startPrefixes: ['M'], values: [125, 13.56] },
+                    { text: "Fréquence de la porteuse du réseau Wi-Fi 5 GHz", startPrefixes: ['G'], values: [2.4, 5.0] },
+                    { text: "Fréquence du réseau électrique européen domestique", startPrefixes: [''], values: [50] },
+                    { text: "Fréquence d'affichage d'un écran de smartphone fluide (Gaming)", startPrefixes: [''], values: [60, 90, 120] },
+                    { text: "Fréquence d'une note de musique standard (le La 3 du diapason)", startPrefixes: [''], values: [440] },
+                    { text: "Fréquence d'échantillonnage audio Haute Définition (Hi-Res)", startPrefixes: ['k'], values: [44.1, 48, 96, 192] }
                 ]
             },
             {
                 name: 'Résistance Électrique', unitName: 'Ohm', symbol: 'Ω',
                 contexts: [
-                    { text: "Résistance d'isolement très élevée d'un câble blindé industriel", startPrefixes: ['G', 'M'], values: [10, 50, 100, 500] },
-                    { text: "Résistance de tirage (pull-up) montée sur un bus I2C de microcontrôleur", startPrefixes: ['k', ''], values: [2.2, 4.7, 10, 22] },
-                    { text: "Résistance équivalente d'un élément chauffant de four industriel", startPrefixes: ['', 'm'], values: [12, 24, 47, 100] },
-                    { text: "Résistance électrique moyenne de la peau humaine sèche", startPrefixes: ['k'], values: [10, 50, 100] },
-                    { text: "Résistance interne mesurée aux bornes d'un haut-parleur audio", startPrefixes: [''], values: [4, 8, 16] }
+                    { text: "Résistance d'isolement minimale requise pour un câble HT de réseau", startPrefixes: ['G'], values: [1, 5, 10] },
+                    { text: "Résistance d'isolement d'un équipement électroménager", startPrefixes: ['M'], values: [2, 10, 50] },
+                    { text: "Résistance de tirage (pull-up) sur une ligne de bus I2C", startPrefixes: ['k'], values: [1.0, 2.2, 4.7, 10] },
+                    { text: "Résistance d'une sonde de température PT100 à 0°C", startPrefixes: [''], values: [100] },
+                    { text: "Shunt de précision pour la mesure de courant forte intensité", startPrefixes: ['m'], values: [1, 5, 10, 50] },
+                    { text: "Résistance moyenne du corps humain en environnement sec", startPrefixes: ['k'], values: [2, 5, 10] },
+                    { text: "Résistance interne d'un haut-parleur de salon ou casque audio", startPrefixes: [''], values: [4, 8, 16, 32] },
+                    { text: "Résistance d'un filament de chauffe-eau électrique classique", startPrefixes: [''], values: [18, 25, 30] }
                 ]
             },
             {
                 name: 'Pression', unitName: 'Pascal', symbol: 'Pa',
                 contexts: [
-                    { text: "Pression de service mesurée dans le circuit pneumatique d'un robot", startPrefixes: ['k', 'M'], values: [100, 300, 600, 1.2] },
-                    { text: "Pression acoustique subtile captée par un microphone d'analyse", startPrefixes: ['m', 'μ', ''], values: [0.02, 2, 20, 100] },
-                    { text: "Pression atmosphérique relative relevée par une station météo", startPrefixes: ['k', ''], values: [101.3, 98, 102.5, 100] },
-                    { text: "Pression des pneus d'une automobile familiale avant un long trajet", startPrefixes: ['k'], values: [220, 250, 280] },
-                    { text: "Pression exercée par l'eau au fond d'une piscine municipale de 3m", startPrefixes: ['k'], values: [30, 300] }
+                    { text: "Pression de service dans un circuit pneumatique d'atelier", startPrefixes: ['k'], values: [200, 400, 600, 800] },
+                    { text: "Pression de service dans un circuit pneumatique d'atelier", startPrefixes: ['M'], values: [0.2, 0.4, 0.6, 0.8] },
+                    { text: "Pression hydraulique dans la ligne de frein d'une voiture", startPrefixes: ['M'], values: [8, 10, 15] },
+                    { text: "Pression d'injection dans un moteur diesel à rampe commune", startPrefixes: ['M'], values: [150, 180, 220] },
+                    { text: "Pression acoustique au seuil d'audibilité humaine à 1 kHz", startPrefixes: ['μ'], values: [20] },
+                    { text: "Pression atmosphérique moyenne au niveau de la mer", startPrefixes: ['k'], values: [101.3] },
+                    { text: "Pression atmosphérique moyenne au niveau de la mer", startPrefixes: [''], values: [101300] },
+                    { text: "Pression de gonflage conseillée pour un pneu de VTT", startPrefixes: ['k'], values: [180, 220, 250] },
+                    { text: "Pression relative exercée au fond d'un grand bassin de piscine (3 m)", startPrefixes: ['k'], values: [30] },
+                    { text: "Pression de vapeur produite par une machine à expresso", startPrefixes: ['M'], values: [1.5] }
                 ]
             },
             {
                 name: 'Longueur', unitName: 'Mètre', symbol: 'm',
                 contexts: [
-                    { text: "Épaisseur nanométrique de la grille de gravure d'un semi-conducteur", startPrefixes: ['n', 'μ'], values: [7, 14, 22, 45] },
-                    { text: "Altitude de vol de précision mesurée par l'altimètre d'un drone", startPrefixes: ['', 'm'], values: [1.2, 15, 50, 120] },
-                    { text: "Portée maximale de détection d'un capteur télémètre à ultrasons", startPrefixes: ['m', ''], values: [20, 150, 300, 4.5] },
-                    { text: "Taille moyenne d'un grain de pollen transporté par le vent", startPrefixes: ['μ', 'm'], values: [20, 0.02] },
-                    { text: "Longueur d'une piscine olympique standard de compétition", startPrefixes: [''], values: [50] }
+                    { text: "Finesse de gravure des puces de processeurs de dernière génération", startPrefixes: ['n'], values: [2, 3, 5, 7, 12] },
+                    { text: "Diamètre d'une fibre optique de télécommunication (cœur)", startPrefixes: ['μ'], values: [9, 50, 62.5] },
+                    { text: "Portée utile d'un télémètre laser d'un chantier BTP", startPrefixes: [''], values: [15, 30, 50, 100] },
+                    { text: "Portée de détection d'un capteur de recul à ultrasons", startPrefixes: ['m'], values: [200, 500, 1500] },
+                    { text: "Portée de détection d'un capteur de recul à ultrasons", startPrefixes: [''], values: [0.2, 0.5, 1.5] },
+                    { text: "Épaisseur moyenne d'une feuille de papier blanc standard (80g/m²)", startPrefixes: ['μ'], values: [100] },
+                    { text: "Diamètre moyen d'un cheveu humain", startPrefixes: ['μ'], values: [50, 70, 100] },
+                    { text: "Longueur d'une piscine olympique officielle", startPrefixes: [''], values: [50] },
+                    { text: "Longueur d'onde de la lumière rouge émise par un pointeur laser", startPrefixes: ['n'], values: [632.8, 650] },
+                    { text: "Taille moyenne d'une bactérie courante (E. Coli)", startPrefixes: ['μ'], values: [2] }
                 ]
             },
             {
                 name: 'Masse', unitName: 'Gramme', symbol: 'g',
                 contexts: [
-                    { text: "Masse totale du bloc-batterie d'un drone d'inspection légère", startPrefixes: ['k', ''], values: [150, 250, 450, 1.2] },
-                    { text: "Charge utile maximale supportée par le préhenseur d'un robot", startPrefixes: ['k', ''], values: [0.5, 1.5, 2.5, 500] },
-                    { text: "Masse unitaire d'une puce ou d'un micro-capteur MEMS silicium", startPrefixes: ['m', 'μ', 'p'], values: [1.5, 15, 250, 500] },
-                    { text: "Masse d'une tablette de chocolat achetée en grande surface", startPrefixes: [''], values: [100, 200, 250] },
-                    { text: "Masse d'un trombone de bureau métallique standard", startPrefixes: [''], values: [1, 2] }
+                    // Correction apportée ici : '' au lieu de 'g'
+                    { text: "Masse maximale autorisée au décollage pour un drone de catégorie ouverte", startPrefixes: [''], values: [249, 900] },
+                    { text: "Charge utile supportée par un bras robotisé d'assemblage léger", startPrefixes: ['k'], values: [1.5, 3.0, 5.0, 10] },
+                    { text: "Masse d'une puce en silicium non encapsulée (Die MEMS)", startPrefixes: ['m'], values: [1.5, 10, 50] },
+                    { text: "Masse d'une batterie d'outillage électroportatif de chantier (18V)", startPrefixes: [''], values: [600, 750, 900] },
+                    { text: "Masse d'un paquet de farine ménager", startPrefixes: ['k'], values: [1.0] },
+                    { text: "Masse d'un paquet de farine ménager", startPrefixes: [''], values: [1000] },
+                    { text: "Masse d'une pièce de 2 Euros en circulation", startPrefixes: [''], values: [8.5] },
+                    { text: "Masse d'une pomme de taille moyenne", startPrefixes: [''], values: [150, 180, 200] },
+                    { text: "Masse maximale autorisée pour une valise cabine d'avion", startPrefixes: ['k'], values: [8, 10, 12] }
                 ]
             },
             {
                 name: 'Temps', unitName: 'Seconde', symbol: 's',
                 contexts: [
-                    { text: "Temps de réponse d'un relais électromécanique de sécurité", startPrefixes: ['m', 'μ'], values: [5, 10, 20, 50] },
-                    { text: "Période d'horloge interne d'un microprocesseur à très haute fréquence", startPrefixes: ['p', 'n', 'μ'], values: [0.5, 1, 5, 25] },
-                    { text: "Durée exacte de l'impulsion du signal de commande PWM d'un servomoteur", startPrefixes: ['m', 'μ'], values: [1, 1.5, 2, 500] },
-                    { text: "Temps de réaction moyen d'un conducteur humain au volant face au danger", startPrefixes: [''], values: [0.75, 1, 1.2] },
-                    { text: "Durée d'un battement de cœur humain au repos complet", startPrefixes: [''], values: [0.8, 1] }
+                    { text: "Temps d'ouverture des contacts d'un disjoncteur différentiel de protection", startPrefixes: ['m'], values: [10, 30, 40] },
+                    { text: "Période d'un cycle d'horloge d'un microprocesseur rapide", startPrefixes: ['n'], values: [0.25, 0.4, 0.8] },
+                    { text: "Période d'un cycle d'horloge d'un microprocesseur rapide", startPrefixes: ['p'], values: [250, 400, 800] },
+                    { text: "Durée d'une impulsion de signal Servo PWM pour la direction d'un modèle réduit", startPrefixes: ['m'], values: [1.0, 1.5, 2.0] },
+                    { text: "Temps de réponse de la matrice de pixels d'un écran Gamer", startPrefixes: ['m'], values: [1, 2, 4] },
+                    { text: "Temps de réaction moyen d'un conducteur humain face à un obstacle", startPrefixes: [''], values: [0.75, 1.0, 1.2] },
+                    { text: "Durée moyenne d'un clignement d'œil humain", startPrefixes: ['m'], values: [100, 150, 200] },
+                    { text: "Durée moyenne d'un clignement d'œil humain", startPrefixes: [''], values: [0.1, 0.15, 0.2] },
+                    { text: "Durée d'une minute mesurée au chronomètre", startPrefixes: [''], values: [60] }
+                ]
+            },
+            {
+                name: 'Capacité Électrique', unitName: 'Farad', symbol: 'F',
+                contexts: [
+                    { text: "Capacité d'un condensateur de découplage antiparasite sur carte PCB", startPrefixes: ['n'], values: [10, 47, 100] },
+                    { text: "Capacité d'un condensateur de découplage antiparasite sur carte PCB", startPrefixes: ['p'], values: [22, 100, 470] },
+                    { text: "Capacité d'un condensateur de filtrage d'une alimentation stabilisée", startPrefixes: ['μ'], values: [10, 100, 470, 1000, 4700] },
+                    { text: "Capacité d'un supercondensateur de stockage d'énergie pour bus hybride", startPrefixes: [''], values: [300, 650, 1200, 3000] },
+                    { text: "Capacité d'un supercondensateur de stockage d'énergie pour bus hybride", startPrefixes: ['k'], values: [1.2, 3.0] }
+                ]
+            },
+            {
+                name: 'Inductance Électrique', unitName: 'Henry', symbol: 'H',
+                contexts: [
+                    { text: "Inductance d'une ferrite de filtrage anti-parasite sur un câble USB", startPrefixes: ['μ'], values: [10, 47, 100, 330] },
+                    { text: "Inductance d'un bobinage de filtre de convertisseur Buck / Boost", startPrefixes: ['m'], values: [1.0, 4.7, 10, 22] },
+                    { text: "Inductance du primaire d'un transformateur d'alimentation découpage", startPrefixes: ['m'], values: [100, 250, 500] }
                 ]
             }
         ];
@@ -588,6 +678,7 @@
         const state = {
             level: 1,
             mode: 'free',
+            requireScientific: false,
             currentQuestion: null,
             stats: { correct: 0, streak: 0, total: 0 },
             history: []
@@ -758,7 +849,7 @@
 
             choices.forEach((choice, idx) => {
                 const btn = document.createElement('button');
-                btn.className = 'qcm-opt-btn p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 hover:border-sky-500 dark:hover:border-sky-400 bg-slate-50 dark:bg-slate-800/80 text-left font-mono text-sm sm:text-base font-bold transition-all flex items-center justify-between shadow-sm';
+                btn.className = 'qcm-opt-btn p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 hover:border-sky-500 dark:hover:border-sky-400 bg-slate-50 dark:bg-slate-800/80 text-left font-mono text-sm sm:text-base font-bold transition-all flex items-center justify-between shadow-sm hover:scale-[1.01] active:scale-[0.99]';
                 
                 const labelText = formatNumberFr(choice.val);
                 btn.innerHTML = `
@@ -783,13 +874,28 @@
             return parseFloat(clean);
         }
 
+        function isNormalizedScientificFormat(inputStr) {
+            if (!inputStr) return false;
+            let clean = inputStr.trim().toLowerCase().replace(',', '.').replace(/\s+/g, '');
+            
+            const regex = /^([+-]?\d+(?:\.\d+)?)(?:e|(?:x|\*|⋅)10\^?)([+-]?\d+)$/;
+            const match = clean.match(regex);
+            
+            if (!match) return false;
+            
+            const mantissa = parseFloat(match[1]);
+            const absMantissa = Math.abs(mantissa);
+            
+            return absMantissa >= 1 && absMantissa < 10;
+        }
+
         function checkAnswer(userVal) {
             const q = state.currentQuestion;
             if (!q) return;
-            let isCorrect = false;
 
+            let rawInput = '';
             if (state.mode === 'free') {
-                const rawInput = document.getElementById('user-answer')?.value;
+                rawInput = document.getElementById('user-answer')?.value || '';
                 userVal = parseUserAnswer(rawInput);
             }
 
@@ -799,9 +905,19 @@
             }
 
             const relativeError = Math.abs((userVal - q.convertedValue) / (q.convertedValue || 1));
-            if (relativeError < 0.005) {
-                isCorrect = true;
+            const isNumericallyCorrect = relativeError < 0.005;
+            
+            let isFormatCorrect = true;
+            let formatErrorMessage = "";
+
+            if (state.requireScientific && state.mode === 'free') {
+                isFormatCorrect = isNormalizedScientificFormat(rawInput);
+                if (!isFormatCorrect && isNumericallyCorrect) {
+                    formatErrorMessage = "La valeur numérique est exacte, mais elle n'est pas écrite sous forme scientifique normée $a \\times 10^n$ (avec $1 \\le \\vert{}a\\vert{} < 10$).";
+                }
             }
+
+            const isCorrect = isNumericallyCorrect && isFormatCorrect;
 
             state.stats.total++;
             if (isCorrect) {
@@ -811,21 +927,20 @@
                 state.stats.streak = 0;
                 
                 const rawFormattedWithUnit = `${formatNumberFr(q.rawValue)} ${q.startSymbol}`;
-                const expRawFormatted = q.deltaExp !== 0 ? ` (${formatNumberFr(q.rawValue)} &times; 10<sup>${q.deltaExp}</sup> ${q.endSymbol})` : '';
                 
                 state.history.unshift({
                     question: `${rawFormattedWithUnit} &rarr; ${q.endSymbol}`,
-                    userAnswer: isNaN(userVal) ? 'Invalide' : `${formatNumberFr(userVal)} ${q.endSymbol}`,
-                    expectedAnswer: `${formatNumberFr(q.convertedValue)} ${q.endSymbol}${expRawFormatted}`,
+                    userAnswer: isNaN(userVal) ? 'Invalide' : (rawInput || `${formatNumberFr(userVal)} ${q.endSymbol}`),
+                    expectedAnswer: formatScientificNotationHtml(q.convertedValue, q.endSymbol),
                     level: `Niveau ${state.level}`
                 });
             }
 
             updateStatsDisplay();
-            showFeedback(isCorrect, userVal);
+            showFeedback(isCorrect, userVal, formatErrorMessage);
         }
 
-        function showFeedback(isCorrect, userVal) {
+        function showFeedback(isCorrect, userVal, formatErrorMessage = "") {
             const q = state.currentQuestion;
             const feedbackCard = document.getElementById('feedback-card');
             const feedbackHeader = document.getElementById('feedback-header');
@@ -836,18 +951,9 @@
 
             feedbackCard.classList.remove('hidden', 'bg-emerald-50', 'bg-rose-50', 'dark:bg-emerald-950/40', 'dark:bg-rose-950/40', 'border-emerald-200', 'border-rose-200', 'dark:border-emerald-800', 'dark:border-rose-800');
 
-            if (isCorrect) {
-                feedbackCard.classList.add('bg-emerald-50', 'dark:bg-emerald-950/40', 'border-emerald-200', 'dark:border-emerald-800');
-                feedbackHeader.className = 'flex items-center space-x-3 font-bold text-lg text-emerald-700 dark:text-emerald-400';
-                feedbackHeader.innerHTML = `<i class="fa-solid fa-circle-check text-2xl"></i> <span>Bravo ! Réponse exacte.</span>`;
-            } else {
-                feedbackCard.classList.add('bg-rose-50', 'dark:bg-rose-950/40', 'border-rose-200', 'dark:border-rose-800');
-                feedbackHeader.className = 'flex items-center space-x-3 font-bold text-lg text-rose-700 dark:text-rose-400';
-                feedbackHeader.innerHTML = `<i class="fa-solid fa-circle-xmark text-2xl"></i> <span>Inexact. Voici la correction pas à pas :</span>`;
-            }
-
             const expSci = formatScientificNotationHtml(q.convertedValue, q.endSymbol);
-            feedbackExplanation.innerHTML = `
+            
+            const detailedExplanationHtml = `
                 <p><strong>1. Analyse des préfixes :</strong><br>
                 • Préfixe de départ : <strong>${q.startPrefix.name}</strong> (${q.startPrefix.symbol || 'unité de base'}) = 10<sup>${q.startPrefix.exp}</sup><br>
                 • Préfixe de destination : <strong>${q.endPrefix.name}</strong> (${q.endPrefix.symbol || 'unité de base'}) = 10<sup>${q.endPrefix.exp}</sup></p>
@@ -862,6 +968,56 @@
                     <strong>En notation scientifique normée :</strong> <strong>${expSci}</strong>
                 </p>
             `;
+
+            if (isCorrect) {
+                feedbackCard.classList.add('bg-emerald-50', 'dark:bg-emerald-950/40', 'border-emerald-200', 'dark:border-emerald-800');
+                feedbackHeader.className = 'flex items-center space-x-3 font-bold text-lg text-emerald-700 dark:text-emerald-400';
+                feedbackHeader.innerHTML = `<i class="fa-solid fa-circle-check text-2xl animate-bounce"></i> <span>Bravo ! Réponse exacte.</span>`;
+                
+                feedbackExplanation.innerHTML = `
+                    <div class="mt-2">
+                        <button id="toggle-detail-btn" type="button" class="text-xs text-emerald-700 dark:text-emerald-300 font-semibold hover:underline flex items-center space-x-1">
+                            <i id="toggle-detail-icon" class="fa-solid fa-chevron-right text-[10px] transition-transform duration-200"></i>
+                            <span>Afficher le détail du calcul</span>
+                        </button>
+                        <div id="success-detail-content" class="hidden mt-3 space-y-2 pt-2 border-t border-emerald-200 dark:border-emerald-800/60 animate-fade-in">
+                            ${detailedExplanationHtml}
+                        </div>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    const toggleBtn = document.getElementById('toggle-detail-btn');
+                    const detailContent = document.getElementById('success-detail-content');
+                    const toggleIcon = document.getElementById('toggle-detail-icon');
+
+                    toggleBtn?.addEventListener('click', () => {
+                        const isHidden = detailContent?.classList.contains('hidden');
+                        detailContent?.classList.toggle('hidden');
+                        toggleIcon?.classList.toggle('rotate-90');
+                        if (toggleBtn.querySelector('span')) {
+                            toggleBtn.querySelector('span').textContent = isHidden ? "Masquer le détail du calcul" : "Afficher le détail du calcul";
+                        }
+                    });
+                }, 0);
+
+            } else {
+                feedbackCard.classList.add('bg-rose-50', 'dark:bg-rose-950/40', 'border-rose-200', 'dark:border-rose-800');
+                feedbackHeader.className = 'flex items-center space-x-3 font-bold text-lg text-rose-700 dark:text-rose-400';
+                
+                let headerText = "Inexact. Voici la correction pas à pas :";
+                let extraWarning = "";
+                
+                if (formatErrorMessage) {
+                    headerText = "Format scientifique non respecté !";
+                    extraWarning = `<div class="p-3 mb-3 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 font-semibold text-xs sm:text-sm">
+                        <i class="fa-solid fa-triangle-exclamation mr-2 text-amber-500"></i> ${formatErrorMessage}
+                    </div>`;
+                }
+                
+                feedbackHeader.innerHTML = `<i class="fa-solid fa-circle-xmark text-2xl"></i> <span>${headerText}</span>`;
+                feedbackExplanation.innerHTML = extraWarning + detailedExplanationHtml;
+            }
 
             if (submitBtn) submitBtn.disabled = true;
 
@@ -916,6 +1072,7 @@
             });
         }
 
+        // Écouteurs de configuration (Niveaux, Modes, Options)
         document.querySelectorAll('.level-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.level-btn').forEach(b => {
@@ -930,8 +1087,46 @@
             });
         });
 
+        // Fonction centralisée pour mettre à jour l'interdiction du QCM et l'état des boutons
+        function updateModeAndScientificState() {
+            const btnQcm = document.getElementById('btn-mode-qcm');
+            const sciToggle = document.getElementById('scientific-toggle');
+            const sciLabel = document.getElementById('scientific-option-label');
+
+            if (state.requireScientific) {
+                if (btnQcm) {
+                    btnQcm.disabled = true;
+                    btnQcm.classList.add('opacity-40', 'cursor-not-allowed');
+                }
+            } else {
+                if (btnQcm) {
+                    btnQcm.disabled = false;
+                    btnQcm.classList.remove('opacity-40', 'cursor-not-allowed');
+                }
+            }
+
+            if (state.mode === 'qcm') {
+                if (sciToggle) {
+                    sciToggle.checked = false;
+                    sciToggle.disabled = true;
+                }
+                state.requireScientific = false;
+                sciLabel?.classList.add('opacity-50', 'cursor-not-allowed');
+                sciLabel?.classList.remove('cursor-pointer', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+            } else {
+                if (sciToggle) {
+                    sciToggle.disabled = false;
+                }
+                sciLabel?.classList.remove('opacity-50', 'cursor-not-allowed');
+                sciLabel?.classList.add('cursor-pointer', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+            }
+        }
+
+        // Écouteur pour le changement de Mode (Saisie Libre vs QCM)
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', () => {
+                if (btn.disabled) return;
+
                 document.querySelectorAll('.mode-btn').forEach(b => {
                     b.classList.remove('border-indigo-500', 'bg-indigo-50/50', 'dark:bg-indigo-950/30', 'text-indigo-900', 'dark:text-indigo-200');
                     b.classList.add('border-slate-200', 'dark:border-slate-800');
@@ -940,15 +1135,31 @@
                 btn.classList.add('border-indigo-500', 'bg-indigo-50/50', 'dark:bg-indigo-950/30', 'text-indigo-900', 'dark:text-indigo-200');
 
                 state.mode = btn.dataset.mode;
+                updateModeAndScientificState();
                 renderQuestion();
             });
         });
 
+        // Écouteur pour la case à cocher "Écriture Scientifique"
+        document.getElementById('scientific-toggle')?.addEventListener('change', (e) => {
+            state.requireScientific = e.target.checked;
+            updateModeAndScientificState();
+        });
+
+        // Écouteurs de validation / saisie
         document.getElementById('submit-btn')?.addEventListener('click', () => checkAnswer());
 
         document.getElementById('user-answer')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 checkAnswer();
+            }
+        });
+
+        // Amélioration 3 : Navigation au clavier (Flèche Droite pour la question suivante)
+        document.addEventListener('keydown', (e) => {
+            const feedbackCard = document.getElementById('feedback-card');
+            if (e.key === 'ArrowRight' && feedbackCard && !feedbackCard.classList.contains('hidden')) {
+                generateQuestion();
             }
         });
 
@@ -987,6 +1198,7 @@
 
         window.onload = function() {
             generateQuestion();
+            updateModeAndScientificState();
         };
     </script>
 </body>

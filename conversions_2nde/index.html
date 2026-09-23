@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Conversions - Physique-Chimie 2nde</title>
+    <title>Conversions - Physique-Chimie Seconde</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome icons -->
@@ -67,6 +67,13 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(100, 116, 139, 0.5);
         }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.25s ease-out forwards;
+        }
     </style>
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-full flex flex-col font-sans transition-colors duration-200">
@@ -79,9 +86,9 @@
                 </div>
                 <div>
                     <h1 class="font-extrabold text-lg sm:text-xl tracking-tight bg-gradient-to-r from-sky-600 to-indigo-600 dark:from-sky-400 dark:to-indigo-400 bg-clip-text text-transparent">
-                        Physique-Chimie <span class="text-xs px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 font-bold border border-sky-300 dark:border-sky-800 uppercase tracking-wide">Seconde</span>
+                        Physique-Chimie <span class="text-xs px-2 py-0.5 rounded-full bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 font-bold border border-sky-300 dark:border-sky-800 uppercase tracking-wide">Classe de Seconde</span>
                     </h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Entraînement et perfectionnement aux conversions des multiples & sous-multiples</p>
+                    <p class="text-sm text-slate-500 dark:text-slate-400 font-medium">Entraînement et perfectionnement aux conversions des multiples & sous-multiples</p>
                 </div>
             </div>
 
@@ -95,146 +102,6 @@
     </header>
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-
-        <!-- Fiche Mémo & Rappel de Cours -->
-        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-all">
-            <button id="toggle-memo-btn" class="w-full px-6 py-4 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left">
-                <div class="flex items-center space-x-3">
-                    <div class="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                        <i class="fa-solid fa-lightbulb text-lg"></i>
-                    </div>
-                    <div>
-                        <h2 class="font-bold text-slate-900 dark:text-slate-100">Fiche Mémo & Rappel de Cours</h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Cliquez pour afficher/masquer la table des préfixes et la méthode de calcul (de Téra à Pico)</p>
-                    </div>
-                </div>
-                <i id="memo-chevron" class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"></i>
-            </button>
-
-            <div id="memo-content" class="hidden border-t border-slate-200 dark:border-slate-800 p-6 space-y-6">
-                <!-- Tableau des préfixes -->
-                <div>
-                    <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center">
-                        <i class="fa-solid fa-table-list mr-2 text-sky-500"></i> Table des Préfixes Scientifiques (10<sup>-12</sup> à 10<sup>12</sup>)
-                    </h3>
-                    <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
-                        <table class="w-full text-sm text-left">
-                            <thead class="bg-slate-100 dark:bg-slate-800 text-xs uppercase font-bold text-slate-600 dark:text-slate-300">
-                                <tr>
-                                    <th class="px-4 py-3">Préfixe</th>
-                                    <th class="px-4 py-3">Symbole</th>
-                                    <th class="px-4 py-3">Facteur (10<sup>n</sup>)</th>
-                                    <th class="px-4 py-3">Nom / Multiplicateur</th>
-                                    <th class="px-4 py-3">Exemple concret STI2D / Quotidien</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
-                                <tr class="bg-emerald-50/40 dark:bg-emerald-950/20">
-                                    <td class="px-4 py-2.5 font-bold text-emerald-700 dark:text-emerald-300">Téra</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">T</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>12</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 000 000 000 000 (Mille milliards)</td>
-                                    <td class="px-4 py-2.5 text-xs">Consommation électrique annuelle d'un pays (TWh)</td>
-                                </tr>
-                                <tr class="bg-emerald-50/30 dark:bg-emerald-950/10">
-                                    <td class="px-4 py-2.5 font-bold text-emerald-600 dark:text-emerald-400">Giga</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">G</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>9</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 000 000 000 (Milliard)</td>
-                                    <td class="px-4 py-2.5 text-xs">Fréquence processeur smartphone (GHz), Capacité SSD (GB)</td>
-                                </tr>
-                                <tr class="bg-emerald-50/20 dark:bg-emerald-950/5">
-                                    <td class="px-4 py-2.5 font-bold text-emerald-600 dark:text-emerald-400">Méga</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">M</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>6</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 000 000 (Million)</td>
-                                    <td class="px-4 py-2.5 text-xs">Puissance éolienne (MW), Fichiers photo lourds (MB)</td>
-                                </tr>
-                                <tr class="bg-emerald-50/10 dark:bg-emerald-950/0">
-                                    <td class="px-4 py-2.5 font-bold text-emerald-600 dark:text-emerald-400">Kilo</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">k</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>3</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 000 (Mille)</td>
-                                    <td class="px-4 py-2.5 text-xs">Masse d'un paquet de farine (kg), Distance routière (km)</td>
-                                </tr>
-                                <tr class="bg-slate-100/80 dark:bg-slate-800/80 font-semibold border-y-2 border-sky-500">
-                                    <td class="px-4 py-2.5 text-sky-600 dark:text-sky-400">Unité de Base</td>
-                                    <td class="px-4 py-2.5 font-mono">-</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>0</sup> = 1</td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 (Unité)</td>
-                                    <td class="px-4 py-2.5 text-xs">Volt (V), Ampère (A), Watt (W), Joule (J), Hertz (Hz), Ohm (Ω), Pascal (Pa), Mètre (m), Gramme (g), Seconde (s)</td>
-                                </tr>
-                                <tr class="bg-rose-50/10 dark:bg-rose-950/0">
-                                    <td class="px-4 py-2.5 font-bold text-rose-600 dark:text-rose-400">Milli</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">m</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>-3</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">0,001 (Millième)</td>
-                                    <td class="px-4 py-2.5 text-xs">Taille d'une pastille de médicament (mg), Courant LED (mA)</td>
-                                </tr>
-                                <tr class="bg-rose-50/20 dark:bg-rose-950/5">
-                                    <td class="px-4 py-2.5 font-bold text-rose-600 dark:text-rose-400">Micro</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">μ</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>-6</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">0,000 001 (Millionième)</td>
-                                    <td class="px-4 py-2.5 text-xs">Épaisseur d'un cheveu humain (μm), Temps de réponse (μs)</td>
-                                </tr>
-                                <tr class="bg-rose-50/30 dark:bg-rose-950/10">
-                                    <td class="px-4 py-2.5 font-bold text-rose-600 dark:text-rose-400">Nano</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">n</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>-9</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">0,000 000 001 (Milliardième)</td>
-                                    <td class="px-4 py-2.5 text-xs">Longueur d'onde lumière visible (nm), Période horloge (ns)</td>
-                                </tr>
-                                <tr class="bg-rose-50/40 dark:bg-rose-950/20">
-                                    <td class="px-4 py-2.5 font-bold text-rose-700 dark:text-rose-300">Pico</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">p</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>-12</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">0,000 000 000 001 (Millionième de milliardième)</td>
-                                    <td class="px-4 py-2.5 text-xs">Masse d'une micro-particule MEMS (pg), Horloges atomiques</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-				
-                <!-- Méthode de Calcul -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
-                    <div class="p-4 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/50">
-                        <h4 class="font-bold text-sky-800 dark:text-sky-300 mb-2 flex items-center">
-                            <i class="fa-solid fa-calculator mr-2"></i> Méthode générale de conversion (A &rarr; B)
-                        </h4>
-                        <p class="mb-2 text-slate-600 dark:text-slate-300">
-                            Pour convertir une valeur exprimée de l'unité A (10<sup>n<sub>A</sub></sup>) vers l'unité B (10<sup>n<sub>B</sub></sup>) :
-                        </p>
-                        <div class="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-sky-300 dark:border-sky-700 font-mono text-center text-sky-600 dark:text-sky-400 font-bold mb-2">
-                            Facteur = 10<sup>(puissance départ - puissance arrivée)</sup>
-                        </div>
-                        <p class="text-slate-600 dark:text-slate-300">
-                            <strong>Exemple :</strong> Convertir 4,5 kW en MW.<br>
-                            • Départ (kilo) : 10<sup>3</sup><br>
-                            • Arrivée (Méga) : 10<sup>6</sup><br>
-                            • Calcul : 10<sup>3 - 6</sup> = 10<sup>-3</sup> &rarr; 4,5 kW = 0,0045 MW.
-                        </p>
-                    </div>
-
-                    <div class="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/50">
-                        <h4 class="font-bold text-indigo-800 dark:text-indigo-300 mb-2 flex items-center">
-                            <i class="fa-solid fa-square-root-variable mr-2"></i> Notation Scientifique Normée
-                        </h4>
-                        <p class="mb-2 text-slate-600 dark:text-slate-300">
-                            Une valeur est en écriture scientifique si elle s'écrit sous la forme :
-                        </p>
-                        <div class="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-indigo-300 dark:border-indigo-700 font-mono text-center text-indigo-600 dark:text-indigo-400 font-bold mb-2">
-                            a &times; 10<sup>n</sup> (avec 1 &le; |a| &lt; 10)
-                        </div>
-                        <p class="text-slate-600 dark:text-slate-300">
-                            • <strong>Correct :</strong> 3,2 &times; 10<sup>-4</sup> ou 5,0 &times; 10<sup>6</sup><br>
-                            • <strong>Saisie autorisée :</strong> <code class="bg-slate-200 dark:bg-slate-800 px-1 rounded">3.2e-4</code> ou <code class="bg-slate-200 dark:bg-slate-800 px-1 rounded">3,2x10^-4</code>.
-                        </p>
-                    </div>
-                </div>				
-            </div>
-        </section>
 
         <!-- Configuration de l'Exercice -->
         <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
@@ -251,7 +118,7 @@
                                 <span class="font-bold text-sm">Niveau 1</span>
                                 <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">Facile</span>
                             </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Uniquement vers l'unité de base (ex: 5,2 kV &rarr; 5200 V, 450 mA &rarr; 0,45 A)</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Uniquement vers l'unité de base (ex: 3,5 kHz &rarr; 3500 Hz, 250 mg &rarr; 0,25 g)</p>
                         </button>
 
                         <button data-level="2" class="level-btn relative p-3.5 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700">
@@ -259,7 +126,7 @@
                                 <span class="font-bold text-sm">Niveau 2</span>
                                 <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold">Moyen</span>
                             </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Entre préfixes avec saut modéré (ex: mA &rarr; kA, MHz &rarr; GHz)</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Entre préfixes usuels (ex: mg &rarr; kg, nm &rarr; µm, kHz &rarr; MHz)</p>
                         </button>
 
                         <button data-level="3" class="level-btn relative p-3.5 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700">
@@ -267,27 +134,40 @@
                                 <span class="font-bold text-sm">Niveau 3</span>
                                 <span class="text-xs px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold">Avancé</span>
                             </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Toutes conversions (téra à pico, sauts amples de 10<sup>12</sup>)</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">Toutes conversions (échelle atomique au giga, sauts amples de 10<sup>12</sup>)</p>
                         </button>
                     </div>
                 </div>
 
-                <!-- Choix du Mode -->
+                <!-- Choix du Mode & Options -->
                 <div class="w-full lg:w-80 space-y-3">
                     <label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center">
                         <i class="fa-solid fa-gamepad mr-2 text-indigo-500"></i> 2. Mode d'exercice
                     </label>
                     <div class="grid grid-cols-2 gap-3">
-                        <button data-mode="free" class="mode-btn p-3.5 rounded-xl border-2 text-center transition-all duration-200 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-900 dark:text-indigo-200">
+                        <button data-mode="free" id="btn-mode-free" class="mode-btn p-3.5 rounded-xl border-2 text-center transition-all duration-200 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-900 dark:text-indigo-200">
                             <i class="fa-solid fa-keyboard mb-1 text-lg block"></i>
                             <span class="font-bold text-xs">Saisie Libre</span>
                         </button>
-                        <button data-mode="qcm" class="mode-btn p-3.5 rounded-xl border-2 text-center transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700">
+                        <button data-mode="qcm" id="btn-mode-qcm" class="mode-btn p-3.5 rounded-xl border-2 text-center transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700">
                             <i class="fa-solid fa-list-check mb-1 text-lg block"></i>
                             <span class="font-bold text-xs">Mode QCM</span>
                         </button>
                     </div>
+
+                    <!-- Option Écriture Scientifique -->
+                    <div id="scientific-option-wrapper" class="pt-2">
+                        <label for="scientific-toggle" id="scientific-option-label" class="flex items-center cursor-pointer space-x-3 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                            <input type="checkbox" id="scientific-toggle" class="sr-only peer">
+                            <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-sky-600 peer-disabled:opacity-50 relative"></div>
+                            <div class="flex-1">
+                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block peer-disabled:text-slate-400">Exiger l'écriture scientifique</span>
+                                <span class="text-[10px] text-slate-500 dark:text-slate-400 block leading-tight">Format : <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-sky-600 dark:text-sky-300 font-mono">a&times;10^n</code> avec <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-sky-600 dark:text-sky-300 font-mono">1&le;|a|&lt;10</code></span>
+                            </div>
+                        </label>
+                    </div>
                 </div>
+                
             </div>
 
             <!-- Dashboard Statistiques -->
@@ -352,13 +232,13 @@
                 <span id="grandeur-badge" class="px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 font-semibold text-xs border border-sky-300 dark:border-sky-800">
                     Grandeur : Chargement...
                 </span>
-                <button id="hint-btn" class="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium flex items-center space-x-1.5 bg-amber-50 dark:bg-amber-950/40 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-800/50 transition-colors">
+                <button id="hint-btn" class="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium flex items-center space-x-1.5 bg-amber-50 dark:bg-amber-950/40 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-800/50 transition-all hover:scale-105 active:scale-95">
                     <i class="fa-solid fa-lightbulb"></i>
                     <span>Besoin d'un indice ?</span>
                 </button>
             </div>
 
-            <!-- Contexte STI2D / Quotidien -->
+            <!-- Contexte Seconde / Quotidien -->
             <p id="question-context" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 italic">
                 Contexte : ...
             </p>
@@ -409,7 +289,7 @@
             </div>
 
             <!-- Boîte d'indice -->
-            <div id="hint-box" class="hidden p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs sm:text-sm text-amber-900 dark:text-amber-200 space-y-1">
+            <div id="hint-box" class="hidden p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/50 text-xs sm:text-sm text-amber-900 dark:text-amber-200 space-y-1 animate-fade-in">
                 <div class="font-bold flex items-center space-x-2">
                     <i class="fa-solid fa-lightbulb text-amber-500"></i>
                     <span>Indice de méthode :</span>
@@ -418,11 +298,14 @@
             </div>
 
             <!-- Carte de feedback -->
-            <div id="feedback-card" class="hidden p-5 rounded-xl border space-y-4 transition-all">
+            <div id="feedback-card" class="hidden p-5 rounded-xl border space-y-4 transition-all duration-300 animate-fade-in">
                 <div id="feedback-header" class="flex items-center space-x-3 font-bold text-lg"></div>
                 <div id="feedback-explanation" class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 space-y-2 leading-relaxed"></div>
-                <div class="pt-2 flex justify-end">
-                    <button id="next-btn" class="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center space-x-2">
+                <div class="pt-2 flex justify-between items-center">
+                    <span class="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline flex items-center">
+                        <i class="fa-solid fa-keyboard mr-1.5"></i> Astuce : Touche <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">&rarr;</kbd> pour question suivante
+                    </span>
+                    <button id="next-btn" class="px-5 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-white text-white dark:text-slate-900 font-bold text-xs sm:text-sm shadow-sm transition-all flex items-center space-x-2 hover:scale-105 active:scale-95 ml-auto">
                         <span>Question suivante</span>
                         <i class="fa-solid fa-arrow-right"></i>
                     </button>
@@ -461,11 +344,151 @@
             </div>
         </section>
 
+        <!-- Fiche Mémo & Rappel de Cours -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden transition-all">
+            <button id="toggle-memo-btn" class="w-full px-6 py-4 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <i class="fa-solid fa-lightbulb text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-900 dark:text-slate-100">Fiche Mémo & Rappel de Cours</h2>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Cliquez pour afficher/masquer la table des préfixes et la méthode de calcul (de Téra à Pico)</p>
+                    </div>
+                </div>
+                <i id="memo-chevron" class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"></i>
+            </button>
+
+            <div id="memo-content" class="hidden border-t border-slate-200 dark:border-slate-800 p-6 space-y-6">
+                <!-- Tableau des préfixes -->
+                <div>
+                    <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center">
+                        <i class="fa-solid fa-table-list mr-2 text-sky-500"></i> Table des Préfixes Scientifiques (10<sup>-12</sup> à 10<sup>12</sup>)
+                    </h3>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-100 dark:bg-slate-800 text-xs uppercase font-bold text-slate-600 dark:text-slate-300">
+                                <tr>
+                                    <th class="px-4 py-3">Préfixe</th>
+                                    <th class="px-4 py-3">Symbole</th>
+                                    <th class="px-4 py-3">Facteur (10<sup>n</sup>)</th>
+                                    <th class="px-4 py-3">Nom / Multiplicateur</th>
+                                    <th class="px-4 py-3">Exemples concréts du programme de Seconde</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                                <tr class="bg-emerald-50/40 dark:bg-emerald-950/20">
+                                    <td class="px-4 py-2.5 font-bold text-emerald-700 dark:text-emerald-300">Téra</td>
+                                    <td class="px-4 py-2.5 font-mono font-bold">T</td>
+                                    <td class="px-4 py-2.5 font-mono">10<sup>12</sup></td>
+                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 000 000 000 000 (Mille milliards)</td>
+                                    <td class="px-4 py-2.5 text-xs">Fréquence des ondes lumineuses (THz)</td>
+                                </tr>
+                                <tr class="bg-emerald-50/30 dark:bg-emerald-950/10">
+                                    <td class="px-4 py-2.5 font-bold text-emerald-600 dark:text-emerald-400">Giga</td>
+                                    <td class="px-4 py-2.5 font-mono font-bold">G</td>
+                                    <td class="px-4 py-2.5 font-mono">10<sup>9</sup></td>
+                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 000 000 000 (Milliard)</td>
+                                    <td class="px-4 py-2.5 text-xs">Fréquence du signal Wi-Fi ou 4G/5G (GHz)</td>
+                                </tr>
+                                <tr class="bg-emerald-50/20 dark:bg-emerald-950/5">
+                                    <td class="px-4 py-2.5 font-bold text-emerald-600 dark:text-emerald-400">Méga</td>
+                                    <td class="px-4 py-2.5 font-mono font-bold">M</td>
+                                    <td class="px-4 py-2.5 font-mono">10<sup>6</sup></td>
+                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 000 000 (Million)</td>
+                                    <td class="px-4 py-2.5 text-xs">Fréquence d'un signal d'échographie (MHz), Pression au centre de la Terre (MPa)</td>
+                                </tr>
+                                <tr class="bg-emerald-50/10 dark:bg-emerald-950/0">
+                                    <td class="px-4 py-2.5 font-bold text-emerald-600 dark:text-emerald-400">Kilo</td>
+                                    <td class="px-4 py-2.5 font-mono font-bold">k</td>
+                                    <td class="px-4 py-2.5 font-mono">10<sup>3</sup></td>
+                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 000 (Mille)</td>
+                                    <td class="px-4 py-2.5 text-xs">Fréquence d'un son aigu (kHz), Masse d'un élève (kg), Distance de course (km)</td>
+                                </tr>
+                                <tr class="bg-slate-100/80 dark:bg-slate-800/80 font-semibold border-y-2 border-sky-500">
+                                    <td class="px-4 py-2.5 text-sky-600 dark:text-sky-400">Unité de Base</td>
+                                    <td class="px-4 py-2.5 font-mono">-</td>
+                                    <td class="px-4 py-2.5 font-mono">10<sup>0</sup> = 1</td>
+                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 (Unité)</td>
+                                    <td class="px-4 py-2.5 text-xs">Mètre (m), Gramme (g), Seconde (s), Hertz (Hz), Pascal (Pa), Volt (V), Ampère (A), Joule (J), Liter (L)</td>
+                                </tr>
+                                <tr class="bg-rose-50/10 dark:bg-rose-950/0">
+                                    <td class="px-4 py-2.5 font-bold text-rose-600 dark:text-rose-400">Milli</td>
+                                    <td class="px-4 py-2.5 font-mono font-bold">m</td>
+                                    <td class="px-4 py-2.5 font-mono">10<sup>-3</sup></td>
+                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">0,001 (Millième)</td>
+                                    <td class="px-4 py-2.5 text-xs">Dosage de principe actif d'un médicament (mg), Volume d'une éprouvette (mL)</td>
+                                </tr>
+                                <tr class="bg-rose-50/20 dark:bg-rose-950/5">
+                                    <td class="px-4 py-2.5 font-bold text-rose-600 dark:text-rose-400">Micro</td>
+                                    <td class="px-4 py-2.5 font-mono font-bold">μ</td>
+                                    <td class="px-4 py-2.5 font-mono">10<sup>-6</sup></td>
+                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">0,000 001 (Millionième)</td>
+                                    <td class="px-4 py-2.5 text-xs">Taille d'une cellule humaine (µm), Durée d'un flash (µs)</td>
+                                </tr>
+                                <tr class="bg-rose-50/30 dark:bg-rose-950/10">
+                                    <td class="px-4 py-2.5 font-bold text-rose-600 dark:text-rose-400">Nano</td>
+                                    <td class="px-4 py-2.5 font-mono font-bold">n</td>
+                                    <td class="px-4 py-2.5 font-mono">10<sup>-9</sup></td>
+                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">0,000 000 001 (Milliardième)</td>
+                                    <td class="px-4 py-2.5 text-xs">Longueur d'onde de la lumière visible (nm), Taille d'un virus (nm)</td>
+                                </tr>
+                                <tr class="bg-rose-50/40 dark:bg-rose-950/20">
+                                    <td class="px-4 py-2.5 font-bold text-rose-700 dark:text-rose-300">Pico</td>
+                                    <td class="px-4 py-2.5 font-mono font-bold">p</td>
+                                    <td class="px-4 py-2.5 font-mono">10<sup>-12</sup></td>
+                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">0,000 000 000 001 (Millionième de milliardième)</td>
+                                    <td class="px-4 py-2.5 text-xs">Rayon d'un atome d'hydrogène ou d'un noyau (pm)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+				
+                <!-- Méthode de Calcul -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
+                    <div class="p-4 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/50">
+                        <h4 class="font-bold text-sky-800 dark:text-sky-300 mb-2 flex items-center">
+                            <i class="fa-solid fa-calculator mr-2"></i> Méthode générale de conversion (A &rarr; B)
+                        </h4>
+                        <p class="mb-2 text-slate-600 dark:text-slate-300">
+                            Pour convertir une valeur exprimée de l'unité A (10<sup>n<sub>A</sub></sup>) vers l'unité B (10<sup>n<sub>B</sub></sup>) :
+                        </p>
+                        <div class="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-sky-300 dark:border-sky-700 font-mono text-center text-sky-600 dark:text-sky-400 font-bold mb-2">
+                            Facteur = 10<sup>(puissance départ - puissance arrivée)</sup>
+                        </div>
+                        <p class="text-slate-600 dark:text-slate-300">
+                            <strong>Exemple :</strong> Convertir 500 nm (lumière verte) en µm.<br>
+                            • Départ (nano) : 10<sup>-9</sup><br>
+                            • Arrivée (micro) : 10<sup>-6</sup><br>
+                            • Calcul : 10<sup>-9 - (-6)</sup> = 10<sup>-3</sup> &rarr; 500 nm = 0,5 µm.
+                        </p>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/50">
+                        <h4 class="font-bold text-indigo-800 dark:text-indigo-300 mb-2 flex items-center">
+                            <i class="fa-solid fa-square-root-variable mr-2"></i> Notation Scientifique Normée
+                        </h4>
+                        <p class="mb-2 text-slate-600 dark:text-slate-300">
+                            Une valeur est en écriture scientifique si elle s'écrit sous la forme :
+                        </p>
+                        <div class="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-indigo-300 dark:border-indigo-700 font-mono text-center text-indigo-600 dark:text-indigo-400 font-bold mb-2">
+                            a &times; 10<sup>n</sup> (avec 1 &le; |a| &lt; 10)
+                        </div>
+                        <p class="text-slate-600 dark:text-slate-300">
+                            • <strong>Correct :</strong> 3,2 &times; 10<sup>-4</sup> ou 5,0 &times; 10<sup>6</sup><br>
+                            • <strong>Saisie autorisée :</strong> <code class="bg-slate-200 dark:bg-slate-800 px-1 rounded">3.2e-4</code> ou <code class="bg-slate-200 dark:bg-slate-800 px-1 rounded">3,2x10^-4</code>.
+                        </p>
+                    </div>
+                </div>				
+            </div>
+        </section>
+
     </main>
 
     <footer class="mt-auto py-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
-        <p>Physique-Chimie • Classe de seconde </p>
-        <p class="mt-1">Conçu avec l'aide de l'IA d'après les idées et les instructions de F.CERONI</p>
+        <p>Physique-Chimie • Classe de Seconde</p>
+        <p class="mt-1">Conçu avec l'aide de l'IA d'après les idées et les instructions de F.CERONI (v1.6)</p>
     </footer>
 
     <!-- JavaScript Logic -->
@@ -484,103 +507,118 @@
 
         const units = [
             {
-                name: 'Tension Électrique', unitName: 'Volt', symbol: 'V',
-                contexts: [
-                    { text: "Tension en sortie d'un transformateur industriel", startPrefixes: ['k', ''], values: [220, 380, 400, 15] },
-                    { text: "Signal fourni par un capteur de température analogique", startPrefixes: ['m', 'μ'], values: [2.5, 10, 50, 450] },
-                    { text: "Tension d'alimentation d'un microcontrôleur basse consommation", startPrefixes: ['', 'm'], values: [1.8, 2.5, 3.3, 5] },
-                    { text: "Tension secteur domestique standard en France", startPrefixes: [''], values: [230] },
-                    { text: "Tension aux bornes de la batterie déchargée d'un smartphone", startPrefixes: ['m', ''], values: [3400, 3.7] }
-                ]
-            },
-            {
-                name: 'Courant Électrique', unitName: 'Ampère', symbol: 'A',
-                contexts: [
-                    { text: "Courant absorbé par un moteur brushless de drone de loisir", startPrefixes: ['', 'm'], values: [2.5, 5.2, 12, 20] },
-                    { text: "Courant de fuite très faible d'un transistor de puissance bloqué", startPrefixes: ['μ', 'n'], values: [1.5, 12, 47, 150] },
-                    { text: "Courant nominal transitant dans une ligne de transport Haute Tension", startPrefixes: ['k', ''], values: [200, 380, 450, 1.2] },
-                    { text: "Courant traversant une lampe à incandescence domestique de salon", startPrefixes: ['', 'm'], values: [0.43, 260] },
-                    { text: "Courant de charge rapide USB d'une tablette tactile", startPrefixes: ['', 'm'], values: [2.1, 2100] }
-                ]
-            },
-            {
-                name: 'Puissance Électrique / Thermique', unitName: 'Watt', symbol: 'W',
-                contexts: [
-                    { text: "Puissance électrique injectée sur le réseau national par un parc éolien", startPrefixes: ['T', 'G', 'M'], values: [1.5, 3.2, 45, 120] },
-                    { text: "Consommation en veille d'un capteur connecté IoT domestique", startPrefixes: ['m', 'μ'], values: [0.15, 0.47, 1.2, 25] },
-                    { text: "Puissance restituée par un hacheur de puissance industriel", startPrefixes: ['k', ''], values: [120, 220, 3.3, 5.2] },
-                    { text: "Puissance nominale consommée par un radiateur soufflant domestique", startPrefixes: ['k', ''], values: [2, 2000] },
-                    { text: "Puissance lumineuse d'une petite veilleuse LED de chambre", startPrefixes: ['m', ''], values: [500, 0.5] }
-                ]
-            },
-            {
-                name: 'Énergie', unitName: 'Joule', symbol: 'J',
-                contexts: [
-                    { text: "Énergie électrique consommée annuellement par un département français", startPrefixes: ['T', 'G'], values: [1.2, 5.4, 12, 45] },
-                    { text: "Travail mécanique développé par un vérin pneumatique en atelier", startPrefixes: ['', 'k'], values: [12, 50, 120, 450] },
-                    { text: "Énergie perdue en veille par un téléviseur en une journée", startPrefixes: [''], values: [864, 4320] },
-                    { text: "Énergie cinétique d'une trottinette électrique lancée à pleine vitesse", startPrefixes: ['k', ''], values: [2.5, 4500] },
-                    { text: "Énergie chimique libérée par la combustion d'un petit morceau de sucre", startPrefixes: ['k', ''], values: [15, 15000] }
-                ]
-            },
-            {
-                name: 'Fréquence', unitName: 'Hertz', symbol: 'Hz',
-                contexts: [
-                    { text: "Fréquence de hachage de la commande MLI (PWM) d'un variateur", startPrefixes: ['k', ''], values: [1.2, 10, 20, 50] },
-                    { text: "Fréquence de l'horloge interne d'un microprocesseur moderne", startPrefixes: ['G', 'M'], values: [1.2, 2.4, 3.2, 16] },
-                    { text: "Fréquence de la porteuse d'un module radio de communication sans fil", startPrefixes: ['M', 'k'], values: [433, 868, 915, 250] },
-                    { text: "Fréquence du réseau électrique alternatif domestique en Europe", startPrefixes: [''], values: [50] },
-                    { text: "Fréquence d'une note de musique standard (le La 3 du diapason)", startPrefixes: [''], values: [440] }
-                ]
-            },
-            {
-                name: 'Résistance Électrique', unitName: 'Ohm', symbol: 'Ω',
-                contexts: [
-                    { text: "Résistance d'isolement très élevée d'un câble blindé industriel", startPrefixes: ['G', 'M'], values: [10, 50, 100, 500] },
-                    { text: "Résistance de tirage (pull-up) montée sur un bus I2C de microcontrôleur", startPrefixes: ['k', ''], values: [2.2, 4.7, 10, 22] },
-                    { text: "Résistance équivalente d'un élément chauffant de four industriel", startPrefixes: ['', 'm'], values: [12, 24, 47, 100] },
-                    { text: "Résistance électrique moyenne de la peau humaine sèche", startPrefixes: ['k'], values: [10, 50, 100] },
-                    { text: "Résistance interne mesurée aux bornes d'un haut-parleur audio", startPrefixes: [''], values: [4, 8, 16] }
-                ]
-            },
-            {
-                name: 'Pression', unitName: 'Pascal', symbol: 'Pa',
-                contexts: [
-                    { text: "Pression de service mesurée dans le circuit pneumatique d'un robot", startPrefixes: ['k', 'M'], values: [100, 300, 600, 1.2] },
-                    { text: "Pression acoustique subtile captée par un microphone d'analyse", startPrefixes: ['m', 'μ', ''], values: [0.02, 2, 20, 100] },
-                    { text: "Pression atmosphérique relative relevée par une station météo", startPrefixes: ['k', ''], values: [101.3, 98, 102.5, 100] },
-                    { text: "Pression des pneus d'une automobile familiale avant un long trajet", startPrefixes: ['k'], values: [220, 250, 280] },
-                    { text: "Pression exercée par l'eau au fond d'une piscine municipale de 3m", startPrefixes: ['k'], values: [30, 300] }
-                ]
-            },
-            {
                 name: 'Longueur', unitName: 'Mètre', symbol: 'm',
                 contexts: [
-                    { text: "Épaisseur nanométrique de la grille de gravure d'un semi-conducteur", startPrefixes: ['n', 'μ'], values: [7, 14, 22, 45] },
-                    { text: "Altitude de vol de précision mesurée par l'altimètre d'un drone", startPrefixes: ['', 'm'], values: [1.2, 15, 50, 120] },
-                    { text: "Portée maximale de détection d'un capteur télémètre à ultrasons", startPrefixes: ['m', ''], values: [20, 150, 300, 4.5] },
-                    { text: "Taille moyenne d'un grain de pollen transporté par le vent", startPrefixes: ['μ', 'm'], values: [20, 0.02] },
-                    { text: "Longueur d'une piscine olympique standard de compétition", startPrefixes: [''], values: [50] }
+                    { text: "Rayon atomique moyen de l'atome d'hydrogène", startPrefixes: ['p'], values: [25, 30, 53, 100] },
+                    { text: "Longueur d'onde de la lumière verte émise par un laser de TP", startPrefixes: ['n'], values: [520, 532, 550] },
+                    { text: "Longueur d'onde d'un rayonnement infrarouge en imagerie médicale", startPrefixes: ['μ'], values: [0.8, 1.5, 10] },
+                    { text: "Taille moyenne d'un virus comme celui de la grippe", startPrefixes: ['n'], values: [80, 100, 120] },
+                    { text: "Taille moyenne d'une cellule de muqueuse buccale observée au microscope", startPrefixes: ['μ'], values: [15, 30, 50] },
+                    { text: "Épaisseur moyenne d'un cheveu humain observé en cours de physique", startPrefixes: ['μ'], values: [50, 70, 100] },
+                    { text: "Taille moyenne d'une gouttelette d'eau dans un brouillard léger", startPrefixes: ['μ'], values: [10, 20, 40] },
+                    { text: "Distance parcourue par un sprinteur lors de l'épreuve du 100 mètres", startPrefixes: [''], values: [100] },
+                    { text: "Longueur de la piste d'un stade d'athlétisme olympique", startPrefixes: ['m'], values: [400] },
+                    { text: "Altitude du sommet du Mont Blanc", startPrefixes: ['k'], values: [4.81] },
+                    { text: "Distance d'une course de marathon en athlétisme", startPrefixes: ['k'], values: [42.195] }
                 ]
             },
             {
                 name: 'Masse', unitName: 'Gramme', symbol: 'g',
                 contexts: [
-                    { text: "Masse totale du bloc-batterie d'un drone d'inspection légère", startPrefixes: ['k', ''], values: [150, 250, 450, 1.2] },
-                    { text: "Charge utile maximale supportée par le préhenseur d'un robot", startPrefixes: ['k', ''], values: [0.5, 1.5, 2.5, 500] },
-                    { text: "Masse unitaire d'une puce ou d'un micro-capteur MEMS silicium", startPrefixes: ['m', 'μ', 'p'], values: [1.5, 15, 250, 500] },
-                    { text: "Masse d'une tablette de chocolat achetée en grande surface", startPrefixes: [''], values: [100, 200, 250] },
-                    { text: "Masse d'un trombone de bureau métallique standard", startPrefixes: [''], values: [1, 2] }
+                    { text: "Masse d'un comprimé d'aspirine ou de paracétamol pédiatrique", startPrefixes: ['m'], values: [100, 250, 500] },
+                    { text: "Masse du principe actif dans une gélule d'un traitement médical", startPrefixes: ['m'], values: [10, 25, 50] },
+                    { text: "Masse d'un grain de sel de table prélevé pour une expérience", startPrefixes: ['m'], values: [0.5, 1.0, 2.0] },
+                    { text: "Masse prélevée lors d'un titrage au TP de chimie", startPrefixes: [''], values: [0.25, 0.50, 1.20, 2.50] },
+                    { text: "Masse d'un ballon de football officiel", startPrefixes: [''], values: [410, 430, 450] },
+                    { text: "Masse d'une pomme consommée au petit-déjeuner", startPrefixes: [''], values: [120, 150, 180] },
+                    { text: "Masse d'un élève de seconde mesurée en cours d'EPS", startPrefixes: ['k'], values: [52, 58, 64, 70] },
+                    { text: "Masse du sac à dos complet d'un lycéen", startPrefixes: ['k'], values: [6.5, 8.0, 9.5] },
+                    { text: "Masse de dioxyde de carbone rejetée par un véhicule sur 1 km", startPrefixes: [''], values: [95, 110, 130] }
+                ]
+            },
+            {
+                name: 'Fréquence', unitName: 'Hertz', symbol: 'Hz',
+                contexts: [
+                    { text: "Fréquence des ultrasons utilisés pour une échographie médicale de santé", startPrefixes: ['M'], values: [2.5, 5.0, 7.5, 12] },
+                    { text: "Fréquence de la note 'La3' émise par un diapason en cours de musique", startPrefixes: [''], values: [440] },
+                    { text: "Fréquence limite audible la plus aiguë pour l'oreille d'un jeune humain", startPrefixes: ['k'], values: [16, 18, 20] },
+                    { text: "Fréquence des signaux radio électromagnétiques de la bande FM", startPrefixes: ['M'], values: [88, 96.5, 102.5, 107.9] },
+                    { text: "Fréquence d'un signal Wi-Fi domestique usuel", startPrefixes: ['G'], values: [2.4, 5.0] },
+                    { text: "Fréquence des ondes lumineuses émises par un laser rouge", startPrefixes: ['T'], values: [430, 470] },
+                    { text: "Fréquence des battements cardiaques d'un athlète au repos", startPrefixes: [''], values: [1.0, 1.2, 1.5] },
+                    { text: "Fréquence du réseau électrique alternatif délivré aux prises", startPrefixes: [''], values: [50] }
                 ]
             },
             {
                 name: 'Temps', unitName: 'Seconde', symbol: 's',
                 contexts: [
-                    { text: "Temps de réponse d'un relais électromécanique de sécurité", startPrefixes: ['m', 'μ'], values: [5, 10, 20, 50] },
-                    { text: "Période d'horloge interne d'un microprocesseur à très haute fréquence", startPrefixes: ['p', 'n', 'μ'], values: [0.5, 1, 5, 25] },
-                    { text: "Durée exacte de l'impulsion du signal de commande PWM d'un servomoteur", startPrefixes: ['m', 'μ'], values: [1, 1.5, 2, 500] },
-                    { text: "Temps de réaction moyen d'un conducteur humain au volant face au danger", startPrefixes: [''], values: [0.75, 1, 1.2] },
-                    { text: "Durée d'un battement de cœur humain au repos complet", startPrefixes: [''], values: [0.8, 1] }
+                    { text: "Période d'une onde sonore aiguë audible en TP de physique", startPrefixes: ['m'], values: [0.5, 1.0, 2.0] },
+                    { text: "Durée d'un flash d'appareil photo pour figer un mouvement sportif", startPrefixes: ['μ'], values: [100, 250, 500] },
+                    { text: "Temps de réaction moyen d'un cycliste attentif", startPrefixes: [''], values: [0.7, 0.8, 1.0] },
+                    { text: "Durée d'une impulsion d'un signal d'échographie médicale", startPrefixes: ['μ'], values: [1.5, 3.0, 5.0] },
+                    { text: "Période de rotation de la Terre sur elle-même (exprimée en s)", startPrefixes: ['k'], values: [86.4] },
+                    { text: "Temps mis par la lumière du Soleil pour atteindre la Terre", startPrefixes: [''], values: [500] },
+                    { text: "Durée d'une séance d'entraînement sportif de 45 minutes", startPrefixes: [''], values: [2700] }
+                ]
+            },
+            {
+                name: 'Pression', unitName: 'Pascal', symbol: 'Pa',
+                contexts: [
+                    { text: "Pression atmosphérique normale au niveau de la mer", startPrefixes: ['k'], values: [101.3] },
+                    { text: "Pression atmosphérique normale au niveau de la mer", startPrefixes: [''], values: [101300] },
+                    { text: "Pression maximale mesurée lors de la systole cardiaque (tension artérielle)", startPrefixes: ['k'], values: [16, 18, 20] },
+                    { text: "Pression du gaz piégé dans un ballon de basket bien gonflé", startPrefixes: ['k'], values: [150, 180, 200] },
+                    { text: "Pression de gonflage recommandée pour un pneu de vélo de course", startPrefixes: ['k'], values: [600, 700, 800] },
+                    { text: "Pression sous l'eau à 10 mètres de profondeur en plongée sous-marine", startPrefixes: ['k'], values: [200] }
+                ]
+            },
+            {
+                name: 'Énergie', unitName: 'Joule', symbol: 'J',
+                contexts: [
+                    { text: "Énergie apportée par la digestion d'une barre de céréales pour le sport", startPrefixes: ['k'], values: [400, 600, 800] },
+                    { text: "Énergie cinétique d'un coureur de 60 kg sprintant à 20 km/h", startPrefixes: ['k'], values: [0.9, 1.2, 1.5] },
+                    { text: "Énergie cinétique d'une balle de tennis de table en plein échange", startPrefixes: [''], values: [0.1, 0.2, 0.3] },
+                    { text: "Énergie lumineuse reçue par un panneau solaire miniature de TP", startPrefixes: [''], values: [15, 30, 45] },
+                    { text: "Énergie consommée par une ampoule LED allumée pendant une heure", startPrefixes: ['k'], values: [36, 50, 72] }
+                ]
+            },
+            {
+                name: 'Puissance', unitName: 'Watt', symbol: 'W',
+                contexts: [
+                    { text: "Puissance développée par un cycliste lors d'un sprint intense", startPrefixes: [''], values: [300, 450, 600, 800] },
+                    { text: "Puissance lumineuse émise par un pointeur laser de cours", startPrefixes: ['m'], values: [1.0, 2.0, 5.0] },
+                    { text: "Puissance d'un émetteur de signal Bluetooth de téléphone", startPrefixes: ['m'], values: [2.5, 10, 100] },
+                    { text: "Puissance électrique d'une lampe de bureau pour réviser", startPrefixes: [''], values: [8, 12, 15] },
+                    { text: "Puissance sonore maximale émise par un haut-parleur d'enceinte portable", startPrefixes: [''], values: [10, 20, 50] }
+                ]
+            },
+            {
+                name: 'Tension Électrique', unitName: 'Volt', symbol: 'V',
+                contexts: [
+                    { text: "Tension mesurée lors d'un électrocardiogramme (ECG) du cœur", startPrefixes: ['m'], values: [1.0, 2.5, 5.0] },
+                    { text: "Tension mesurée lors d'un électroencéphalogramme (EEG) cérébral", startPrefixes: ['μ'], values: [10, 50, 100] },
+                    { text: "Tension aux bornes d'une pile ronde usuelle R6 / AA en TP", startPrefixes: [''], values: [1.5] },
+                    { text: "Tension de la batterie d'un smartphone récent", startPrefixes: [''], values: [3.8, 4.2] },
+                    { text: "Tension efficace délivrée par une prise du secteur domestique", startPrefixes: [''], values: [230] }
+                ]
+            },
+            {
+                name: 'Courant Électrique', unitName: 'Ampère', symbol: 'A',
+                contexts: [
+                    { text: "Intensité du courant traversant un nerf humain lors d'un influx nerveux", startPrefixes: ['μ'], values: [1, 5, 10] },
+                    { text: "Intensité du courant traversant une DEL (diode électroluminescente) en TP", startPrefixes: ['m'], values: [10, 15, 20] },
+                    { text: "Intensité du courant débité par un chargeur de smartphone en charge rapide", startPrefixes: [''], values: [2.0, 3.0] },
+                    { text: "Intensité du courant dans un radiateur électrique de chambre", startPrefixes: [''], values: [6.5, 8.7, 10] }
+                ]
+            },
+            {
+                name: 'Volume', unitName: 'Litre', symbol: 'L',
+                contexts: [
+                    { text: "Volume de sang total contenu dans le corps d'un adulte", startPrefixes: [''], values: [4.5, 5.0, 5.5] },
+                    { text: "Volume d'une goutte d'eau tombant d'une burette graduée au TP", startPrefixes: ['m'], values: [50] },
+                    { text: "Volume prélevé avec une pipette jaugée lors d'une solution fille", startPrefixes: ['m'], values: [10, 20, 25] },
+                    { text: "Volume d'une bouteille d'eau minérale pour la séance de sport", startPrefixes: [''], values: [0.5, 1.0, 1.5] },
+                    { text: "Volume d'air inspiré à chaque respiration au repos (volume courant)", startPrefixes: ['m'], values: [500] }
                 ]
             }
         ];
@@ -588,6 +626,7 @@
         const state = {
             level: 1,
             mode: 'free',
+            requireScientific: false,
             currentQuestion: null,
             stats: { correct: 0, streak: 0, total: 0 },
             history: []
@@ -758,7 +797,7 @@
 
             choices.forEach((choice, idx) => {
                 const btn = document.createElement('button');
-                btn.className = 'qcm-opt-btn p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 hover:border-sky-500 dark:hover:border-sky-400 bg-slate-50 dark:bg-slate-800/80 text-left font-mono text-sm sm:text-base font-bold transition-all flex items-center justify-between shadow-sm';
+                btn.className = 'qcm-opt-btn p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 hover:border-sky-500 dark:hover:border-sky-400 bg-slate-50 dark:bg-slate-800/80 text-left font-mono text-sm sm:text-base font-bold transition-all flex items-center justify-between shadow-sm hover:scale-[1.01] active:scale-[0.99]';
                 
                 const labelText = formatNumberFr(choice.val);
                 btn.innerHTML = `
@@ -783,13 +822,28 @@
             return parseFloat(clean);
         }
 
+        function isNormalizedScientificFormat(inputStr) {
+            if (!inputStr) return false;
+            let clean = inputStr.trim().toLowerCase().replace(',', '.').replace(/\s+/g, '');
+            
+            const regex = /^([+-]?\d+(?:\.\d+)?)(?:e|(?:x|\*|⋅)10\^?)([+-]?\d+)$/;
+            const match = clean.match(regex);
+            
+            if (!match) return false;
+            
+            const mantissa = parseFloat(match[1]);
+            const absMantissa = Math.abs(mantissa);
+            
+            return absMantissa >= 1 && absMantissa < 10;
+        }
+
         function checkAnswer(userVal) {
             const q = state.currentQuestion;
             if (!q) return;
-            let isCorrect = false;
 
+            let rawInput = '';
             if (state.mode === 'free') {
-                const rawInput = document.getElementById('user-answer')?.value;
+                rawInput = document.getElementById('user-answer')?.value || '';
                 userVal = parseUserAnswer(rawInput);
             }
 
@@ -799,9 +853,19 @@
             }
 
             const relativeError = Math.abs((userVal - q.convertedValue) / (q.convertedValue || 1));
-            if (relativeError < 0.005) {
-                isCorrect = true;
+            const isNumericallyCorrect = relativeError < 0.005;
+            
+            let isFormatCorrect = true;
+            let formatErrorMessage = "";
+
+            if (state.requireScientific && state.mode === 'free') {
+                isFormatCorrect = isNormalizedScientificFormat(rawInput);
+                if (!isFormatCorrect && isNumericallyCorrect) {
+                    formatErrorMessage = "La valeur numérique est exacte, mais elle n'est pas écrite sous forme scientifique normée $a \\times 10^n$ (avec $1 \\le \\vert{}a\\vert{} < 10$).";
+                }
             }
+
+            const isCorrect = isNumericallyCorrect && isFormatCorrect;
 
             state.stats.total++;
             if (isCorrect) {
@@ -811,21 +875,20 @@
                 state.stats.streak = 0;
                 
                 const rawFormattedWithUnit = `${formatNumberFr(q.rawValue)} ${q.startSymbol}`;
-                const expRawFormatted = q.deltaExp !== 0 ? ` (${formatNumberFr(q.rawValue)} &times; 10<sup>${q.deltaExp}</sup> ${q.endSymbol})` : '';
                 
                 state.history.unshift({
                     question: `${rawFormattedWithUnit} &rarr; ${q.endSymbol}`,
-                    userAnswer: isNaN(userVal) ? 'Invalide' : `${formatNumberFr(userVal)} ${q.endSymbol}`,
-                    expectedAnswer: `${formatNumberFr(q.convertedValue)} ${q.endSymbol}${expRawFormatted}`,
+                    userAnswer: isNaN(userVal) ? 'Invalide' : (rawInput || `${formatNumberFr(userVal)} ${q.endSymbol}`),
+                    expectedAnswer: formatScientificNotationHtml(q.convertedValue, q.endSymbol),
                     level: `Niveau ${state.level}`
                 });
             }
 
             updateStatsDisplay();
-            showFeedback(isCorrect, userVal);
+            showFeedback(isCorrect, userVal, formatErrorMessage);
         }
 
-        function showFeedback(isCorrect, userVal) {
+        function showFeedback(isCorrect, userVal, formatErrorMessage = "") {
             const q = state.currentQuestion;
             const feedbackCard = document.getElementById('feedback-card');
             const feedbackHeader = document.getElementById('feedback-header');
@@ -836,18 +899,9 @@
 
             feedbackCard.classList.remove('hidden', 'bg-emerald-50', 'bg-rose-50', 'dark:bg-emerald-950/40', 'dark:bg-rose-950/40', 'border-emerald-200', 'border-rose-200', 'dark:border-emerald-800', 'dark:border-rose-800');
 
-            if (isCorrect) {
-                feedbackCard.classList.add('bg-emerald-50', 'dark:bg-emerald-950/40', 'border-emerald-200', 'dark:border-emerald-800');
-                feedbackHeader.className = 'flex items-center space-x-3 font-bold text-lg text-emerald-700 dark:text-emerald-400';
-                feedbackHeader.innerHTML = `<i class="fa-solid fa-circle-check text-2xl"></i> <span>Bravo ! Réponse exacte.</span>`;
-            } else {
-                feedbackCard.classList.add('bg-rose-50', 'dark:bg-rose-950/40', 'border-rose-200', 'dark:border-rose-800');
-                feedbackHeader.className = 'flex items-center space-x-3 font-bold text-lg text-rose-700 dark:text-rose-400';
-                feedbackHeader.innerHTML = `<i class="fa-solid fa-circle-xmark text-2xl"></i> <span>Inexact. Voici la correction pas à pas :</span>`;
-            }
-
             const expSci = formatScientificNotationHtml(q.convertedValue, q.endSymbol);
-            feedbackExplanation.innerHTML = `
+            
+            const detailedExplanationHtml = `
                 <p><strong>1. Analyse des préfixes :</strong><br>
                 • Préfixe de départ : <strong>${q.startPrefix.name}</strong> (${q.startPrefix.symbol || 'unité de base'}) = 10<sup>${q.startPrefix.exp}</sup><br>
                 • Préfixe de destination : <strong>${q.endPrefix.name}</strong> (${q.endPrefix.symbol || 'unité de base'}) = 10<sup>${q.endPrefix.exp}</sup></p>
@@ -862,6 +916,56 @@
                     <strong>En notation scientifique normée :</strong> <strong>${expSci}</strong>
                 </p>
             `;
+
+            if (isCorrect) {
+                feedbackCard.classList.add('bg-emerald-50', 'dark:bg-emerald-950/40', 'border-emerald-200', 'dark:border-emerald-800');
+                feedbackHeader.className = 'flex items-center space-x-3 font-bold text-lg text-emerald-700 dark:text-emerald-400';
+                feedbackHeader.innerHTML = `<i class="fa-solid fa-circle-check text-2xl animate-bounce"></i> <span>Bravo ! Réponse exacte.</span>`;
+                
+                feedbackExplanation.innerHTML = `
+                    <div class="mt-2">
+                        <button id="toggle-detail-btn" type="button" class="text-xs text-emerald-700 dark:text-emerald-300 font-semibold hover:underline flex items-center space-x-1">
+                            <i id="toggle-detail-icon" class="fa-solid fa-chevron-right text-[10px] transition-transform duration-200"></i>
+                            <span>Afficher le détail du calcul</span>
+                        </button>
+                        <div id="success-detail-content" class="hidden mt-3 space-y-2 pt-2 border-t border-emerald-200 dark:border-emerald-800/60 animate-fade-in">
+                            ${detailedExplanationHtml}
+                        </div>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    const toggleBtn = document.getElementById('toggle-detail-btn');
+                    const detailContent = document.getElementById('success-detail-content');
+                    const toggleIcon = document.getElementById('toggle-detail-icon');
+
+                    toggleBtn?.addEventListener('click', () => {
+                        const isHidden = detailContent?.classList.contains('hidden');
+                        detailContent?.classList.toggle('hidden');
+                        toggleIcon?.classList.toggle('rotate-90');
+                        if (toggleBtn.querySelector('span')) {
+                            toggleBtn.querySelector('span').textContent = isHidden ? "Masquer le détail du calcul" : "Afficher le détail du calcul";
+                        }
+                    });
+                }, 0);
+
+            } else {
+                feedbackCard.classList.add('bg-rose-50', 'dark:bg-rose-950/40', 'border-rose-200', 'dark:border-rose-800');
+                feedbackHeader.className = 'flex items-center space-x-3 font-bold text-lg text-rose-700 dark:text-rose-400';
+                
+                let headerText = "Inexact. Voici la correction pas à pas :";
+                let extraWarning = "";
+                
+                if (formatErrorMessage) {
+                    headerText = "Format scientifique non respecté !";
+                    extraWarning = `<div class="p-3 mb-3 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 font-semibold text-xs sm:text-sm">
+                        <i class="fa-solid fa-triangle-exclamation mr-2 text-amber-500"></i> ${formatErrorMessage}
+                    </div>`;
+                }
+                
+                feedbackHeader.innerHTML = `<i class="fa-solid fa-circle-xmark text-2xl"></i> <span>${headerText}</span>`;
+                feedbackExplanation.innerHTML = extraWarning + detailedExplanationHtml;
+            }
 
             if (submitBtn) submitBtn.disabled = true;
 
@@ -916,6 +1020,7 @@
             });
         }
 
+        // Écouteurs de configuration (Niveaux, Modes, Options)
         document.querySelectorAll('.level-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.level-btn').forEach(b => {
@@ -930,8 +1035,46 @@
             });
         });
 
+        // Fonction centralisée pour mettre à jour l'interdiction du QCM et l'état des boutons
+        function updateModeAndScientificState() {
+            const btnQcm = document.getElementById('btn-mode-qcm');
+            const sciToggle = document.getElementById('scientific-toggle');
+            const sciLabel = document.getElementById('scientific-option-label');
+
+            if (state.requireScientific) {
+                if (btnQcm) {
+                    btnQcm.disabled = true;
+                    btnQcm.classList.add('opacity-40', 'cursor-not-allowed');
+                }
+            } else {
+                if (btnQcm) {
+                    btnQcm.disabled = false;
+                    btnQcm.classList.remove('opacity-40', 'cursor-not-allowed');
+                }
+            }
+
+            if (state.mode === 'qcm') {
+                if (sciToggle) {
+                    sciToggle.checked = false;
+                    sciToggle.disabled = true;
+                }
+                state.requireScientific = false;
+                sciLabel?.classList.add('opacity-50', 'cursor-not-allowed');
+                sciLabel?.classList.remove('cursor-pointer', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+            } else {
+                if (sciToggle) {
+                    sciToggle.disabled = false;
+                }
+                sciLabel?.classList.remove('opacity-50', 'cursor-not-allowed');
+                sciLabel?.classList.add('cursor-pointer', 'hover:bg-slate-100', 'dark:hover:bg-slate-800');
+            }
+        }
+
+        // Écouteur pour le changement de Mode (Saisie Libre vs QCM)
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', () => {
+                if (btn.disabled) return;
+
                 document.querySelectorAll('.mode-btn').forEach(b => {
                     b.classList.remove('border-indigo-500', 'bg-indigo-50/50', 'dark:bg-indigo-950/30', 'text-indigo-900', 'dark:text-indigo-200');
                     b.classList.add('border-slate-200', 'dark:border-slate-800');
@@ -940,15 +1083,31 @@
                 btn.classList.add('border-indigo-500', 'bg-indigo-50/50', 'dark:bg-indigo-950/30', 'text-indigo-900', 'dark:text-indigo-200');
 
                 state.mode = btn.dataset.mode;
+                updateModeAndScientificState();
                 renderQuestion();
             });
         });
 
+        // Écouteur pour la case à cocher "Écriture Scientifique"
+        document.getElementById('scientific-toggle')?.addEventListener('change', (e) => {
+            state.requireScientific = e.target.checked;
+            updateModeAndScientificState();
+        });
+
+        // Écouteurs de validation / saisie
         document.getElementById('submit-btn')?.addEventListener('click', () => checkAnswer());
 
         document.getElementById('user-answer')?.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
                 checkAnswer();
+            }
+        });
+
+        // Navigation au clavier (Flèche Droite pour la question suivante)
+        document.addEventListener('keydown', (e) => {
+            const feedbackCard = document.getElementById('feedback-card');
+            if (e.key === 'ArrowRight' && feedbackCard && !feedbackCard.classList.contains('hidden')) {
+                generateQuestion();
             }
         });
 
@@ -987,6 +1146,7 @@
 
         window.onload = function() {
             generateQuestion();
+            updateModeAndScientificState();
         };
     </script>
 </body>

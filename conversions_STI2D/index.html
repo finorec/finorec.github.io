@@ -18,7 +18,6 @@
             }
         };
     </script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>
         tailwind.config = {
@@ -103,71 +102,100 @@
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-        <!-- Configuration de l'Exercice -->
-        <section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 border-b border-slate-200 dark:border-slate-800 pb-6">
-                
-                <!-- Choix du Niveau -->
-                <div class="flex-1 space-y-3">
-                    <label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center">
-                        <i class="fa-solid fa-layer-group mr-2 text-sky-500"></i> 1. Choisissez le niveau de difficulté
-                    </label>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <button data-level="1" class="level-btn relative p-3.5 rounded-xl border-2 text-left transition-all duration-200 border-sky-500 bg-sky-50/50 dark:bg-sky-950/30 text-sky-900 dark:text-sky-200">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="font-bold text-sm">Niveau 1</span>
-                                <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold">Facile</span>
-                            </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Uniquement vers l'unité de base (ex: 5,2 kV &rarr; 5200 V, 450 mA &rarr; 0,45 A)</p>
-                        </button>
+		<!-- Configuration de l'Exercice (Alignement parfait ligne par ligne) -->
+		<section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
+			<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 border-b border-slate-200 dark:border-slate-800 pb-6">
+				
+				<!-- Colonne 1 : Choix du Niveau (Numéros à gauche) -->
+				<div class="lg:col-span-5 flex flex-col">
+					<label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center h-6 mb-3">
+						<i class="fa-solid fa-layer-group mr-2 text-sky-500"></i> 1. Niveau de difficulté
+					</label>
+					<div class="flex flex-col gap-2">
+						<!-- Ligne 1 : Niveau 1 -->
+						<button data-level="1" class="level-btn relative px-4 py-3 rounded-xl border-2 text-left transition-all duration-200 border-sky-500 bg-sky-50/50 dark:bg-sky-950/30 text-sky-900 dark:text-sky-200 flex items-center space-x-3 h-[54px]">
+							<span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold shrink-0">Facile</span>
+							<div>
+								<span class="font-bold text-xs sm:text-sm block">Niveau 1</span>
+								<span class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 block">Uniquement vers l'unité de base (ex : kV &rarr; V, mA &rarr; A)</span>
+							</div>
+						</button>
 
-                        <button data-level="2" class="level-btn relative p-3.5 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="font-bold text-sm">Niveau 2</span>
-                                <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold">Moyen</span>
-                            </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Entre préfixes avec saut modéré (ex: mA &rarr; kA, MHz &rarr; GHz)</p>
-                        </button>
+						<!-- Ligne 2 : Niveau 2 -->
+						<button data-level="2" class="level-btn relative px-4 py-3 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center space-x-3 h-[54px]">
+							<span class="text-xs px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold shrink-0">Moyen</span>
+							<div>
+								<span class="font-bold text-xs sm:text-sm block">Niveau 2</span>
+								<span class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 block">Entre préfixes avec saut modéré (ex : mA &rarr; kA, MHz &rarr; GHz)</span>
+							</div>
+						</button>
 
-                        <button data-level="3" class="level-btn relative p-3.5 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="font-bold text-sm">Niveau 3</span>
-                                <span class="text-xs px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold">Avancé</span>
-                            </div>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Toutes conversions (téra à pico, sauts amples de 10<sup>12</sup>)</p>
-                        </button>
-                    </div>
-                </div>
+						<!-- Ligne 3 : Niveau 3 -->
+						<button data-level="3" class="level-btn relative px-4 py-3 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center space-x-3 h-[54px]">
+							<span class="text-xs px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold shrink-0">Avancé</span>
+							<div>
+								<span class="font-bold text-xs sm:text-sm block">Niveau 3</span>
+								<span class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 block">Toutes conversions (Téra à Pico)</span>
+							</div>
+						</button>
+					</div>
+				</div>
 
-                <!-- Choix du Mode & Options -->
-                <div class="w-full lg:w-80 space-y-3">
-                    <label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center">
-                        <i class="fa-solid fa-gamepad mr-2 text-indigo-500"></i> 2. Mode d'exercice
-                    </label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button data-mode="free" id="btn-mode-free" class="mode-btn p-3.5 rounded-xl border-2 text-center transition-all duration-200 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-900 dark:text-indigo-200">
-                            <i class="fa-solid fa-keyboard mb-1 text-lg block"></i>
-                            <span class="font-bold text-xs">Saisie Libre</span>
-                        </button>
-                        <button data-mode="qcm" id="btn-mode-qcm" class="mode-btn p-3.5 rounded-xl border-2 text-center transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700">
-                            <i class="fa-solid fa-list-check mb-1 text-lg block"></i>
-                            <span class="font-bold text-xs">Mode QCM</span>
-                        </button>
-                    </div>
+				<!-- Colonne 2 : Mode d'exercice (3 colonnes) -->
+				<div class="lg:col-span-3 flex flex-col">
+					<label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center h-6 mb-3">
+						<i class="fa-solid fa-gamepad mr-2 text-indigo-500"></i> 2. Mode de réponse
+					</label>
+					<div class="flex flex-col gap-2">
+				
+						<!-- Ligne 1 : Mode Saisie Libre -->
+						<button data-mode="free" id="btn-mode-free" class="mode-btn px-4 py-3 rounded-xl border-2 text-left transition-all duration-200 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-900 dark:text-indigo-200 flex items-center space-x-3 h-[54px]">
+							<i class="fa-solid fa-keyboard text-lg text-indigo-500 shrink-0"></i>
+							<div>
+								<span class="font-bold text-xs sm:text-sm block">Saisie Libre</span>
+								<span class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 block">Clavier / Saisie</span>
+							</div>
+						</button>
+						
+						<!-- Ligne 2 : Mode QCM (Aligné exactement avec le Niveau 2 grâce à la même hauteur de bloc au-dessus) -->
+						<button data-mode="qcm" id="btn-mode-qcm" class="mode-btn px-4 py-3 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center space-x-3 h-[54px]">
+							<i class="fa-solid fa-list-check text-lg text-slate-400 shrink-0"></i>
+							<div>
+								<span class="font-bold text-xs sm:text-sm block">Mode QCM</span>
+								<span class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 block">Choix multiples</span>
+							</div>
+						</button>
+					</div>
+				</div>
 
-                    <!-- Option Écriture Scientifique -->
-                    <div id="scientific-option-wrapper" class="pt-2">
-                        <label for="scientific-toggle" id="scientific-option-label" class="flex items-center cursor-pointer space-x-3 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                            <input type="checkbox" id="scientific-toggle" class="sr-only peer">
-                            <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-sky-600 peer-disabled:opacity-50 relative"></div>
-                            <div class="flex-1">
-                                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block peer-disabled:text-slate-400">Exiger l'écriture scientifique</span>
-                                <span class="text-[10px] text-slate-500 dark:text-slate-400 block leading-tight">Format : <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-sky-600 dark:text-sky-300 font-mono">a&times;10^n</code> avec <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded text-sky-600 dark:text-sky-300 font-mono">1&le;|a|&lt;10</code></span>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-                
+				<!-- Colonne 3 : Options Avancées (4 colonnes) -->
+				<div class="lg:col-span-4 flex flex-col">
+					<label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center h-6 mb-3">
+						<i class="fa-solid fa-sliders mr-2 text-emerald-500"></i> 3. Options
+					</label>
+					<div class="flex flex-col gap-2">
+						<!-- Ligne 1 : Écriture Scientifique -->
+						<label for="scientific-toggle" id="scientific-option-label" class="flex items-center cursor-pointer space-x-3 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors h-[54px]">
+							<input type="checkbox" id="scientific-toggle" class="sr-only peer">
+							<div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-sky-600 peer-disabled:opacity-50 relative shrink-0"></div>
+							<div class="flex-1">
+								<span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 block peer-disabled:text-slate-400">Exiger l'écriture scientifique</span>
+								<span class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 block">Format <code class="bg-slate-200 dark:bg-slate-700 px-1 rounded font-mono"> a &times; 10<sup>n</sup></code> (avec 1 &le; |a| &lt; 10)</span>
+							</div>
+						</label>
+
+						<!-- Ligne 2 : Masquer le contexte (Aligne parfaitement avec le Niveau 2) -->
+						<label for="no-context-toggle" id="no-context-option-label" class="flex items-center cursor-pointer space-x-3 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors h-[54px]">
+							<input type="checkbox" id="no-context-toggle" class="sr-only peer">
+							<div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-sky-600 relative shrink-0"></div>
+							<div class="flex-1">
+								<span class="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 block">Masquer le contexte</span>
+								<span class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 block">Valeurs abstraites (entraînement réflexe)</span>
+							</div>
+						</label>
+					</div>
+				</div>
+
             </div>
 
             <!-- Dashboard Statistiques -->
@@ -229,51 +257,52 @@
         <!-- Zone d'Exercice -->
         <section id="exercise-card" class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-4">
-                <span id="grandeur-badge" class="px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 font-semibold text-xs border border-sky-300 dark:border-sky-800">
+                <span id="grandeur-badge" class="px-3 py-1 rounded-full bg-sky-100 dark:bg-sky-950/80 text-sky-700 dark:text-sky-300 font-bold text-xs border border-sky-300 dark:border-sky-800 tracking-wide uppercase">
                     Grandeur : Chargement...
                 </span>
-                <button id="hint-btn" class="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-medium flex items-center space-x-1.5 bg-amber-50 dark:bg-amber-950/40 px-3 py-1.5 rounded-lg border border-amber-200 dark:border-amber-800/50 transition-all hover:scale-105 active:scale-95">
+                <button id="hint-btn" class="text-xs text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 font-semibold flex items-center space-x-1.5 bg-amber-50 dark:bg-amber-950/40 px-3 py-1.5 rounded-xl border border-amber-200 dark:border-amber-800/50 transition-all hover:scale-105 active:scale-95">
                     <i class="fa-solid fa-lightbulb"></i>
                     <span>Besoin d'un indice ?</span>
                 </button>
             </div>
 
-            <!-- Contexte STI2D / Quotidien -->
-            <p id="question-context" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 italic">
-                Contexte : ...
-            </p>
+            <!-- Contexte -->
+            <div class="flex items-start space-x-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-200/60 dark:border-slate-800">
+                <i class="fa-solid fa-circle-info text-sky-500 mt-0.5"></i>
+                <p id="question-context" class="italic">Contexte : ...</p>
+            </div>
 
             <!-- Énoncé / Question -->
-            <div class="text-center py-6 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-800">
-                <div id="question-text" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-800 dark:text-slate-100 font-mono">
+            <div class="text-center py-8 px-4 bg-gradient-to-b from-sky-50/50 to-indigo-50/30 dark:from-sky-950/20 dark:to-indigo-950/10 rounded-2xl border border-sky-200/60 dark:border-sky-900/40 shadow-inner">
+                <div id="question-text" class="text-3xl sm:text-4xl font-black tracking-tight text-slate-800 dark:text-slate-100 font-mono">
                     <!-- Chargement question -->
                 </div>
             </div>
 
-            <!-- Mode Saisie Libre -->
-            <div id="free-input-container" class="space-y-4">
-                <div class="flex flex-col sm:flex-row gap-3">
+            <!-- Mode Saisie Libre Amélioré -->
+            <div id="free-input-container" class="space-y-3 max-w-2xl mx-auto">
+                <div class="relative flex flex-col sm:flex-row gap-3">
                     <div class="relative flex-grow">
-                        <input type="text" id="user-answer" placeholder="Entrez votre réponse (ex: 5200, 5.2e3, 5,2x10^3)" 
-                               class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-mono focus:border-sky-500 dark:focus:border-sky-400 focus:outline-none transition-colors">
+                        <input type="text" id="user-answer" placeholder="Entrez la valeur..." 
+                               class="w-full px-5 py-3.5 text-center sm:text-left text-xl font-bold rounded-2xl border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-mono focus:border-sky-500 dark:focus:border-sky-400 focus:ring-4 focus:ring-sky-500/10 focus:outline-none transition-all shadow-sm">
                     </div>
-                    <button id="submit-btn" class="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-bold shadow-md shadow-sky-500/20 active:scale-95 transition-all flex items-center justify-center space-x-2 min-w-[140px]">
+                    <button id="submit-btn" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white font-extrabold shadow-lg shadow-sky-500/25 active:scale-95 transition-all flex items-center justify-center space-x-2 text-base">
                         <i class="fa-solid fa-paper-plane"></i>
                         <span>Valider</span>
                     </button>
                 </div>
 
-                <!-- Raccourcis clavier -->
-                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                    <span class="font-semibold">Saisie rapide :</span>
-                    <button type="button" data-insert="x10^" class="key-shortcut px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono border border-slate-300 dark:border-slate-700 font-bold transition-colors">
+                <!-- Raccourcis clavier (style calculatrice) -->
+                <div class="flex items-center justify-center sm:justify-start gap-2 pt-1">
+                    <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Raccourcis :</span>
+                    <button type="button" data-insert="x10^" class="key-shortcut px-3 py-1.5 rounded-xl bg-slate-200/70 dark:bg-slate-800 hover:bg-sky-500 hover:text-white dark:hover:bg-sky-500 text-slate-700 dark:text-slate-300 font-mono text-xs font-bold border border-slate-300 dark:border-slate-700 transition-all active:scale-95 shadow-sm">
                         &times;10^
                     </button>
-                    <button type="button" data-insert="e" class="key-shortcut px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono border border-slate-300 dark:border-slate-700 font-bold transition-colors">
-                        e (ex: 5.2e3)
+                    <button type="button" data-insert="e" class="key-shortcut px-3 py-1.5 rounded-xl bg-slate-200/70 dark:bg-slate-800 hover:bg-sky-500 hover:text-white dark:hover:bg-sky-500 text-slate-700 dark:text-slate-300 font-mono text-xs font-bold border border-slate-300 dark:border-slate-700 transition-all active:scale-95 shadow-sm">
+                        e
                     </button>
-                    <button type="button" data-insert="," class="key-shortcut px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-mono border border-slate-300 dark:border-slate-700 font-bold transition-colors">
-                        , (virgule)
+                    <button type="button" data-insert="," class="key-shortcut px-3 py-1.5 rounded-xl bg-slate-200/70 dark:bg-slate-800 hover:bg-sky-500 hover:text-white dark:hover:bg-sky-500 text-slate-700 dark:text-slate-300 font-mono text-xs font-bold border border-slate-300 dark:border-slate-700 transition-all active:scale-95 shadow-sm">
+                        ,
                     </button>
                 </div>
             </div>
@@ -300,7 +329,7 @@
             <!-- Carte de feedback -->
             <div id="feedback-card" class="hidden p-5 rounded-xl border space-y-4 transition-all duration-300 animate-fade-in">
                 <div id="feedback-header" class="flex items-center space-x-3 font-bold text-lg"></div>
-                <div id="feedback-explanation" class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 space-y-2 leading-relaxed"></div>
+                <div id="feedback-explanation" class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 space-y-3 leading-relaxed"></div>
                 <div class="pt-2 flex justify-between items-center">
                     <span class="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline flex items-center">
                         <i class="fa-solid fa-keyboard mr-1.5"></i> Astuce : Touche <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">&rarr;</kbd> pour question suivante
@@ -353,7 +382,7 @@
                     </div>
                     <div>
                         <h2 class="font-bold text-slate-900 dark:text-slate-100">Fiche Mémo & Rappel de Cours</h2>
-                        <p class="text-xs text-slate-500 dark:text-slate-400">Cliquez pour afficher/masquer la table des préfixes et la méthode de calcul (de Téra à Pico)</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Table des préfixes colorée et méthodologie de calcul détaillée (de Téra à Pico)</p>
                     </div>
                 </div>
                 <i id="memo-chevron" class="fa-solid fa-chevron-down text-slate-400 transition-transform duration-300"></i>
@@ -363,11 +392,11 @@
                 <!-- Tableau des préfixes -->
                 <div>
                     <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3 flex items-center">
-                        <i class="fa-solid fa-table-list mr-2 text-sky-500"></i> Table des Préfixes Scientifiques (10<sup>-12</sup> à 10<sup>12</sup>)
+                        <i class="fa-solid fa-table-list mr-2 text-sky-500"></i> Table des Préfixes Scientifiques (10<sup>-12</sup>&#8239;à 10<sup>12</sup>)
                     </h3>
-                    <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                    <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                         <table class="w-full text-sm text-left">
-                            <thead class="bg-slate-100 dark:bg-slate-800 text-xs uppercase font-bold text-slate-600 dark:text-slate-300">
+                            <thead class="bg-slate-100 dark:bg-slate-800 text-[11px] uppercase font-extrabold text-slate-600 dark:text-slate-300 tracking-wider">
                                 <tr>
                                     <th class="px-4 py-3">Préfixe</th>
                                     <th class="px-4 py-3">Symbole</th>
@@ -376,69 +405,69 @@
                                     <th class="px-4 py-3">Exemple concret STI2D / Quotidien</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
-                                <tr class="bg-emerald-50/40 dark:bg-emerald-950/20">
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-800 text-xs">
+                                <tr class="bg-emerald-50/50 dark:bg-emerald-950/20">
                                     <td class="px-4 py-2.5 font-bold text-emerald-700 dark:text-emerald-300">Téra</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">T</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>12</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 000 000 000 000 (Mille milliards)</td>
-                                    <td class="px-4 py-2.5 text-xs">Consommation électrique annuelle d'un pays (TWh)</td>
+                                    <td class="px-4 py-2.5 font-mono font-extrabold text-emerald-800 dark:text-emerald-200">T</td>
+                                    <td class="px-4 py-2.5 font-mono font-semibold">10<sup>12</sup></td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">1 000 000 000 000 (Mille milliards)</td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 italic">Consommation électrique annuelle d'un pays (TWh)</td>
                                 </tr>
                                 <tr class="bg-emerald-50/30 dark:bg-emerald-950/10">
                                     <td class="px-4 py-2.5 font-bold text-emerald-600 dark:text-emerald-400">Giga</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">G</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>9</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 000 000 000 (Milliard)</td>
-                                    <td class="px-4 py-2.5 text-xs">Fréquence processeur smartphone (GHz), Capacité SSD (GB)</td>
+                                    <td class="px-4 py-2.5 font-mono font-extrabold text-emerald-700 dark:text-emerald-300">G</td>
+                                    <td class="px-4 py-2.5 font-mono font-semibold">10<sup>9</sup></td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">1 000 000 000 (Milliard)</td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 italic">Fréquence processeur smartphone (GHz), Capacité SSD (GB)</td>
                                 </tr>
                                 <tr class="bg-emerald-50/20 dark:bg-emerald-950/5">
                                     <td class="px-4 py-2.5 font-bold text-emerald-600 dark:text-emerald-400">Méga</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">M</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>6</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 000 000 (Million)</td>
-                                    <td class="px-4 py-2.5 text-xs">Puissance éolienne (MW), Fichiers photo lourds (MB)</td>
+                                    <td class="px-4 py-2.5 font-mono font-extrabold text-emerald-700 dark:text-emerald-300">M</td>
+                                    <td class="px-4 py-2.5 font-mono font-semibold">10<sup>6</sup></td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">1 000 000 (Million)</td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 italic">Puissance éolienne (MW), Fichiers photo lourds (MB)</td>
                                 </tr>
                                 <tr class="bg-emerald-50/10 dark:bg-emerald-950/0">
                                     <td class="px-4 py-2.5 font-bold text-emerald-600 dark:text-emerald-400">Kilo</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">k</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>3</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 000 (Mille)</td>
-                                    <td class="px-4 py-2.5 text-xs">Masse d'un paquet de farine (kg), Distance routière (km)</td>
+                                    <td class="px-4 py-2.5 font-mono font-extrabold text-emerald-700 dark:text-emerald-300">k</td>
+                                    <td class="px-4 py-2.5 font-mono font-semibold">10<sup>3</sup></td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">1 000 (Mille)</td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 italic">Masse d'un paquet de farine (kg), Distance routière (km)</td>
                                 </tr>
-                                <tr class="bg-slate-100/80 dark:bg-slate-800/80 font-semibold border-y-2 border-sky-500">
-                                    <td class="px-4 py-2.5 text-sky-600 dark:text-sky-400">Unité de Base</td>
-                                    <td class="px-4 py-2.5 font-mono">-</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>0</sup> = 1</td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">1 (Unité)</td>
-                                    <td class="px-4 py-2.5 text-xs">Volt (V), Ampère (A), Watt (W), Joule (J), Hertz (Hz), Ohm (Ω), Pascal (Pa), Mètre (m), Gramme (g), Seconde (s)</td>
+                                <tr class="bg-sky-50/80 dark:bg-sky-950/50 font-bold border-y-2 border-sky-500">
+                                    <td class="px-4 py-3 text-sky-700 dark:text-sky-300">Unité de Base</td>
+                                    <td class="px-4 py-3 font-mono">-</td>
+                                    <td class="px-4 py-3 font-mono">10<sup>0</sup> = 1</td>
+                                    <td class="px-4 py-3 text-slate-600 dark:text-slate-300">1 (Unité)</td>
+                                    <td class="px-4 py-3 text-slate-600 dark:text-slate-300 italic">Volt (V), Ampère (A), Watt (W), Joule (J), Hertz (Hz), Ohm (Ω), Pascal (Pa), Mètre (m), Gramme (g), Seconde (s)</td>
                                 </tr>
                                 <tr class="bg-rose-50/10 dark:bg-rose-950/0">
                                     <td class="px-4 py-2.5 font-bold text-rose-600 dark:text-rose-400">Milli</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">m</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>-3</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">0,001 (Millième)</td>
-                                    <td class="px-4 py-2.5 text-xs">Taille d'une pastille de médicament (mg), Courant LED (mA)</td>
+                                    <td class="px-4 py-2.5 font-mono font-extrabold text-rose-700 dark:text-rose-300">m</td>
+                                    <td class="px-4 py-2.5 font-mono font-semibold">10<sup>-3</sup></td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">0,001 (Millième)</td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 italic">Taille d'une pastille de médicament (mg), Courant LED (mA)</td>
                                 </tr>
                                 <tr class="bg-rose-50/20 dark:bg-rose-950/5">
                                     <td class="px-4 py-2.5 font-bold text-rose-600 dark:text-rose-400">Micro</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">μ</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>-6</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">0,000 001 (Millionième)</td>
-                                    <td class="px-4 py-2.5 text-xs">Épaisseur d'un cheveu humain (μm), Temps de réponse (μs)</td>
+                                    <td class="px-4 py-2.5 font-mono font-extrabold text-rose-700 dark:text-rose-300">μ</td>
+                                    <td class="px-4 py-2.5 font-mono font-semibold">10<sup>-6</sup></td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">0,000 001 (Millionième)</td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 italic">Épaisseur d'un cheveu (μm), Temps de réponse (μs)</td>
                                 </tr>
                                 <tr class="bg-rose-50/30 dark:bg-rose-950/10">
                                     <td class="px-4 py-2.5 font-bold text-rose-600 dark:text-rose-400">Nano</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">n</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>-9</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">0,000 000 001 (Milliardième)</td>
-                                    <td class="px-4 py-2.5 text-xs">Longueur d'onde lumière visible (nm), Période horloge (ns)</td>
+                                    <td class="px-4 py-2.5 font-mono font-extrabold text-rose-700 dark:text-rose-300">n</td>
+                                    <td class="px-4 py-2.5 font-mono font-semibold">10<sup>-9</sup></td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">0,000 000 001 (Milliardième)</td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 italic">Longueur d'onde lumière visible (nm), Période horloge (ns)</td>
                                 </tr>
-                                <tr class="bg-rose-50/40 dark:bg-rose-950/20">
+                                <tr class="bg-rose-50/50 dark:bg-rose-950/20">
                                     <td class="px-4 py-2.5 font-bold text-rose-700 dark:text-rose-300">Pico</td>
-                                    <td class="px-4 py-2.5 font-mono font-bold">p</td>
-                                    <td class="px-4 py-2.5 font-mono">10<sup>-12</sup></td>
-                                    <td class="px-4 py-2.5 text-xs text-slate-500 dark:text-slate-400">0,000 000 000 001 (Millionième de milliardième)</td>
-                                    <td class="px-4 py-2.5 text-xs">Masse d'une micro-particule MEMS (pg), Horloges atomiques</td>
+                                    <td class="px-4 py-2.5 font-mono font-extrabold text-rose-800 dark:text-rose-200">p</td>
+                                    <td class="px-4 py-2.5 font-mono font-semibold">10<sup>-12</sup></td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">0,000 000 000 001 (Millionième de milliardième)</td>
+                                    <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 italic">Masse micro-particule MEMS (pg), Horloges atomiques</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -447,37 +476,37 @@
 				
                 <!-- Méthode de Calcul -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs sm:text-sm">
-                    <div class="p-4 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/50">
-                        <h4 class="font-bold text-sky-800 dark:text-sky-300 mb-2 flex items-center">
+                    <div class="p-4 rounded-xl bg-sky-50 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-800/50 space-y-2">
+                        <h4 class="font-bold text-sky-800 dark:text-sky-300 flex items-center">
                             <i class="fa-solid fa-calculator mr-2"></i> Méthode générale de conversion (A &rarr; B)
                         </h4>
-                        <p class="mb-2 text-slate-600 dark:text-slate-300">
-                            Pour convertir une valeur exprimée de l'unité A (10<sup>n<sub>A</sub></sup>) vers l'unité B (10<sup>n<sub>B</sub></sup>) :
+                        <p class="text-slate-600 dark:text-slate-300">
+                            Pour convertir une valeur exprimée de l'unité A ($10^{n_A}$) vers l'unité B ($10^{n_B}$) :
                         </p>
-                        <div class="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-sky-300 dark:border-sky-700 font-mono text-center text-sky-600 dark:text-sky-400 font-bold mb-2">
+                        <div class="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-sky-300 dark:border-sky-700 font-mono text-center text-sky-600 dark:text-sky-400 font-bold">
                             Facteur = 10<sup>(puissance départ - puissance arrivée)</sup>
                         </div>
                         <p class="text-slate-600 dark:text-slate-300">
                             <strong>Exemple :</strong> Convertir 4,5 kW en MW.<br>
-                            • Départ (kilo) : 10<sup>3</sup><br>
-                            • Arrivée (Méga) : 10<sup>6</sup><br>
-                            • Calcul : 10<sup>3 - 6</sup> = 10<sup>-3</sup> &rarr; 4,5 kW = 0,0045 MW.
+                            &bull; Départ (kilo) : $10^3$<br>
+                            &bull; Arrivée (Méga) : $10^6$<br>
+                            &bull; Calcul : $10^{3 - 6} = 10^{-3} \implies 4,5 \text{ kW} = 0,0045 \text{ MW}$.
                         </p>
                     </div>
 
-                    <div class="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/50">
-                        <h4 class="font-bold text-indigo-800 dark:text-indigo-300 mb-2 flex items-center">
-                            <i class="fa-solid fa-square-root-variable mr-2"></i> Notation Scientifique Normée
+                    <div class="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/50 space-y-2">
+                        <h4 class="font-bold text-indigo-800 dark:text-indigo-300 flex items-center">
+                            <i class="fa-solid fa-square-root-variable mr-2"></i> Notation Scientifique
                         </h4>
-                        <p class="mb-2 text-slate-600 dark:text-slate-300">
-                            Une valeur est en écriture scientifique si elle s'écrit sous la forme :
+                        <p class="text-slate-600 dark:text-slate-300">
+                            Une valeur est écrite en notation scientifique si elle s'écrit sous la forme :
                         </p>
-                        <div class="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-indigo-300 dark:border-indigo-700 font-mono text-center text-indigo-600 dark:text-indigo-400 font-bold mb-2">
+                        <div class="bg-white dark:bg-slate-900 p-2.5 rounded-lg border border-indigo-300 dark:border-indigo-700 font-mono text-center text-indigo-600 dark:text-indigo-400 font-bold">
                             a &times; 10<sup>n</sup> (avec 1 &le; |a| &lt; 10)
                         </div>
                         <p class="text-slate-600 dark:text-slate-300">
-                            • <strong>Correct :</strong> 3,2 &times; 10<sup>-4</sup> ou 5,0 &times; 10<sup>6</sup><br>
-                            • <strong>Saisie autorisée :</strong> <code class="bg-slate-200 dark:bg-slate-800 px-1 rounded">3.2e-4</code> ou <code class="bg-slate-200 dark:bg-slate-800 px-1 rounded">3,2x10^-4</code>.
+                            &bull; <strong>Correct :</strong> $3,2 \times 10^{-4}$ ou $5,0 \times 10^6$<br>
+                            &bull; <strong>Saisie autorisée :</strong> <code class="bg-slate-200 dark:bg-slate-800 px-1 rounded">3.2e-4</code> ou <code class="bg-slate-200 dark:bg-slate-800 px-1 rounded">3,2x10^-4</code>.
                         </p>
                     </div>
                 </div>				
@@ -488,12 +517,12 @@
 
     <footer class="mt-auto py-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
         <p>Spécialité Physique-Chimie et Mathématiques (PCM) • Première et terminale STI2D</p>
-        <p class="mt-1">Conçu avec l'aide de l'IA d'après les idées et les instructions d'un humain (FC v1.6)</p>
+        <p class="mt-1">Conçu avec l'aide de l'IA d'après les idées et les instructions d'un humain (FC v1.9)</p>
     </footer>
 
     <!-- JavaScript Logic -->
     <script>
-        const prefixes = [
+		const prefixes = [
             { name: 'Téra', symbol: 'T', exp: 12 },
             { name: 'Giga', symbol: 'G', exp: 9 },
             { name: 'Méga', symbol: 'M', exp: 6 },
@@ -629,7 +658,6 @@
             {
                 name: 'Masse', unitName: 'Gramme', symbol: 'g',
                 contexts: [
-                    // Correction apportée ici : '' au lieu de 'g'
                     { text: "Masse maximale autorisée au décollage pour un drone de catégorie ouverte", startPrefixes: [''], values: [249, 900] },
                     { text: "Charge utile supportée par un bras robotisé d'assemblage léger", startPrefixes: ['k'], values: [1.5, 3.0, 5.0, 10] },
                     { text: "Masse d'une puce en silicium non encapsulée (Die MEMS)", startPrefixes: ['m'], values: [1.5, 10, 50] },
@@ -679,6 +707,7 @@
             level: 1,
             mode: 'free',
             requireScientific: false,
+            noContext: false,
             currentQuestion: null,
             stats: { correct: 0, streak: 0, total: 0 },
             history: []
@@ -712,56 +741,74 @@
             });
         }
 
-        function formatNumberFr(num) {
-            if (num === null || num === undefined || isNaN(num)) return '0';
-            if (num === 0) return '0';
+		// Fonction pour repositionner l'affichage sur les statistiques et la question
+        function scrollToExercise() {
+            const statsSection = document.querySelector('section.space-y-6');
+            const exerciseCard = document.getElementById('exercise-card');
+            const target = exerciseCard || statsSection;
+            
+            if (target) {
+                const yOffset = -80; 
+                const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        }
 
-            const absVal = Math.abs(num);
+		function formatNumberFr(num) {
+			if (num === null || num === undefined || isNaN(num)) return '0';
+			if (num === 0) return '0';
 
-            if (absVal >= 1e6 || absVal < 1e-3) {
-                const exp = Math.floor(Math.log10(absVal));
-                const mantissa = num / Math.pow(10, exp);
-                const roundMantissa = Math.round(mantissa * 10000) / 10000;
-                const mantissaStr = roundMantissa.toString().replace('.', ',');
-                return `${mantissaStr} &times; 10<sup>${exp}</sup>`;
+			const absVal = Math.abs(num);
+
+			if (absVal >= 1e6 || absVal < 1e-3) {
+				const parts = num.toExponential(4).split('e');
+				const mantissaStr = parseFloat(parts[0]).toString().replace('.', ',');
+				const exp = parseInt(parts[1], 10);
+				return `${mantissaStr} &times; 10<sup>${exp}</sup>`;
+			}
+
+			const rounded = Math.round(num * 1e8) / 1e8;
+			return rounded.toString().replace('.', ',');
+		}
+
+		function formatScientificNotationHtml(num, unitSymbol = '') {
+			if (num === 0) return `0 ${unitSymbol}`.trim();
+			const parts = num.toExponential(3).split('e');
+			const mantissaStr = parseFloat(parts[0]).toString().replace('.', ',');
+			const exp = parseInt(parts[1], 10);
+			return `${mantissaStr} &times; 10<sup>${exp}</sup> ${unitSymbol}`.trim();
+		}
+
+		function generateQuestion() {
+            const unitObj = units[Math.floor(Math.random() * units.length)];
+            let contextText = "";
+            let rawValue = 0;
+            let availableStartSymbols = [];
+
+			if (state.noContext) {
+                contextText = "Entraînement direct (sans contexte).";
+                const exp = Math.floor(Math.random() * 6) - 2; 
+                const mantissa = (Math.random() * 9) + 1;
+                const sigFigs = Math.floor(Math.random() * 3) + 2; 
+                const rawValExact = mantissa * Math.pow(10, exp);
+                rawValue = parseFloat(rawValExact.toPrecision(sigFigs));
+                availableStartSymbols = prefixes.map(p => p.symbol);
+            } else {
+                const contextObj = unitObj.contexts[Math.floor(Math.random() * unitObj.contexts.length)];
+                contextText = contextObj.text;
+                rawValue = contextObj.values[Math.floor(Math.random() * contextObj.values.length)];
+                availableStartSymbols = contextObj.startPrefixes;
             }
 
-            const rounded = Math.round(num * 1e8) / 1e8;
-            return rounded.toString().replace('.', ',');
-        }
-
-        function formatScientificNotationHtml(num, unitSymbol = '') {
-            if (num === 0) return `0 ${unitSymbol}`.trim();
-            const absVal = Math.abs(num);
-            const exp = Math.floor(Math.log10(absVal));
-            const mantissa = num / Math.pow(10, exp);
-            const roundMantissa = Math.round(mantissa * 1000) / 1000;
-            const mantissaStr = roundMantissa.toString().replace('.', ',');
-            return `${mantissaStr} &times; 10<sup>${exp}</sup> ${unitSymbol}`.trim();
-        }
-
-        function generateQuestion() {
-            const unitObj = units[Math.floor(Math.random() * units.length)];
-            const contextObj = unitObj.contexts[Math.floor(Math.random() * unitObj.contexts.length)];
-            const contextText = contextObj.text;
-
-            const availableStartSymbols = contextObj.startPrefixes;
             const chosenStartSymbol = availableStartSymbols[Math.floor(Math.random() * availableStartSymbols.length)];
             let startPrefix = prefixes.find(p => p.symbol === chosenStartSymbol) || prefixes.find(p => p.exp === 0);
 
-            const rawValue = contextObj.values[Math.floor(Math.random() * contextObj.values.length)];
             let endPrefix;
-
             if (state.level === 1) {
                 endPrefix = prefixes.find(p => p.exp === 0);
                 if (startPrefix.symbol === endPrefix.symbol) {
-                    const nonBasePrefixes = prefixes.filter(p => p.symbol !== endPrefix.symbol && availableStartSymbols.includes(p.symbol));
-                    if (nonBasePrefixes.length > 0) {
-                        startPrefix = nonBasePrefixes[Math.floor(Math.random() * nonBasePrefixes.length)];
-                    } else {
-                        const allNonBase = prefixes.filter(p => p.symbol !== endPrefix.symbol);
-                        startPrefix = allNonBase[Math.floor(Math.random() * allNonBase.length)];
-                    }
+                    const allNonBase = prefixes.filter(p => p.symbol !== endPrefix.symbol);
+                    startPrefix = allNonBase[Math.floor(Math.random() * allNonBase.length)];
                 }
             } else if (state.level === 2) {
                 let validPrefixes = prefixes.filter(p => {
@@ -801,7 +848,17 @@
             const submitBtn = document.getElementById('submit-btn');
 
             if (grandeurBadge) grandeurBadge.textContent = `Grandeur : ${q.unitObj.name} (${q.unitObj.unitName})`;
-            if (questionContext) questionContext.textContent = `Contexte : ${q.contextText}.`;
+            
+            const contextWrapper = questionContext?.closest('div');
+            if (contextWrapper) {
+                if (state.noContext) {
+                    contextWrapper.classList.add('hidden');
+                } else {
+                    contextWrapper.classList.remove('hidden');
+                    if (questionContext) questionContext.textContent = `Contexte : ${q.contextText}.`;
+                }
+            }
+
             if (questionText) questionText.innerHTML = `${formatNumberFr(q.rawValue)} ${q.startSymbol} = <span class="text-sky-500 border-b-4 border-sky-500 inline-block px-2">?</span> ${q.endSymbol}`;
 
             if (hintBox) hintBox.classList.add('hidden');
@@ -828,23 +885,27 @@
                 qcmContainer?.classList.remove('hidden');
                 generateQCMOptions(q);
             }
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
         }
 
-        function generateQCMOptions(q) {
+		function generateQCMOptions(q) {
             const qcmOptionsContainer = document.getElementById('qcm-options');
             if (!qcmOptionsContainer) return;
             qcmOptionsContainer.innerHTML = '';
 
             const correctVal = q.convertedValue;
-            const distractor1 = q.rawValue * Math.pow(10, -q.deltaExp);
-            const distractor2 = q.rawValue * Math.pow(10, q.deltaExp + 3);
-            const distractor3 = q.rawValue * Math.pow(10, q.deltaExp - 3);
+            const d1 = q.rawValue * Math.pow(10, -q.deltaExp); 
+            const d2 = q.convertedValue * 10;
+            const d3 = q.convertedValue / 10;
 
             let choices = [
                 { val: correctVal, isCorrect: true },
-                { val: distractor1, isCorrect: false },
-                { val: distractor2, isCorrect: false },
-                { val: distractor3, isCorrect: false }
+                { val: d1, isCorrect: false },
+                { val: d2, isCorrect: false },
+                { val: d3, isCorrect: false }
             ].sort(() => Math.random() - 0.5);
 
             choices.forEach((choice, idx) => {
@@ -864,30 +925,30 @@
 
                 qcmOptionsContainer.appendChild(btn);
             });
+
+            if (window.MathJax) {
+                MathJax.typesetPromise();
+            }
         }
 
-        function parseUserAnswer(inputStr) {
-            if (!inputStr) return NaN;
-            let clean = inputStr.trim().toLowerCase().replace(',', '.').replace(/\s+/g, '');
-            clean = clean.replace(/(?:x|\*|⋅)10\^?([+-]?\d+)/g, 'e$1');
-            clean = clean.replace(/(?:x|\*|⋅)10\*\*([+-]?\d+)/g, 'e$1');
-            return parseFloat(clean);
-        }
+		function parseUserAnswer(inputStr) {
+			if (!inputStr) return NaN;
+			let clean = inputStr.trim().toLowerCase().replace(',', '.').replace(/[\s\u00a0]+/g, '');
+			clean = clean.replace(/(?:x|×|\*|⋅)10\^?([+-]?\d+)/g, 'e$1');
+			clean = clean.replace(/(?:x|×|\*|⋅)10\*\*([+-]?\d+)/g, 'e$1');
+			return parseFloat(clean);
+		}
 
-        function isNormalizedScientificFormat(inputStr) {
-            if (!inputStr) return false;
-            let clean = inputStr.trim().toLowerCase().replace(',', '.').replace(/\s+/g, '');
-            
-            const regex = /^([+-]?\d+(?:\.\d+)?)(?:e|(?:x|\*|⋅)10\^?)([+-]?\d+)$/;
-            const match = clean.match(regex);
-            
-            if (!match) return false;
-            
-            const mantissa = parseFloat(match[1]);
-            const absMantissa = Math.abs(mantissa);
-            
-            return absMantissa >= 1 && absMantissa < 10;
-        }
+		function isNormalizedScientificFormat(inputStr) {
+			if (!inputStr) return false;
+			let clean = inputStr.trim().toLowerCase().replace(',', '.').replace(/[\s\u00a0]+/g, '');
+			const regex = /^([+-]?\d+(?:\.\d+)?)(?:e|(?:x|\*|⋅)10\^?)([+-]?\d+)$/;
+			const match = clean.match(regex);
+			if (!match) return false;
+			const mantissa = parseFloat(match[1]);
+			const absMantissa = Math.abs(mantissa);
+			return absMantissa >= 1 && absMantissa < 10;
+		}
 
         function checkAnswer(userVal) {
             const q = state.currentQuestion;
@@ -925,9 +986,7 @@
                 state.stats.streak++;
             } else {
                 state.stats.streak = 0;
-                
                 const rawFormattedWithUnit = `${formatNumberFr(q.rawValue)} ${q.startSymbol}`;
-                
                 state.history.unshift({
                     question: `${rawFormattedWithUnit} &rarr; ${q.endSymbol}`,
                     userAnswer: isNaN(userVal) ? 'Invalide' : (rawInput || `${formatNumberFr(userVal)} ${q.endSymbol}`),
@@ -953,20 +1012,36 @@
 
             const expSci = formatScientificNotationHtml(q.convertedValue, q.endSymbol);
             
-            const detailedExplanationHtml = `
-                <p><strong>1. Analyse des préfixes :</strong><br>
-                • Préfixe de départ : <strong>${q.startPrefix.name}</strong> (${q.startPrefix.symbol || 'unité de base'}) = 10<sup>${q.startPrefix.exp}</sup><br>
-                • Préfixe de destination : <strong>${q.endPrefix.name}</strong> (${q.endPrefix.symbol || 'unité de base'}) = 10<sup>${q.endPrefix.exp}</sup></p>
+            const detailedStepsHtml = `
+                <div class="space-y-3 pt-1">
+                    <div class="flex items-start space-x-2.5 p-3 rounded-xl bg-white/70 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800">
+                        <span class="flex items-center justify-center w-5 h-5 rounded-full bg-sky-500 text-white text-[10px] font-bold mt-0.5 shrink-0">1</span>
+                        <div class="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                            <strong>Analyse des préfixes :</strong><br>
+                            &bull; Départ : <strong>${q.startPrefix.name}</strong> (${q.startPrefix.symbol || 'unité de base'}) = $10^{${q.startPrefix.exp}}$<br>
+                            &bull; Destination : <strong>${q.endPrefix.name}</strong> (${q.endPrefix.symbol || 'unité de base'}) = $10^{${q.endPrefix.exp}}$
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-start space-x-2.5 p-3 rounded-xl bg-white/70 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800">
+                        <span class="flex items-center justify-center w-5 h-5 rounded-full bg-sky-500 text-white text-[10px] font-bold mt-0.5 shrink-0">2</span>
+                        <div class="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                            <strong>Calcul du facteur de puissance :</strong><br>
+                            Saut = $10^{${q.startPrefix.exp} - (${q.endPrefix.exp})} = 10^{${q.deltaExp}}$
+                        </div>
+                    </div>
 
-                <p><strong>2. Calcul du facteur de puissance :</strong><br>
-                Le saut de puissance est de 10<sup>${q.startPrefix.exp} - (${q.endPrefix.exp})</sup> = 10<sup>${q.deltaExp}</sup>.</p>
-
-                <p><strong>3. Résultat final :</strong><br>
-                ${formatNumberFr(q.rawValue)} ${q.startSymbol} = ${formatNumberFr(q.rawValue)} &times; 10<sup>${q.deltaExp}</sup> ${q.endSymbol} = <strong>${formatNumberFr(q.convertedValue)} ${q.endSymbol}</strong></p>
-                
-                <p class="pt-2 text-xs sm:text-sm">
-                    <strong>En notation scientifique normée :</strong> <strong>${expSci}</strong>
-                </p>
+                    <div class="flex items-start space-x-2.5 p-3 rounded-xl bg-white/70 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800">
+                        <span class="flex items-center justify-center w-5 h-5 rounded-full bg-sky-500 text-white text-[10px] font-bold mt-0.5 shrink-0">3</span>
+                        <div class="text-xs sm:text-sm text-slate-700 dark:text-slate-300">
+                            <strong>Résultat final :</strong><br>
+                            ${formatNumberFr(q.rawValue)} ${q.startSymbol} = ${formatNumberFr(q.rawValue)} &times; $10^{${q.deltaExp}}$ ${q.endSymbol} = <strong class="text-sky-600 dark:text-sky-400">${formatNumberFr(q.convertedValue)} ${q.endSymbol}</strong><br>
+                            <div class="mt-2 text-sm font-semibold text-slate-800 dark:text-slate-200">
+								En écriture scientifique normée : <strong class="font-mono text-sky-600 dark:text-sky-400 text-base">${expSci}</strong>
+							</div>
+                        </div>
+                    </div>
+                </div>
             `;
 
             if (isCorrect) {
@@ -975,13 +1050,13 @@
                 feedbackHeader.innerHTML = `<i class="fa-solid fa-circle-check text-2xl animate-bounce"></i> <span>Bravo ! Réponse exacte.</span>`;
                 
                 feedbackExplanation.innerHTML = `
-                    <div class="mt-2">
+                    <div>
                         <button id="toggle-detail-btn" type="button" class="text-xs text-emerald-700 dark:text-emerald-300 font-semibold hover:underline flex items-center space-x-1">
                             <i id="toggle-detail-icon" class="fa-solid fa-chevron-right text-[10px] transition-transform duration-200"></i>
-                            <span>Afficher le détail du calcul</span>
+                            <span>Afficher le détail du calcul pas à pas</span>
                         </button>
-                        <div id="success-detail-content" class="hidden mt-3 space-y-2 pt-2 border-t border-emerald-200 dark:border-emerald-800/60 animate-fade-in">
-                            ${detailedExplanationHtml}
+                        <div id="success-detail-content" class="hidden mt-3 animate-fade-in">
+                            ${detailedStepsHtml}
                         </div>
                     </div>
                 `;
@@ -996,7 +1071,7 @@
                         detailContent?.classList.toggle('hidden');
                         toggleIcon?.classList.toggle('rotate-90');
                         if (toggleBtn.querySelector('span')) {
-                            toggleBtn.querySelector('span').textContent = isHidden ? "Masquer le détail du calcul" : "Afficher le détail du calcul";
+                            toggleBtn.querySelector('span').textContent = isHidden ? "Masquer le détail du calcul pas à pas" : "Afficher le détail du calcul pas à pas";
                         }
                     });
                 }, 0);
@@ -1005,18 +1080,19 @@
                 feedbackCard.classList.add('bg-rose-50', 'dark:bg-rose-950/40', 'border-rose-200', 'dark:border-rose-800');
                 feedbackHeader.className = 'flex items-center space-x-3 font-bold text-lg text-rose-700 dark:text-rose-400';
                 
-                let headerText = "Inexact. Voici la correction pas à pas :";
+                let headerText = "Inexact. Voici la correction détaillée :";
                 let extraWarning = "";
                 
                 if (formatErrorMessage) {
                     headerText = "Format scientifique non respecté !";
-                    extraWarning = `<div class="p-3 mb-3 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 font-semibold text-xs sm:text-sm">
-                        <i class="fa-solid fa-triangle-exclamation mr-2 text-amber-500"></i> ${formatErrorMessage}
+                    extraWarning = `<div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200 font-medium text-xs sm:text-sm flex items-start space-x-2">
+                        <i class="fa-solid fa-triangle-exclamation text-amber-500 mt-0.5 text-base"></i>
+                        <div>${formatErrorMessage}</div>
                     </div>`;
                 }
                 
                 feedbackHeader.innerHTML = `<i class="fa-solid fa-circle-xmark text-2xl"></i> <span>${headerText}</span>`;
-                feedbackExplanation.innerHTML = extraWarning + detailedExplanationHtml;
+                feedbackExplanation.innerHTML = extraWarning + detailedStepsHtml;
             }
 
             if (submitBtn) submitBtn.disabled = true;
@@ -1072,7 +1148,6 @@
             });
         }
 
-        // Écouteurs de configuration (Niveaux, Modes, Options)
         document.querySelectorAll('.level-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.level-btn').forEach(b => {
@@ -1084,10 +1159,10 @@
 
                 state.level = parseInt(btn.dataset.level);
                 generateQuestion();
+                scrollToExercise();
             });
         });
 
-        // Fonction centralisée pour mettre à jour l'interdiction du QCM et l'état des boutons
         function updateModeAndScientificState() {
             const btnQcm = document.getElementById('btn-mode-qcm');
             const sciToggle = document.getElementById('scientific-toggle');
@@ -1122,7 +1197,6 @@
             }
         }
 
-        // Écouteur pour le changement de Mode (Saisie Libre vs QCM)
         document.querySelectorAll('.mode-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 if (btn.disabled) return;
@@ -1137,16 +1211,17 @@
                 state.mode = btn.dataset.mode;
                 updateModeAndScientificState();
                 renderQuestion();
+                scrollToExercise();
             });
         });
 
-        // Écouteur pour la case à cocher "Écriture Scientifique"
         document.getElementById('scientific-toggle')?.addEventListener('change', (e) => {
             state.requireScientific = e.target.checked;
             updateModeAndScientificState();
+            generateQuestion();
+            scrollToExercise();
         });
 
-        // Écouteurs de validation / saisie
         document.getElementById('submit-btn')?.addEventListener('click', () => checkAnswer());
 
         document.getElementById('user-answer')?.addEventListener('keypress', (e) => {
@@ -1155,11 +1230,11 @@
             }
         });
 
-        // Amélioration 3 : Navigation au clavier (Flèche Droite pour la question suivante)
         document.addEventListener('keydown', (e) => {
             const feedbackCard = document.getElementById('feedback-card');
             if (e.key === 'ArrowRight' && feedbackCard && !feedbackCard.classList.contains('hidden')) {
                 generateQuestion();
+                scrollToExercise();
             }
         });
 
@@ -1182,7 +1257,10 @@
             });
         });
 
-        document.getElementById('next-btn')?.addEventListener('click', generateQuestion);
+        document.getElementById('next-btn')?.addEventListener('click', () => {
+            generateQuestion();
+            scrollToExercise();
+        });
 
         document.getElementById('clear-history-btn')?.addEventListener('click', () => {
             state.history = [];
@@ -1194,6 +1272,12 @@
             state.stats.streak = 0;
             state.stats.total = 0;
             updateStatsDisplay();
+        });
+
+        document.getElementById('no-context-toggle')?.addEventListener('change', (e) => {
+            state.noContext = e.target.checked;
+            generateQuestion();
+            scrollToExercise();
         });
 
         window.onload = function() {

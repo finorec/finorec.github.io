@@ -102,17 +102,16 @@
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-		<!-- Configuration de l'Exercice (Alignement parfait ligne par ligne) -->
+		<!-- Configuration de l'Exercice -->
 		<section class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
 			<div class="grid grid-cols-1 lg:grid-cols-12 gap-6 border-b border-slate-200 dark:border-slate-800 pb-6">
 				
-				<!-- Colonne 1 : Choix du Niveau (Numéros à gauche) -->
+				<!-- Colonne 1 : Choix du Niveau -->
 				<div class="lg:col-span-5 flex flex-col">
 					<label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center h-6 mb-3">
 						<i class="fa-solid fa-layer-group mr-2 text-sky-500"></i> 1. Niveau de difficulté
 					</label>
 					<div class="flex flex-col gap-2">
-						<!-- Ligne 1 : Niveau 1 -->
 						<button data-level="1" class="level-btn relative px-4 py-3 rounded-xl border-2 text-left transition-all duration-200 border-sky-500 bg-sky-50/50 dark:bg-sky-950/30 text-sky-900 dark:text-sky-200 flex items-center space-x-3 h-[54px]">
 							<span class="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold shrink-0">Facile</span>
 							<div>
@@ -121,7 +120,6 @@
 							</div>
 						</button>
 
-						<!-- Ligne 2 : Niveau 2 -->
 						<button data-level="2" class="level-btn relative px-4 py-3 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center space-x-3 h-[54px]">
 							<span class="text-xs px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold shrink-0">Moyen</span>
 							<div>
@@ -130,7 +128,6 @@
 							</div>
 						</button>
 
-						<!-- Ligne 3 : Niveau 3 -->
 						<button data-level="3" class="level-btn relative px-4 py-3 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center space-x-3 h-[54px]">
 							<span class="text-xs px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 font-bold shrink-0">Avancé</span>
 							<div>
@@ -141,14 +138,12 @@
 					</div>
 				</div>
 
-				<!-- Colonne 2 : Mode d'exercice (3 colonnes) -->
+				<!-- Colonne 2 : Mode d'exercice -->
 				<div class="lg:col-span-3 flex flex-col">
 					<label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center h-6 mb-3">
 						<i class="fa-solid fa-gamepad mr-2 text-indigo-500"></i> 2. Mode de réponse
 					</label>
 					<div class="flex flex-col gap-2">
-				
-						<!-- Ligne 1 : Mode Saisie Libre -->
 						<button data-mode="free" id="btn-mode-free" class="mode-btn px-4 py-3 rounded-xl border-2 text-left transition-all duration-200 border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-900 dark:text-indigo-200 flex items-center space-x-3 h-[54px]">
 							<i class="fa-solid fa-keyboard text-lg text-indigo-500 shrink-0"></i>
 							<div>
@@ -157,7 +152,6 @@
 							</div>
 						</button>
 						
-						<!-- Ligne 2 : Mode QCM (Aligné exactement avec le Niveau 2 grâce à la même hauteur de bloc au-dessus) -->
 						<button data-mode="qcm" id="btn-mode-qcm" class="mode-btn px-4 py-3 rounded-xl border-2 text-left transition-all duration-200 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 flex items-center space-x-3 h-[54px]">
 							<i class="fa-solid fa-list-check text-lg text-slate-400 shrink-0"></i>
 							<div>
@@ -168,13 +162,12 @@
 					</div>
 				</div>
 
-				<!-- Colonne 3 : Options Avancées (4 colonnes) -->
+				<!-- Colonne 3 : Options Avancées -->
 				<div class="lg:col-span-4 flex flex-col">
 					<label class="text-xs uppercase font-bold tracking-wider text-slate-500 dark:text-slate-400 flex items-center h-6 mb-3">
 						<i class="fa-solid fa-sliders mr-2 text-emerald-500"></i> 3. Options
 					</label>
 					<div class="flex flex-col gap-2">
-						<!-- Ligne 1 : Écriture Scientifique -->
 						<label for="scientific-toggle" id="scientific-option-label" class="flex items-center cursor-pointer space-x-3 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors h-[54px]">
 							<input type="checkbox" id="scientific-toggle" class="sr-only peer">
 							<div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-sky-600 peer-disabled:opacity-50 relative shrink-0"></div>
@@ -184,7 +177,6 @@
 							</div>
 						</label>
 
-						<!-- Ligne 2 : Masquer le contexte (Aligne parfaitement avec le Niveau 2) -->
 						<label for="no-context-toggle" id="no-context-option-label" class="flex items-center cursor-pointer space-x-3 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors h-[54px]">
 							<input type="checkbox" id="no-context-toggle" class="sr-only peer">
 							<div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-slate-600 peer-checked:bg-sky-600 relative shrink-0"></div>
@@ -279,7 +271,7 @@
                 </div>
             </div>
 
-            <!-- Mode Saisie Libre Amélioré -->
+            <!-- Mode Saisie Libre -->
             <div id="free-input-container" class="space-y-3 max-w-2xl mx-auto">
                 <div class="relative flex flex-col sm:flex-row gap-3">
                     <div class="relative flex-grow">
@@ -292,7 +284,7 @@
                     </button>
                 </div>
 
-                <!-- Raccourcis clavier (style calculatrice) -->
+                <!-- Raccourcis clavier -->
                 <div class="flex items-center justify-center sm:justify-start gap-2 pt-1">
                     <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Raccourcis :</span>
                     <button type="button" data-insert="x10^" class="key-shortcut px-3 py-1.5 rounded-xl bg-slate-200/70 dark:bg-slate-800 hover:bg-sky-500 hover:text-white dark:hover:bg-sky-500 text-slate-700 dark:text-slate-300 font-mono text-xs font-bold border border-slate-300 dark:border-slate-700 transition-all active:scale-95 shadow-sm">
@@ -517,7 +509,7 @@
 
     <footer class="mt-auto py-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
         <p>Physique-Chimie • Classe de Seconde</p>
-        <p class="mt-1">Conçu avec l'aide de l'IA d'après les idées et les instructions d'un humain (FC v1.9)</p>
+        <p class="mt-1">Conçu avec l'aide de l'IA d'après les idées et les instructions d'un humain (FC v2.0)</p>
     </footer>
 
     <!-- JavaScript Logic -->
@@ -538,116 +530,115 @@
             {
                 name: 'Longueur', unitName: 'Mètre', symbol: 'm',
                 contexts: [
-                    { text: "Rayon atomique moyen de l'atome d'hydrogène", startPrefixes: ['p'], values: [25, 30, 53, 100] },
-                    { text: "Longueur d'onde de la lumière verte émise par un laser de TP", startPrefixes: ['n'], values: [520, 532, 550] },
-                    { text: "Longueur d'onde d'un rayonnement infrarouge en imagerie médicale", startPrefixes: ['μ'], values: [0.8, 1.5, 10] },
-                    { text: "Taille moyenne d'un virus comme celui de la grippe", startPrefixes: ['n'], values: [80, 100, 120] },
-                    { text: "Taille moyenne d'une cellule de muqueuse buccale observée au microscope", startPrefixes: ['μ'], values: [15, 30, 50] },
-                    { text: "Épaisseur moyenne d'un cheveu humain observé en cours de physique", startPrefixes: ['μ'], values: [50, 70, 100] },
-                    { text: "Taille moyenne d'une gouttelette d'eau dans un brouillard léger", startPrefixes: ['μ'], values: [10, 20, 40] },
-                    { text: "Distance parcourue par un sprinteur lors de l'épreuve du 100 mètres", startPrefixes: [''], values: [100] },
-                    { text: "Longueur de la piste d'un stade d'athlétisme olympique", startPrefixes: ['m'], values: [400] },
-                    { text: "Altitude du sommet du Mont Blanc", startPrefixes: ['k'], values: [4.81] },
-                    { text: "Distance d'une course de marathon en athlétisme", startPrefixes: ['k'], values: [42.195] }
+                    { text: "Rayon atomique moyen de l'atome d'hydrogène", allowedPrefixes: ['p'], baseValue: [2.5e-11, 3.0e-11, 5.3e-11, 1.0e-10] },
+                    { text: "Longueur d'onde de la lumière verte émise par un laser de TP", allowedPrefixes: ['n'], baseValue: [5.2e-7, 5.32e-7, 5.5e-7] },
+                    { text: "Longueur d'onde d'un rayonnement infrarouge en imagerie médicale", allowedPrefixes: ['μ'], baseValue: [8.0e-7, 1.5e-6, 1.0e-5] },
+                    { text: "Taille moyenne d'un virus comme celui de la grippe", allowedPrefixes: ['n'], baseValue: [8.0e-8, 1.0e-7, 1.2e-7] },
+                    { text: "Taille moyenne d'une cellule de muqueuse buccale observée au microscope", allowedPrefixes: ['μ'], baseValue: [1.5e-5, 3.0e-5, 5.0e-5] },
+                    { text: "Épaisseur moyenne d'un cheveu humain observé en cours de physique", allowedPrefixes: ['μ'], baseValue: [5.0e-5, 7.0e-5, 1.0e-4] },
+                    { text: "Taille moyenne d'une gouttelette d'eau dans un brouillard léger", allowedPrefixes: ['μ'], baseValue: [1.0e-5, 2.0e-5, 4.0e-5] },
+                    { text: "Distance parcourue par un sprinteur lors de l'épreuve du 100 mètres", allowedPrefixes: [''], baseValue: [100] },
+                    { text: "Longueur de la piste d'un stade d'athlétisme olympique", allowedPrefixes: ['m', ''], baseValue: [400] },
+                    { text: "Altitude du sommet du Mont Blanc", allowedPrefixes: ['k'], baseValue: [4810] },
+                    { text: "Distance d'une course de marathon en athlétisme", allowedPrefixes: ['k'], baseValue: [42195] }
                 ]
             },
             {
                 name: 'Masse', unitName: 'Gramme', symbol: 'g',
                 contexts: [
-                    { text: "Masse d'un comprimé d'aspirine ou de paracétamol pédiatrique", startPrefixes: ['m'], values: [100, 250, 500] },
-                    { text: "Masse du principe actif dans une gélule d'un traitement médical", startPrefixes: ['m'], values: [10, 25, 50] },
-                    { text: "Masse d'un grain de sel de table prélevé pour une expérience", startPrefixes: ['m'], values: [0.5, 1.0, 2.0] },
-                    { text: "Masse prélevée lors d'un titrage au TP de chimie", startPrefixes: [''], values: [0.25, 0.50, 1.20, 2.50] },
-                    { text: "Masse d'un ballon de football officiel", startPrefixes: [''], values: [410, 430, 450] },
-                    { text: "Masse d'une pomme consommée au petit-déjeuner", startPrefixes: [''], values: [120, 150, 180] },
-                    { text: "Masse d'un élève de seconde mesurée en cours d'EPS", startPrefixes: ['k'], values: [52, 58, 64, 70] },
-                    { text: "Masse du sac à dos complet d'un lycéen", startPrefixes: ['k'], values: [6.5, 8.0, 9.5] },
-                    { text: "Masse de dioxyde de carbone rejetée par un véhicule sur 1 km", startPrefixes: [''], values: [95, 110, 130] }
+                    { text: "Masse d'un comprimé d'aspirine ou de paracétamol pédiatrique", allowedPrefixes: ['m'], baseValue: [0.100, 0.250, 0.500] },
+                    { text: "Masse du principe actif dans une gélule d'un traitement médical", allowedPrefixes: ['m'], baseValue: [0.010, 0.025, 0.050] },
+                    { text: "Masse d'un grain de sel de table prélevé pour une expérience", allowedPrefixes: ['m'], baseValue: [0.0005, 0.001, 0.002] },
+                    { text: "Masse prélevée lors d'un titrage au TP de chimie", allowedPrefixes: [''], baseValue: [0.25, 0.50, 1.20, 2.50] },
+                    { text: "Masse d'un ballon de football officiel", allowedPrefixes: [''], baseValue: [410, 430, 450] },
+                    { text: "Masse d'une pomme consommée au petit-déjeuner", allowedPrefixes: [''], baseValue: [120, 150, 180] },
+                    { text: "Masse d'un élève de seconde mesurée en cours d'EPS", allowedPrefixes: ['k'], baseValue: [52000, 58000, 64000, 70000] },
+                    { text: "Masse du sac à dos complet d'un lycéen", allowedPrefixes: ['k'], baseValue: [6500, 8000, 9500] },
+                    { text: "Masse de dioxyde de carbone rejetée par un véhicule sur 1 km", allowedPrefixes: [''], baseValue: [95, 110, 130] }
                 ]
             },
             {
                 name: 'Fréquence', unitName: 'Hertz', symbol: 'Hz',
                 contexts: [
-                    { text: "Fréquence des ultrasons utilisés pour une échographie médicale de santé", startPrefixes: ['M'], values: [2.5, 5.0, 7.5, 12] },
-                    { text: "Fréquence de la note 'La3' émise par un diapason en cours de musique", startPrefixes: [''], values: [440] },
-                    { text: "Fréquence limite audible la plus aiguë pour l'oreille d'un jeune humain", startPrefixes: ['k'], values: [16, 18, 20] },
-                    { text: "Fréquence des signaux radio électromagnétiques de la bande FM", startPrefixes: ['M'], values: [88, 96.5, 102.5, 107.9] },
-                    { text: "Fréquence d'un signal Wi-Fi domestique usuel", startPrefixes: ['G'], values: [2.4, 5.0] },
-                    { text: "Fréquence des ondes lumineuses émises par un laser rouge", startPrefixes: ['T'], values: [430, 470] },
-                    { text: "Fréquence des battements cardiaques d'un athlète au repos", startPrefixes: [''], values: [1.0, 1.2, 1.5] },
-                    { text: "Fréquence du réseau électrique alternatif délivré aux prises", startPrefixes: [''], values: [50] }
+                    { text: "Fréquence des ultrasons utilisés pour une échographie médicale de santé", allowedPrefixes: ['M'], baseValue: [2.5e6, 5.0e6, 7.5e6, 1.2e7] },
+                    { text: "Fréquence de la note 'La3' émise par un diapason en cours de musique", allowedPrefixes: [''], baseValue: [440] },
+                    { text: "Fréquence limite audible la plus aiguë pour l'oreille d'un jeune humain", allowedPrefixes: ['k'], baseValue: [16000, 18000, 20000] },
+                    { text: "Fréquence des signaux radio électromagnétiques de la bande FM", allowedPrefixes: ['M'], baseValue: [88e6, 96.5e6, 102.5e6, 107.9e6] },
+                    { text: "Fréquence d'un signal Wi-Fi domestique usuel", allowedPrefixes: ['G'], baseValue: [2.4e9, 5.0e9] },
+                    { text: "Fréquence des ondes lumineuses émises par un laser rouge", allowedPrefixes: ['T'], baseValue: [4.3e14, 4.7e14] },
+                    { text: "Fréquence des battements cardiaques d'un athlète au repos", allowedPrefixes: [''], baseValue: [1.0, 1.2, 1.5] },
+                    { text: "Fréquence du réseau électrique alternatif délivré aux prises", allowedPrefixes: [''], baseValue: [50] }
                 ]
             },
             {
                 name: 'Temps', unitName: 'Seconde', symbol: 's',
                 contexts: [
-                    { text: "Période d'une onde sonore aiguë audible en TP de physique", startPrefixes: ['m'], values: [0.5, 1.0, 2.0] },
-                    { text: "Durée d'un flash d'appareil photo pour figer un mouvement sportif", startPrefixes: ['μ'], values: [100, 250, 500] },
-                    { text: "Temps de réaction moyen d'un cycliste attentif", startPrefixes: [''], values: [0.7, 0.8, 1.0] },
-                    { text: "Durée d'une impulsion d'un signal d'échographie médicale", startPrefixes: ['μ'], values: [1.5, 3.0, 5.0] },
-                    { text: "Période de rotation de la Terre sur elle-même (exprimée en s)", startPrefixes: ['k'], values: [86.4] },
-                    { text: "Temps mis par la lumière du Soleil pour atteindre la Terre", startPrefixes: [''], values: [500] },
-                    { text: "Durée d'une séance d'entraînement sportif de 45 minutes", startPrefixes: [''], values: [2700] }
+                    { text: "Période d'une onde sonore aiguë audible en TP de physique", allowedPrefixes: ['m'], baseValue: [0.0005, 0.001, 0.002] },
+                    { text: "Durée d'un flash d'appareil photo pour figer un mouvement sportif", allowedPrefixes: ['μ'], baseValue: [1.0e-4, 2.5e-4, 5.0e-4] },
+                    { text: "Temps de réaction moyen d'un cycliste attentif", allowedPrefixes: [''], baseValue: [0.7, 0.8, 1.0] },
+                    { text: "Durée d'une impulsion d'un signal d'échographie médicale", allowedPrefixes: ['μ'], baseValue: [1.5e-6, 3.0e-6, 5.0e-6] },
+                    { text: "Période de rotation de la Terre sur elle-même (exprimée en s)", allowedPrefixes: ['k'], baseValue: [86400] },
+                    { text: "Temps mis par la lumière du Soleil pour atteindre la Terre", allowedPrefixes: [''], baseValue: [500] },
+                    { text: "Durée d'une séance d'entraînement sportif de 45 minutes", allowedPrefixes: [''], baseValue: [2700] }
                 ]
             },
             {
                 name: 'Pression', unitName: 'Pascal', symbol: 'Pa',
                 contexts: [
-                    { text: "Pression atmosphérique normale au niveau de la mer", startPrefixes: ['k'], values: [101.3] },
-                    { text: "Pression atmosphérique normale au niveau de la mer", startPrefixes: [''], values: [101300] },
-                    { text: "Pression maximale mesurée lors de la systole cardiaque (tension artérielle)", startPrefixes: ['k'], values: [16, 18, 20] },
-                    { text: "Pression du gaz piégé dans un ballon de basket bien gonflé", startPrefixes: ['k'], values: [150, 180, 200] },
-                    { text: "Pression de gonflage recommandée pour un pneu de vélo de course", startPrefixes: ['k'], values: [600, 700, 800] },
-                    { text: "Pression sous l'eau à 10 mètres de profondeur en plongée sous-marine", startPrefixes: ['k'], values: [200] }
+                    { text: "Pression atmosphérique normale au niveau de la mer", allowedPrefixes: ['k', ''], baseValue: [101300] },
+                    { text: "Pression maximale mesurée lors de la systole cardiaque (tension artérielle)", allowedPrefixes: ['k'], baseValue: [16000, 18000, 20000] },
+                    { text: "Pression du gaz piégé dans un ballon de basket bien gonflé", allowedPrefixes: ['k'], baseValue: [150000, 180000, 200000] },
+                    { text: "Pression de gonflage recommandée pour un pneu de vélo de course", allowedPrefixes: ['k'], baseValue: [600000, 700000, 800000] },
+                    { text: "Pression sous l'eau à 10 mètres de profondeur en plongée sous-marine", allowedPrefixes: ['k'], baseValue: [200000] }
                 ]
             },
             {
                 name: 'Énergie', unitName: 'Joule', symbol: 'J',
                 contexts: [
-                    { text: "Énergie apportée par la digestion d'une barre de céréales pour le sport", startPrefixes: ['k'], values: [400, 600, 800] },
-                    { text: "Énergie cinétique d'un coureur de 60 kg sprintant à 20 km/h", startPrefixes: ['k'], values: [0.9, 1.2, 1.5] },
-                    { text: "Énergie cinétique d'une balle de tennis de table en plein échange", startPrefixes: [''], values: [0.1, 0.2, 0.3] },
-                    { text: "Énergie lumineuse reçue par un panneau solaire miniature de TP", startPrefixes: [''], values: [15, 30, 45] },
-                    { text: "Énergie consommée par une ampoule LED allumée pendant une heure", startPrefixes: ['k'], values: [36, 50, 72] }
+                    { text: "Énergie apportée par la digestion d'une barre de céréales pour le sport", allowedPrefixes: ['k'], baseValue: [400000, 600000, 800000] },
+                    { text: "Énergie cinétique d'un coureur de 60 kg sprintant à 20 km/h", allowedPrefixes: ['k'], baseValue: [900, 1200, 1500] },
+                    { text: "Énergie cinétique d'une balle de tennis de table en plein échange", allowedPrefixes: [''], baseValue: [0.1, 0.2, 0.3] },
+                    { text: "Énergie lumineuse reçue par un panneau solaire miniature de TP", allowedPrefixes: [''], baseValue: [15, 30, 45] },
+                    { text: "Énergie consommée par une ampoule LED allumée pendant une heure", allowedPrefixes: ['k'], baseValue: [36000, 50000, 72000] }
                 ]
             },
             {
                 name: 'Puissance', unitName: 'Watt', symbol: 'W',
                 contexts: [
-                    { text: "Puissance développée par un cycliste lors d'un sprint intense", startPrefixes: [''], values: [300, 450, 600, 800] },
-                    { text: "Puissance lumineuse émise par un pointeur laser de cours", startPrefixes: ['m'], values: [1.0, 2.0, 5.0] },
-                    { text: "Puissance d'un émetteur de signal Bluetooth de téléphone", startPrefixes: ['m'], values: [2.5, 10, 100] },
-                    { text: "Puissance électrique d'une lampe de bureau pour réviser", startPrefixes: [''], values: [8, 12, 15] },
-                    { text: "Puissance sonore maximale émise par un haut-parleur d'enceinte portable", startPrefixes: [''], values: [10, 20, 50] }
+                    { text: "Puissance développée par un cycliste lors d'un sprint intense", allowedPrefixes: [''], baseValue: [300, 450, 600, 800] },
+                    { text: "Puissance lumineuse émise par un pointeur laser de cours", allowedPrefixes: ['m'], baseValue: [0.001, 0.002, 0.005] },
+                    { text: "Puissance d'un émetteur de signal Bluetooth de téléphone", allowedPrefixes: ['m'], baseValue: [0.0025, 0.010, 0.100] },
+                    { text: "Puissance électrique d'une lampe de bureau pour réviser", allowedPrefixes: [''], baseValue: [8, 12, 15] },
+                    { text: "Puissance sonore maximale émise par un haut-parleur d'enceinte portable", allowedPrefixes: [''], baseValue: [10, 20, 50] }
                 ]
             },
             {
                 name: 'Tension Électrique', unitName: 'Volt', symbol: 'V',
                 contexts: [
-                    { text: "Tension mesurée lors d'un électrocardiogramme (ECG) du cœur", startPrefixes: ['m'], values: [1.0, 2.5, 5.0] },
-                    { text: "Tension mesurée lors d'un électroencéphalogramme (EEG) cérébral", startPrefixes: ['μ'], values: [10, 50, 100] },
-                    { text: "Tension aux bornes d'une pile ronde usuelle R6 / AA en TP", startPrefixes: [''], values: [1.5] },
-                    { text: "Tension de la batterie d'un smartphone récent", startPrefixes: [''], values: [3.8, 4.2] },
-                    { text: "Tension efficace délivrée par une prise du secteur domestique", startPrefixes: [''], values: [230] }
+                    { text: "Tension mesurée lors d'un électrocardiogramme (ECG) du cœur", allowedPrefixes: ['m'], baseValue: [0.001, 0.0025, 0.005] },
+                    { text: "Tension mesurée lors d'un électroencéphalogramme (EEG) cérébral", allowedPrefixes: ['μ'], baseValue: [1.0e-5, 5.0e-5, 1.0e-4] },
+                    { text: "Tension aux bornes d'une pile ronde usuelle R6 / AA en TP", allowedPrefixes: [''], baseValue: [1.5] },
+                    { text: "Tension de la batterie d'un smartphone récent", allowedPrefixes: [''], baseValue: [3.8, 4.2] },
+                    { text: "Tension efficace délivrée par une prise du secteur domestique", allowedPrefixes: [''], baseValue: [230] }
                 ]
             },
             {
                 name: 'Courant Électrique', unitName: 'Ampère', symbol: 'A',
                 contexts: [
-                    { text: "Intensité du courant traversant un nerf humain lors d'un influx nerveux", startPrefixes: ['μ'], values: [1, 5, 10] },
-                    { text: "Intensité du courant traversant une DEL (diode électroluminescente) en TP", startPrefixes: ['m'], values: [10, 15, 20] },
-                    { text: "Intensité du courant débité par un chargeur de smartphone en charge rapide", startPrefixes: [''], values: [2.0, 3.0] },
-                    { text: "Intensité du courant dans un radiateur électrique de chambre", startPrefixes: [''], values: [6.5, 8.7, 10] }
+                    { text: "Intensité du courant traversant un nerf humain lors d'un influx nerveux", allowedPrefixes: ['μ'], baseValue: [1e-6, 5e-6, 1e-5] },
+                    { text: "Intensité du courant traversant une DEL (diode électroluminescente) en TP", allowedPrefixes: ['m'], baseValue: [0.010, 0.015, 0.020] },
+                    { text: "Intensité du courant débité par un chargeur de smartphone en charge rapide", allowedPrefixes: [''], baseValue: [2.0, 3.0] },
+                    { text: "Intensité du courant dans un radiateur électrique de chambre", allowedPrefixes: ['m', '', 'k'], baseValue: [6.5, 8.7, 10.0] }
                 ]
             },
             {
                 name: 'Volume', unitName: 'Litre', symbol: 'L',
                 contexts: [
-                    { text: "Volume de sang total contenu dans le corps d'un adulte", startPrefixes: [''], values: [4.5, 5.0, 5.5] },
-                    { text: "Volume d'une goutte d'eau tombant d'une burette graduée au TP", startPrefixes: ['m'], values: [50] },
-                    { text: "Volume prélevé avec une pipette jaugée lors d'une solution fille", startPrefixes: ['m'], values: [10, 20, 25] },
-                    { text: "Volume d'une bouteille d'eau minérale pour la séance de sport", startPrefixes: [''], values: [0.5, 1.0, 1.5] },
-                    { text: "Volume d'air inspiré à chaque respiration au repos (volume courant)", startPrefixes: ['m'], values: [500] }
+                    { text: "Volume de sang total contenu dans le corps d'un adulte", allowedPrefixes: [''], baseValue: [4.5, 5.0, 5.5] },
+                    { text: "Volume d'une goutte d'eau tombant d'une burette graduée au TP", allowedPrefixes: ['m'], baseValue: [0.050] },
+                    { text: "Volume prélevé avec une pipette jaugée lors d'une solution fille", allowedPrefixes: ['m'], baseValue: [0.010, 0.020, 0.025] },
+                    { text: "Volume d'une bouteille d'eau minérale pour la séance de sport", allowedPrefixes: [''], baseValue: [0.5, 1.0, 1.5] },
+                    { text: "Volume d'air inspiré à chaque respiration au repos (volume courant)", allowedPrefixes: ['m'], baseValue: [0.500] }
                 ]
             }
         ];
@@ -690,7 +681,6 @@
             });
         }
 
-		// Fonction pour repositionner l'affichage sur les statistiques et la question
         function scrollToExercise() {
             const statsSection = document.querySelector('section.space-y-6');
             const exerciseCard = document.getElementById('exercise-card');
@@ -731,33 +721,34 @@
 		function generateQuestion() {
             const unitObj = units[Math.floor(Math.random() * units.length)];
             let contextText = "";
-            let rawValue = 0;
-            let availableStartSymbols = [];
+            let baseValReal = 0; 
+            let startPrefix, endPrefix;
 
 			if (state.noContext) {
                 contextText = "Entraînement direct (sans contexte).";
                 const exp = Math.floor(Math.random() * 6) - 2; 
                 const mantissa = (Math.random() * 9) + 1;
                 const sigFigs = Math.floor(Math.random() * 3) + 2; 
-                const rawValExact = mantissa * Math.pow(10, exp);
-                rawValue = parseFloat(rawValExact.toPrecision(sigFigs));
-                availableStartSymbols = prefixes.map(p => p.symbol);
+                baseValReal = parseFloat((mantissa * Math.pow(10, exp)).toPrecision(sigFigs));
+                
+                startPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
             } else {
                 const contextObj = unitObj.contexts[Math.floor(Math.random() * unitObj.contexts.length)];
                 contextText = contextObj.text;
-                rawValue = contextObj.values[Math.floor(Math.random() * contextObj.values.length)];
-                availableStartSymbols = contextObj.startPrefixes;
+                
+                baseValReal = contextObj.baseValue[Math.floor(Math.random() * contextObj.baseValue.length)];
+                
+                const allowedStartSymbols = contextObj.allowedPrefixes || [''];
+                const chosenStartSymbol = allowedStartSymbols[Math.floor(Math.random() * allowedStartSymbols.length)];
+                startPrefix = prefixes.find(p => p.symbol === chosenStartSymbol) || prefixes.find(p => p.exp === 0);
             }
 
-            const chosenStartSymbol = availableStartSymbols[Math.floor(Math.random() * availableStartSymbols.length)];
-            let startPrefix = prefixes.find(p => p.symbol === chosenStartSymbol) || prefixes.find(p => p.exp === 0);
-
-            let endPrefix;
             if (state.level === 1) {
                 endPrefix = prefixes.find(p => p.exp === 0);
+
                 if (startPrefix.symbol === endPrefix.symbol) {
-                    const allNonBase = prefixes.filter(p => p.symbol !== endPrefix.symbol);
-                    startPrefix = allNonBase[Math.floor(Math.random() * allNonBase.length)];
+                    const alternativePrefixes = prefixes.filter(p => p.symbol !== endPrefix.symbol && Math.abs(p.exp) <= 6);
+                    startPrefix = alternativePrefixes[Math.floor(Math.random() * alternativePrefixes.length)];
                 }
             } else if (state.level === 2) {
                 let validPrefixes = prefixes.filter(p => {
@@ -770,6 +761,8 @@
                 let validPrefixes = prefixes.filter(p => p.symbol !== startPrefix.symbol);
                 endPrefix = validPrefixes[Math.floor(Math.random() * validPrefixes.length)];
             }
+
+            const rawValue = baseValReal / Math.pow(10, startPrefix.exp);
 
             const deltaExp = startPrefix.exp - endPrefix.exp;
             const convertedValue = rawValue * Math.pow(10, deltaExp);
@@ -1232,6 +1225,7 @@
         window.onload = function() {
             generateQuestion();
             updateModeAndScientificState();
+            scrollToExercise(); // Alignement vertical dès le chargement initial
         };
     </script>
 </body>

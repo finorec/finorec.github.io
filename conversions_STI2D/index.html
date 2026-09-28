@@ -509,7 +509,7 @@
 
     <footer class="mt-auto py-6 border-t border-slate-200 dark:border-slate-800 text-center text-xs text-slate-500 dark:text-slate-400">
         <p>Spécialité Physique-Chimie et Mathématiques (PCM) • Première et terminale STI2D</p>
-        <p class="mt-1">Conçu avec l'aide de l'IA d'après les idées et les instructions d'un humain (FC v2.0)</p>
+        <p class="mt-1">Conçu avec l'aide de l'IA d'après les idées et les instructions d'un humain (FC v2.1)</p>
     </footer>
 
     <!-- JavaScript Logic -->
@@ -527,7 +527,7 @@
         ];
 
         // Tableau units mis à jour pour la STI2D avec baseValue (unité SI) et allowedPrefixes
-        const units = [
+		const units = [
             {
                 name: 'Tension Électrique', unitName: 'Volt', symbol: 'V',
                 contexts: [
@@ -540,7 +540,19 @@
                     { text: "Tension secteur domestique standard en France", allowedPrefixes: [''], baseValue: [230] },
                     { text: "Tension aux bornes d'une pile bouton pour montre (CR2032)", allowedPrefixes: [''], baseValue: [3.0] },
                     { text: "Tension aux bornes de la batterie d'un smartphone", allowedPrefixes: ['m', ''], baseValue: [3.2, 3.7, 3.85, 4.2] },
-                    { text: "Tension d'une batterie de voiture thermique au repos", allowedPrefixes: [''], baseValue: [12.6] }
+                    { text: "Tension d'une batterie de voiture thermique au repos", allowedPrefixes: [''], baseValue: [12.6] },
+                    { text: "Tension de ligne d'un caténaire de train régional", allowedPrefixes: ['k'], baseValue: [1500, 25000] },
+                    { text: "Tension de fonctionnement d'un tube d'écran rétro d'oscilloscope", allowedPrefixes: ['k'], baseValue: [2000, 5000] },
+                    { text: "Tension de seuil d'une diode électroluminescente (LED)", allowedPrefixes: [''], baseValue: [1.8, 2.1, 3.2] },
+                    { text: "Signal de commande logique d'un automate industriel", allowedPrefixes: [''], baseValue: [24] },
+                    { text: "Bruit de fond résiduel sur une ligne de mesure haute précision", allowedPrefixes: ['μ'], baseValue: [5e-6, 1.2e-5, 4.5e-5] },
+                    { text: "Tension d'une pile bâton standard AA / AAA usuelle", allowedPrefixes: [''], baseValue: [1.2, 1.5] },
+                    { text: "Tension de sortie du chargeur d'un ordinateur portable moderne (USB-C Power Delivery)", allowedPrefixes: [''], baseValue: [19, 20] },
+                    { text: "Tension aux bornes de la batterie d'une trottinette électrique", allowedPrefixes: [''], baseValue: [36, 48] },
+                    { text: "Tension délivrée par une pile monobloc 9V pour détecteur de fumée", allowedPrefixes: [''], baseValue: [9.0] },
+                    { text: "Tension d'une clôture électrique pour animaux de pâturage", allowedPrefixes: ['k'], baseValue: [4000, 8000, 10000] },
+                    { text: "Impulsion électrique d'un électrocardiogramme (ECG) mesurée sur la peau", allowedPrefixes: ['m'], baseValue: [0.0005, 0.001, 0.0025] },
+                    { text: "Tension d'allumage d'une bougie de voiture à essence", allowedPrefixes: ['k'], baseValue: [12000, 20000, 30000] }
                 ]
             },
             {
@@ -554,7 +566,18 @@
                     { text: "Courant consommé par une DEL (LED) voyant d'affichage", allowedPrefixes: ['m'], baseValue: [0.005, 0.010, 0.015, 0.020] },
                     { text: "Courant de charge USB rapide d'un smartphone moderne", allowedPrefixes: ['m', ''], baseValue: [1.5, 2.1, 2.4, 3.0] },
                     { text: "Courant consommé par une plaque à induction en pleine puissance", allowedPrefixes: [''], baseValue: [16, 20, 32] },
-                    { text: "Courant traversant une ampoule LED domestique de 10W", allowedPrefixes: ['m'], baseValue: [0.043, 0.045, 0.050] }
+                    { text: "Courant traversant une ampoule LED domestique de 10W", allowedPrefixes: ['m'], baseValue: [0.043, 0.045, 0.050] },
+                    { text: "Courant consommé par une horloge à quartz en veille", allowedPrefixes: ['μ', 'n'], baseValue: [1e-6, 3e-6, 5e-7] },
+                    { text: "Courant de soudage d'un poste à arc industriel", allowedPrefixes: [''], baseValue: [80, 150, 250] },
+                    { text: "Courant délivré par un petit module solaire souple", allowedPrefixes: ['m'], baseValue: [0.05, 0.15, 0.35] },
+                    { text: "Intensité d'un éclair lors d'un orage violent", allowedPrefixes: ['k'], baseValue: [10000, 30000, 50000] },
+                    { text: "Courant maximal autorisé sur un disjoncteur de prise de courant domestique", allowedPrefixes: [''], baseValue: [16] },
+                    { text: "Courant consommé par un grille-pain en fonctionnement", allowedPrefixes: [''], baseValue: [3.5, 4.5, 6.0] },
+                    { text: "Courant absorbé par une montre connectée en charge", allowedPrefixes: ['m'], baseValue: [0.15, 0.3, 0.5] },
+                    { text: "Courant consommé par un lave-linge en phase de chauffe de l'eau", allowedPrefixes: [''], baseValue: [8.5, 10] },
+                    { text: "Courant débité par une pile bouton usagée", allowedPrefixes: ['m', 'μ'], baseValue: [0.0002, 0.001, 0.005] },
+                    { text: "Courant traversant un défibrillateur cardiaque externe lors de l'impulsion", allowedPrefixes: [''], baseValue: [30, 50] },
+                    { text: "Courant absorbé par une console de jeux portable en fonctionnement", allowedPrefixes: [''], baseValue: [1.2, 2.0] }
                 ]
             },
             {
@@ -569,7 +592,19 @@
                     { text: "Puissance nominale d'un four à micro-ondes", allowedPrefixes: [''], baseValue: [700, 800, 900, 1000] },
                     { text: "Puissance d'une bouilloire électrique rapide", allowedPrefixes: ['k', ''], baseValue: [1800, 2200, 2400] },
                     { text: "Puissance absorbée par une console de jeu vidéo moderne en charge", allowedPrefixes: [''], baseValue: [160, 200, 220] },
-                    { text: "Puissance d'une ampoule de phare de voiture", allowedPrefixes: [''], baseValue: [55, 60] }
+                    { text: "Puissance d'une ampoule de phare de voiture", allowedPrefixes: [''], baseValue: [55, 60] },
+                    { text: "Puissance de calcul thermique dissipée par un processeur graphique (GPU)", allowedPrefixes: [''], baseValue: [120, 250, 450] },
+                    { text: "Puissance fournie par un réacteur nucléaire de centrale électrique", allowedPrefixes: ['M', 'G'], baseValue: [900e6, 1300e6, 1500e6] },
+                    { text: "Puissance lumineuse d'un laser de découpe de précision", allowedPrefixes: ['k'], baseValue: [1000, 4000, 10000] },
+                    { text: "Puissance absorbée par un sèche-cheveux domestique", allowedPrefixes: ['k'], baseValue: [1200, 1800, 2200] },
+                    { text: "Puissance moyenne reçue par un panneau solaire d'habitation", allowedPrefixes: ['k', ''], baseValue: [300, 1500, 3000] },
+                    { text: "Puissance thermique émise par un corps humain au repos", allowedPrefixes: [''], baseValue: [80, 100, 120] },
+                    { text: "Puissance d'un aspirateur balai sans fil moderne", allowedPrefixes: [''], baseValue: [250, 450, 600] },
+                    { text: "Puissance d'une tondeuse à gazon électrique de jardin", allowedPrefixes: ['k'], baseValue: [1400, 1800] },
+                    { text: "Puissance d'un fer à repasser avec centrale vapeur", allowedPrefixes: ['k'], baseValue: [2200, 2600] },
+                    { text: "Puissance consommée par un téléviseur LED 55 pouces allumé", allowedPrefixes: [''], baseValue: [65, 95, 130] },
+                    { text: "Puissance d'un chargeur de téléphone intelligent rapide", allowedPrefixes: [''], baseValue: [20, 45, 67, 120] },
+                    { text: "Puissance sonore maximale restituée par une enceinte Bluetooth nomade", allowedPrefixes: [''], baseValue: [10, 20, 40] }
                 ]
             },
             {
@@ -582,7 +617,16 @@
                     { text: "Énergie cinétique d'un piéton marchant à 5 km/h", allowedPrefixes: [''], baseValue: [60, 75, 90] },
                     { text: "Énergie cinétique d'une trottinette électrique lancée à 25 km/h", allowedPrefixes: ['k', ''], baseValue: [1800, 2500, 3200] },
                     { text: "Énergie apportée par la digestion d'une pomme (approx. 80 kcal)", allowedPrefixes: ['k'], baseValue: [335000] },
-                    { text: "Énergie perdue par une box internet laissée allumée un jour entier", allowedPrefixes: ['k'], baseValue: [864000, 1200000, 1500000] }
+                    { text: "Énergie perdue par une box internet laissée allumée un jour entier", allowedPrefixes: ['k'], baseValue: [864000, 1200000, 1500000] },
+                    { text: "Énergie d'un choc subit par une coque de smartphone lors d'une chute", allowedPrefixes: [''], baseValue: [5, 12, 25] },
+                    { text: "Énergie stockée dans un condensateur de flash d'appareil photo", allowedPrefixes: [''], baseValue: [20, 50, 100] },
+                    { text: "Énergie consommée par une charge de lave-linge en cycle éco", allowedPrefixes: ['M'], baseValue: [2.5e6, 3.6e6] },
+                    { text: "Énergie libérée par la combustion d'un litre d'essence", allowedPrefixes: ['M'], baseValue: [3.2e7] },
+                    { text: "Énergie calorifique nécessaire pour faire bouillir un bol d'eau du matin", allowedPrefixes: ['k'], baseValue: [100000, 150000] },
+                    { text: "Énergie métabolique dépensée lors d'un footing de 30 minutes", allowedPrefixes: ['M', 'k'], baseValue: [1.2e6, 1.5e6] },
+                    { text: "Énergie consommée par une ampoule LED allumée pendant toute une nuit (8h)", allowedPrefixes: ['k'], baseValue: [288000, 432000] },
+                    { text: "Énergie cinétique d'un ballon de football lors d'une frappe puissante", allowedPrefixes: [''], baseValue: [100, 150, 220] },
+                    { text: "Énergie nécessaire pour recharger complètement un ordinateur portable", allowedPrefixes: ['k'], baseValue: [180000, 250000] }
                 ]
             },
             {
@@ -596,7 +640,16 @@
                     { text: "Fréquence du réseau électrique européen domestique", allowedPrefixes: [''], baseValue: [50] },
                     { text: "Fréquence d'affichage d'un écran de smartphone fluide (Gaming)", allowedPrefixes: [''], baseValue: [60, 90, 120] },
                     { text: "Fréquence d'une note de musique standard (le La 3 du diapason)", allowedPrefixes: [''], baseValue: [440] },
-                    { text: "Fréquence d'échantillonnage audio Haute Définition (Hi-Res)", allowedPrefixes: ['k'], baseValue: [44100, 48000, 96000, 192000] }
+                    { text: "Fréquence d'échantillonnage audio Haute Définition (Hi-Res)", allowedPrefixes: ['k'], baseValue: [44100, 48000, 96000, 192000] },
+                    { text: "Fréquence d'une station de radio FM régionale", allowedPrefixes: ['M'], baseValue: [8.8e7, 9.6e7, 1.04e8] },
+                    { text: "Fréquence des ultrasons utilisés en échographie médicale", allowedPrefixes: ['M'], baseValue: [2.5e6, 5e6, 1e7] },
+                    { text: "Fréquence de rotation d'un disque dur d'ordinateur de bureau", allowedPrefixes: [''], baseValue: [90, 120] },
+                    { text: "Fréquence des micro-ondes émises par un four domestique", allowedPrefixes: ['G'], baseValue: [2.45e9] },
+                    { text: "Rythme des battements de cœur d'un adulte au repos (exprimé en Hz)", allowedPrefixes: [''], baseValue: [1.0, 1.2, 1.4] },
+                    { text: "Fréquence de battement des ailes d'un colibri ou d'une abeille", allowedPrefixes: [''], baseValue: [50, 120, 200] },
+                    { text: "Fréquence d'une télécommande de garage sans fil (bande RF)", allowedPrefixes: ['M'], baseValue: [4.3392e8, 8.68e8] },
+                    { text: "Fréquence du signal du réseau cellulaire 4G / 5G", allowedPrefixes: ['G', 'M'], baseValue: [800e6, 1.8e9, 2.6e9, 3.5e9] },
+                    { text: "Fréquence du clignotant d'un véhicule automobile", allowedPrefixes: [''], baseValue: [1.5, 2.0] }
                 ]
             },
             {
@@ -609,7 +662,15 @@
                     { text: "Shunt de précision pour la mesure de courant forte intensité", allowedPrefixes: ['m'], baseValue: [0.001, 0.005, 0.010, 0.050] },
                     { text: "Résistance moyenne du corps humain en environnement sec", allowedPrefixes: ['k'], baseValue: [2000, 5000, 10000] },
                     { text: "Résistance interne d'un haut-parleur de salon ou casque audio", allowedPrefixes: [''], baseValue: [4, 8, 16, 32] },
-                    { text: "Résistance d'un filament de chauffe-eau électrique classique", allowedPrefixes: [''], baseValue: [18, 25, 30] }
+                    { text: "Résistance d'un filament de chauffe-eau électrique classique", allowedPrefixes: [''], baseValue: [18, 25, 30] },
+                    { text: "Résistance d'une ligne de câble Ethernet sur une longueur importante", allowedPrefixes: [''], baseValue: [12, 25, 48] },
+                    { text: "Résistance de mise à la terre d'un bâtiment individuel", allowedPrefixes: [''], baseValue: [15, 35, 75] },
+                    { text: "Résistance d'une thermistance CTN pour capteur météo", allowedPrefixes: ['k'], baseValue: [10000, 47000] },
+                    { text: "Résistance électrique d'une piste en cuivre fine sur circuit imprimé", allowedPrefixes: ['m'], baseValue: [0.015, 0.045, 0.12] },
+                    { text: "Résistance d'une résistance de protection de LED standard", allowedPrefixes: [''], baseValue: [220, 330, 470] },
+                    { text: "Résistance du filament d'une ampoule de phare de voiture", allowedPrefixes: [''], baseValue: [2.4, 3.0] },
+                    { text: "Résistance d'un mètre de fil de cuivre de rallonge électrique", allowedPrefixes: ['m'], baseValue: [0.01, 0.02, 0.05] },
+                    { text: "Résistance thermique d'un capteur de sèche-linge", allowedPrefixes: ['k'], baseValue: [5000, 12000] }
                 ]
             },
             {
@@ -622,7 +683,17 @@
                     { text: "Pression atmosphérique moyenne au niveau de la mer", allowedPrefixes: ['k', ''], baseValue: [101300] },
                     { text: "Pression de gonflage conseillée pour un pneu de VTT", allowedPrefixes: ['k'], baseValue: [180000, 220000, 250000] },
                     { text: "Pression relative exercée au fond d'un grand bassin de piscine (3 m)", allowedPrefixes: ['k'], baseValue: [30000] },
-                    { text: "Pression de vapeur produite par une machine à expresso", allowedPrefixes: ['M'], baseValue: [1.5e6] }
+                    { text: "Pression de vapeur produite par une machine à expresso", allowedPrefixes: ['M'], baseValue: [1.5e6] },
+                    { text: "Pression au sein d'une bouteille de plongée sous-marine remplie", allowedPrefixes: ['M'], baseValue: [2e7, 3e7] },
+                    { text: "Dépression générée par un aspirateur ménager", allowedPrefixes: ['k'], baseValue: [15000, 22000] },
+                    { text: "Pression du gaz de ville dans le réseau de distribution domestique", allowedPrefixes: ['m', 'k'], baseValue: [2000, 3700] },
+                    { text: "Pression dans une chambre à vide d'expérimentation laboratoire", allowedPrefixes: ['m', 'μ'], baseValue: [0.1, 0.001, 1e-5] },
+                    { text: "Pression de gonflage recommandée pour un pneu de voiture de tourisme", allowedPrefixes: ['k'], baseValue: [220000, 250000] },
+                    { text: "Pression sanguine artérielle maximale lors de la contraction du cœur (systolique)", allowedPrefixes: ['k'], baseValue: [16000, 18000] },
+                    { text: "Pression sous la lame d'un patin à glace au contact du sol", allowedPrefixes: ['M'], baseValue: [2.5e6, 5e6] },
+                    { text: "Pression exercée par un bouchon de champagne dans sa bouteille", allowedPrefixes: ['k'], baseValue: [600000, 800000] },
+                    { text: "Pression d'un nettoyeur haute pression d'extérieur (type Kärcher)", allowedPrefixes: ['M'], baseValue: [1.1e7, 1.5e7, 1.8e7] },
+                    { text: "Pression de la vapeur à l'intérieur d'un autocuiseur (cocotte-minute)", allowedPrefixes: ['k'], baseValue: [180000, 200000] }
                 ]
             },
             {
@@ -636,7 +707,19 @@
                     { text: "Diamètre moyen d'un cheveu humain", allowedPrefixes: ['μ'], baseValue: [5e-5, 7e-5, 1e-4] },
                     { text: "Longueur d'une piscine olympique officielle", allowedPrefixes: [''], baseValue: [50] },
                     { text: "Longueur d'onde de la lumière rouge émise par un pointeur laser", allowedPrefixes: ['n'], baseValue: [6.328e-7, 6.5e-7] },
-                    { text: "Taille moyenne d'une bactérie courante (E. Coli)", allowedPrefixes: ['μ'], baseValue: [2e-6] }
+                    { text: "Taille moyenne d'une bactérie courante (E. Coli)", allowedPrefixes: ['μ'], baseValue: [2e-6] },
+                    { text: "Altitude d'un satellite d'observation en orbite basse", allowedPrefixes: ['k'], baseValue: [400000, 800000] },
+                    { text: "Distance entre deux pylônes d'une ligne de transport électrique", allowedPrefixes: [''], baseValue: [250, 400, 500] },
+                    { text: "Diamètre d'une particule de poussière fine en suspension (PM2.5)", allowedPrefixes: ['μ'], baseValue: [2.5e-6] },
+                    { text: "Longueur d'un câble d'interconnexion sous-marin transatlantique", allowedPrefixes: ['k'], baseValue: [6000000] },
+                    { text: "Course utile d'un bras de robot d'assemblage mécanique", allowedPrefixes: ['m', ''], baseValue: [0.35, 0.80, 1.2] },
+                    { text: "Taille moyenne d'un grain de sable sur une plage", allowedPrefixes: ['m', 'μ'], baseValue: [0.0002, 0.0005] },
+                    { text: "Épaisseur d'un écran en verre trempé de smartphone", allowedPrefixes: ['m'], baseValue: [0.0003, 0.0005] },
+                    { text: "Hauteur moyenne de la Tour Eiffel", allowedPrefixes: [''], baseValue: [330] },
+                    { text: "Diamètre d'un brin d'ADN humain", allowedPrefixes: ['n'], baseValue: [2.5e-9] },
+                    { text: "Longueur d'un terrain de football officiel", allowedPrefixes: [''], baseValue: [105] },
+                    { text: "Taille d'une goutte d'eau de pluie fine (bruine)", allowedPrefixes: ['m', 'μ'], baseValue: [0.0002, 0.0005] },
+                    { text: "Épaisseur d'une lame de couteau de cuisine", allowedPrefixes: ['m'], baseValue: [0.0015, 0.0025] }
                 ]
             },
             {
@@ -649,7 +732,19 @@
                     { text: "Masse d'un paquet de farine ménager", allowedPrefixes: ['k', ''], baseValue: [1000] },
                     { text: "Masse d'une pièce de 2 Euros en circulation", allowedPrefixes: [''], baseValue: [8.5] },
                     { text: "Masse d'une pomme de taille moyenne", allowedPrefixes: [''], baseValue: [150, 180, 200] },
-                    { text: "Masse maximale autorisée pour une valise cabine d'avion", allowedPrefixes: ['k'], baseValue: [8000, 10000, 12000] }
+                    { text: "Masse maximale autorisée pour une valise cabine d'avion", allowedPrefixes: ['k'], baseValue: [8000, 10000, 12000] },
+                    { text: "Masse d'un essieu de motrice de train à grande vitesse", allowedPrefixes: ['k'], baseValue: [1500000, 2000000] },
+                    { text: "Masse d'un échantillon chimique pour dosage de laboratoire", allowedPrefixes: ['m', 'μ'], baseValue: [0.005, 0.025, 0.150] },
+                    { text: "Masse d'un véhicule électrique urbain compact sans batterie", allowedPrefixes: ['k'], baseValue: [900000, 1200000] },
+                    { text: "Masse de la poussière accumulée sur les pales d'un ventilateur PC", allowedPrefixes: ['m'], baseValue: [0.2, 0.5, 1.2] },
+                    { text: "Masse d'une pincée de sel de cuisine usuelle", allowedPrefixes: [''], baseValue: [0.5, 1.0, 1.5] },
+                    { text: "Masse d'un œuf de poule moyen (taille M)", allowedPrefixes: [''], baseValue: [55, 60, 65] },
+                    { text: "Masse d'une brique de lait ou jus de fruit d'un litre", allowedPrefixes: ['k', ''], baseValue: [1000] },
+                    { text: "Masse d'un trombone en métal de bureau", allowedPrefixes: [''], baseValue: [1.0] },
+                    { text: "Masse d'une tablette de chocolat standard", allowedPrefixes: [''], baseValue: [100, 200] },
+                    { text: "Masse d'un grain de riz blanc cru", allowedPrefixes: ['m'], baseValue: [0.02, 0.03] },
+                    { text: "Masse d'un smartphone moderne avec coque de protection", allowedPrefixes: [''], baseValue: [180, 220, 250] },
+                    { text: "Masse d'une boule de pétanque de compétition", allowedPrefixes: [''], baseValue: [680, 720, 750] }
                 ]
             },
             {
@@ -661,7 +756,16 @@
                     { text: "Temps de réponse de la matrice de pixels d'un écran Gamer", allowedPrefixes: ['m'], baseValue: [0.001, 0.002, 0.004] },
                     { text: "Temps de réaction moyen d'un conducteur humain face à un obstacle", allowedPrefixes: [''], baseValue: [0.75, 1.0, 1.2] },
                     { text: "Durée moyenne d'un clignement d'œil humain", allowedPrefixes: ['m', ''], baseValue: [0.1, 0.15, 0.2] },
-                    { text: "Durée d'une minute mesurée au chronomètre", allowedPrefixes: [''], baseValue: [60] }
+                    { text: "Durée d'une minute mesurée au chronomètre", allowedPrefixes: [''], baseValue: [60] },
+                    { text: "Temps de recharge d'un condensateur d'alimentation stabilisée", allowedPrefixes: ['m'], baseValue: [0.005, 0.015, 0.050] },
+                    { text: "Temps de basculement d'une porte logique CMOS", allowedPrefixes: ['n', 'p'], baseValue: [1e-9, 5e-9, 2e-10] },
+                    { text: "Durée d'émission d'un flash photo électronique", allowedPrefixes: ['m', 'μ'], baseValue: [1e-4, 5e-4, 1e-3] },
+                    { text: "Temps nécessaire pour le démarrage complet d'un serveur informatique", allowedPrefixes: [''], baseValue: [45, 90, 180] },
+                    { text: "Temps d'infusion recommandé pour un sachet de thé", allowedPrefixes: [''], baseValue: [180, 240, 300] },
+                    { text: "Durée de la cuisson d'un œuf à la coque", allowedPrefixes: [''], baseValue: [180] },
+                    { text: "Temps d'exposition photo d'un cliché de jour rapide", allowedPrefixes: ['m', 'μ'], baseValue: [0.001, 0.002, 0.00025] },
+                    { text: "Période de rotation de la Terre sur elle-même (un jour)", allowedPrefixes: ['k'], baseValue: [86400] },
+                    { text: "Temps nécessaire pour le brossage des dents préconisé", allowedPrefixes: [''], baseValue: [120] }
                 ]
             },
             {
@@ -669,7 +773,12 @@
                 contexts: [
                     { text: "Capacité d'un condensateur de découplage antiparasite sur carte PCB", allowedPrefixes: ['n', 'p'], baseValue: [1e-8, 4.7e-8, 1e-7] },
                     { text: "Capacité d'un condensateur de filtrage d'une alimentation stabilisée", allowedPrefixes: ['μ'], baseValue: [1e-5, 1e-4, 4.7e-4, 1e-3, 4.7e-3] },
-                    { text: "Capacité d'un supercondensateur de stockage d'énergie pour bus hybride", allowedPrefixes: ['k', ''], baseValue: [300, 650, 1200, 3000] }
+                    { text: "Capacité d'un supercondensateur de stockage d'énergie pour bus hybride", allowedPrefixes: ['k', ''], baseValue: [300, 650, 1200, 3000] },
+                    { text: "Capacité parasite entre deux pistes parallèles d'un circuit imprimé", allowedPrefixes: ['p'], baseValue: [1e-12, 5e-12, 1.5e-11] },
+                    { text: "Capacité équivalente d'une touche de clavier tactile capacitif", allowedPrefixes: ['p'], baseValue: [1e-11, 2.2e-11, 4.7e-11] },
+                    { text: "Capacité d'un condensateur de démarrage de moteur monophasé", allowedPrefixes: ['μ'], baseValue: [8e-6, 1.6e-5, 3.2e-5] },
+                    { text: "Capacité électrostatique du corps humain accumulée en marchant sur un tapis", allowedPrefixes: ['p'], baseValue: [1e-10, 2e-10] },
+                    { text: "Capacité d'un condensateur céramique à disque usuel en électronique", allowedPrefixes: ['n', 'p'], baseValue: [1e-9, 1e-10, 2.2e-9] }
                 ]
             },
             {
@@ -677,7 +786,12 @@
                 contexts: [
                     { text: "Inductance d'une ferrite de filtrage anti-parasite sur un câble USB", allowedPrefixes: ['μ'], baseValue: [1e-5, 4.7e-5, 1e-4, 3.3e-4] },
                     { text: "Inductance d'un bobinage de filtre de convertisseur Buck / Boost", allowedPrefixes: ['m'], baseValue: [0.001, 0.0047, 0.010, 0.022] },
-                    { text: "Inductance du primaire d'un transformateur d'alimentation découpage", allowedPrefixes: ['m'], baseValue: [0.100, 0.250, 0.500] }
+                    { text: "Inductance du primaire d'un transformateur d'alimentation découpage", allowedPrefixes: ['m'], baseValue: [0.100, 0.250, 0.500] },
+                    { text: "Inductance propre d'une boucle d'induction de détection de véhicules sous la chaussée", allowedPrefixes: ['m', 'μ'], baseValue: [1e-4, 5e-4, 2e-3] },
+                    { text: "Inductance d'une antenne RFID pour étiquette d'identification", allowedPrefixes: ['μ'], baseValue: [2.5e-6, 8.2e-6, 1.5e-5] },
+                    { text: "Inductance d'un enroulement de moteur électrique d'asservissement", allowedPrefixes: ['m'], baseValue: [0.002, 0.015, 0.080] },
+                    { text: "Inductance du bobinage d'une plaque de cuisson à induction domestique", allowedPrefixes: ['μ'], baseValue: [5e-5, 1e-4, 2e-4] },
+                    { text: "Inductance du récepteur de charge sans fil Qi d'un smartphone", allowedPrefixes: ['μ'], baseValue: [8e-6, 1.2e-5, 2.4e-5] }
                 ]
             }
         ];

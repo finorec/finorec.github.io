@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Flashix : Cartes Flash en MD</title>
+    <link rel="stylesheet" href="style.css?22">
+    <link rel="stylesheet" href="katex.min.css">
+    <link rel="stylesheet" href="excalidraw.css">
+    <script defer src="katex.min.js"></script>
+    <script defer src="auto-render.min.js" onload="renderMathInElement(document.body);"></script>
+    <script src="marked.min.js"></script>
+    <script src="lz-string.min.js"></script>
+</head>
+
+<body>
+    <div id="toolbar">
+        <button id="view-editor-btn" class="active">Édition & Aperçu</button>
+        <button id="view-revision-btn">Mode Révision</button>
+        <button id="print-btn">Imprimer</button>
+        <button id="fichix-print-btn">Imprimer Fiche</button>
+        <button id="fichix-print-nb-btn">Imprimer Fiche NB</button>
+        <button id="copy-link-btn">Partager mes cartes</button>
+        <button id="copy-revision-link-btn">Copier lien Révision</button>
+        <button id="about-btn" title="À propos">?</button>
+    </div>
+
+    <div id="about-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2>À propos de Flashix v22 : Cartes Flash en MD</h2>
+            <p>Ce programme a été entièrement créé par <strong>Arnaud DURAND</strong>.</p>
+            <p>Ce programme est sous licence GPL v3.</p>
+            <p>Il est basé sur une idée originale de <strong>Cédric Eyssette</strong> (<a href="https://flashmd.forge.apps.education.fr/">FlashMD</a>).</p>
+            <p>Ce programme s'appuie sur les bibliothèques Excalidraw,react.</p>
+            <p>Vous pouvez retrouver les sources du programme, l'utiliser et le modifier ici :</p>
+
+            <a href="https://mathix.org/flashix/flashix.zip" target="_blank" class="source-link">Sources sur Mathix</a>
+        </div>
+    </div>
+
+    <div id="main-container">
+        <div id="editor-container" class="view-section">
+            <div id="editor-toolbar">
+                <button id="insert-image-btn" title="Parcourir une image localement">🖼️ Image (Fichier)</button>
+                <button id="insert-image-link-btn" title="Insérer une image via un lien">🔗 Image (Lien)</button>
+                <button id="insert-excalidraw-btn" title="Dessiner une image avec Excalidraw">✏️ Dessin (Excalidraw)</button>
+                <button id="insert-math-btn" title="Insérer une formule">Σ Math</button>
+                <input type="file" id="image-input" accept="image/*" class="hidden">
+            </div>
+            <textarea id="markdown-input" placeholder="fond: bleu
+## Recto 1
+Verso 1
+#### Label 1
+---
+fond: vert
+## Recto 2
+Verso 2
+#### Label 2"></textarea>
+        </div>
+
+        <div id="preview-container" class="view-section">
+            <!-- Screen View (Side-by-side) -->
+            <div id="screen-grid-wrapper" class="grid-wrapper">
+                <h3>Cartes (Recto / Verso)</h3>
+                <div id="cards-grid" class="grid"></div>
+            </div>
+            <!-- Print View (Separated) -->
+            <div id="print-grid-wrapper" class="hidden"></div>
+        </div>
+
+        <div id="revision-container" class="view-section hidden">
+            <div id="leitner-selector">
+                Réviser les boîtes :
+                <label><input type="checkbox" id="box1-sel"> Je ne connais pas du tout (<span id="count-b1">0</span>)</label>
+                <label><input type="checkbox" id="box2-sel"> Je connais un peu (<span id="count-b2">0</span>)</label>
+                <label><input type="checkbox" id="box3-sel"> Je connais bien (<span id="count-b3">0</span>)</label>
+                <button id="start-session-btn">Lancer la série</button>
+            </div>
+            <div id="revision-card-wrapper">
+                <div id="revision-card" class="card-flip-container">
+                    <div class="card-flip-inner">
+                        <div class="card-front"></div>
+                        <div class="card-back"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="leitner-controls">
+                <button id="leitner-fail-btn" title="Je ne sais pas">❌</button>
+                <button id="leitner-success-btn" title="Je sais">✅</button>
+            </div>
+            <div id="revision-controls">
+                <button id="prev-card-btn" title="Précédent">←</button>
+                <button id="shuffle-btn" title="Mélanger">🎲</button>
+                <span id="card-counter">0 / 0</span>
+                <button id="next-card-btn" title="Suivant">→</button>
+                <button id="revision-print-btn" title="Imprimer les cartes">🖨️</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="excalidraw-modal" class="modal hidden">
+        <div class="modal-content-excalidraw">
+            <span class="close-modal" id="close-excalidraw">&times;</span>
+            <div id="excalidraw-container"></div>
+            <div class="excalidraw-actions">
+                <button id="save-excalidraw-btn" class="source-link">Insérer le dessin</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts de base locaux -->
+    <script src="react.min.js"></script>
+    <script src="react-dom.min.js"></script>
+
+    <!-- Excalidraw local -->
+    <script>
+        window.EXCALIDRAW_ASSET_PATH = "./";
+    </script>
+    <script src="excalidraw.min.js"></script>
+
+    <!-- Application logic -->
+    <script src="app.js?22"></script>
+    <div id="fichix-print-area"></div>
+</body>
+
+</html>

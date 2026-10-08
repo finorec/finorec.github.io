@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Générateur de Fiches Recto-Verso</title>
+    <style>
+        /* === STYLE POUR L'INTERFACE ECRAN === */
+        @media screen {
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f9;
+                padding: 20px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #ui-container {
+                width: 100%;
+                max-width: 800px;
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            textarea {
+                width: 100%;
+                height: 300px;
+                font-family: monospace;
+                padding: 10px;
+                box-sizing: border-box;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                resize: vertical;
+            }
+
+            button {
+                margin-top: 15px;
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 16px;
+            }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+            #print-area {
+                display: none;
+                /* Caché sur l'écran */
+            }
+        }
+
+        /* === STYLE POUR L'IMPRESSION === */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+                /* Pas de marges navigateur */
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Trebuchet MS', sans-serif;
+            }
+
+            #ui-container {
+                display: none;
+                /* Cache l'interface d'édition */
+            }
+
+            #print-area {
+                display: block;
+            }
+
+            .page {
+                width: 210mm;
+                height: 297mm;
+                display: flex;
+                page-break-after: always;
+                box-sizing: border-box;
+                padding: 10mm;
+                /* Marges internes de la feuille */
+            }
+
+            /* Recto (2 colonnes) */
+            .col-2 {
+                width: 50%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+
+            /* Verso (4 colonnes) */
+            .col-4 {
+                width: 25%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .cell {
+                flex: 1;
+                /* Remplissage égal pour faire 5 lignes (20% chaque) */
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                padding: 15px;
+                text-align: center;
+                box-sizing: border-box;
+                border-bottom: 1px dashed #ccc;
+            }
+
+            .cell:last-child {
+                border-bottom: none;
+            }
+
+            /* Enlever la ligne du bas pour le dernier */
+
+            /* Bordures de pliage et découpe */
+            .col-2:first-child {
+                border-right: 1px dashed #999;
+            }
+
+            .col-4:nth-child(2) {
+                border-right: 1px solid #000;
+            }
+
+            /* Ligne centrale de séparation Verso */
+            .col-4:first-child .cell {
+                border-right: 1px dashed #999;
+            }
+
+            /* Ligne de pliage H */
+            .col-4:nth-child(3) .cell {
+                border-right: 1px dashed #999;
+            }
+
+            /* Ligne de pliage E */
+
+            /* Typographie */
+            .cell-q {
+                font-weight: bold;
+                font-size: 13pt;
+            }
+
+            .cell-a {
+                font-size: 11pt;
+                line-height: 1.4;
+            }
+
+            .label {
+                font-size: 8pt;
+                text-transform: uppercase;
+                opacity: 0.6;
+                margin-bottom: 8px;
+            }
+
+            /* Formatage Maths */
+            .frac {
+                display: inline-block;
+                vertical-align: middle;
+                text-align: center;
+                font-family: 'Times New Roman', serif;
+                font-style: italic;
+                margin: 0 3px;
+            }
+
+            .frac span {
+                display: block;
+                padding: 0 4px;
+            }
+
+            .frac .top {
+                border-bottom: 1px solid black;
+            }
+
+            /* Couleurs */
+            .bg-vert {
+                background-color: #e8f5e9;
+                color: #2e7d32;
+                border-left: 5px solid #2e7d32;
+            }
+
+            .bg-orange {
+                background-color: #fff3e0;
+                color: #ef6c00;
+                border-left: 5px solid #ef6c00;
+            }
+
+            .bg-rouge {
+                background-color: #ffebee;
+                color: #c62828;
+                border-left: 5px solid #c62828;
+            }
+
+            /* Les questions n'ont pas de bordure gauche épaisse, juste le fond */
+            .col-4 .cell {
+                border-left: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="ui-container">
+        <h2>Générateur de fiches à plier (Recto-Verso)</h2>
+        <p>Collez votre texte Markdown ci-dessous puis cliquez sur "Générer et Imprimer".</p>
+        <textarea id="md-input">
+fond:vert
+## Comment additionne-t-on deux fractions ayant le même dénominateur ?
+Pour additionner deux fractions ayant le même dénominateur, on additionne les numérateurs et on garde le dénominateur commun.
+Exemple : $\frac{2}{5} + \frac{1}{5} = \frac{2+1}{5} = \frac{3}{5}$.
+
+---
+fond:vert
+## Comment soustrait-on deux fractions ayant le même dénominateur ?
+Pour soustraire deux fractions ayant le même dénominateur, on soustrait les numérateurs et on garde le dénominateur commun.
+Exemple : $\frac{5}{7} - \frac{2}{7} = \frac{5-2}{7} = \frac{3}{7}$.
+
+---
+fond:orange
+## Comment additionne-t-on deux fractions ayant des dénominateurs différents ?
+Pour additionner deux fractions ayant des dénominateurs différents, on trouve un dénominateur commun (le plus petit commun multiple des dénominateurs), on convertit les fractions et on additionne les numérateurs.
+Exemple : $\frac{1}{2} + \frac{1}{3} = \frac{3}{6} + \frac{2}{6} = \frac{5}{6}$.
+
+---
+fond:orange
+## Comment soustrait-on deux fractions ayant des dénominateurs différents ?
+Pour soustraire deux fractions ayant des dénominateurs différents, on trouve un dénominateur commun (le plus petit commun multiple des dénominateurs), on convertit les fractions et on soustrait les numérateurs.
+Exemple : $\frac{5}{6} - \frac{1}{4} = \frac{10}{12} - \frac{3}{12} = \frac{7}{12}$.
+
+---
+fond:rouge
+## Comment multiplie-t-on deux fractions ?
+Pour multiplier deux fractions, on multiplie les numérateurs entre eux et les dénominateurs entre eux.
+Exemple : $\frac{2}{3} \times \frac{4}{5} = \frac{2 \times 4}{3 \times 5} = \frac{8}{15}$.
+
+---
+fond:rouge
+## Comment divise-t-on deux fractions ?
+Pour diviser deux fractions, on multiplie la première fraction par l'inverse de la deuxième fraction.
+Exemple : $\frac{3}{4} \div \frac{2}{5} = \frac{3}{4} \times \frac{5}{2} = \frac{15}{8}$.
+
+---
+fond:orange
+## Comment simplifie-t-on une fraction ?
+Pour simplifier une fraction, on divise le numérateur et le dénominateur par leur plus grand commun diviseur (PGCD).
+Exemple : $\frac{8}{12} = \frac{8 \div 4}{12 \div 4} = \frac{2}{3}$.
+
+---
+fond:orange
+## Comment compare-t-on deux fractions ?
+Pour comparer deux fractions, on peut les convertir en fractions ayant le même dénominateur ou les convertir en nombres décimaux.
+Exemple : $\frac{3}{4} > \frac{2}{5}$ car $\frac{3}{4} = 0,75$ et $\frac{2}{5} = 0,4$.
+
+---
+fond:vert
+## Qu'est-ce qu'une fraction équivalente ?
+Une fraction équivalente est une fraction qui a la même valeur qu'une autre fraction mais avec un numérateur et un dénominateur différents.
+Exemple : $\frac{1}{2} = \frac{2}{4} = \frac{3}{6}$.
+
+---
+fond:vert
+## Comment convertit-on une fraction en nombre décimal ?
+Pour convertir une fraction en nombre décimal, on divise le numérateur par le dénominateur.
+Exemple : $\frac{3}{4} = 3 \div 4 = 0,75$.
+        </textarea>
+        <button onclick="processAndPrint()">Générer et Imprimer</button>
+    </div>
+
+    <!-- C'est ici que le contenu imprimable sera injecté -->
+    <div id="print-area"></div>
+
+    <script>
+        function formatMath(text) {
+            // Remplace \frac{x}{y} par du HTML stylisé
+            text = text.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '<span class="frac"><span class="top">$1</span><span class="bottom">$2</span></span>');
+            // Supprime les $ LaTeX
+            text = text.replace(/\$/g, '');
+            // Remplace les opérateurs
+            text = text.replace(/\\times/g, '×').replace(/\\div/g, '÷');
+            return text;
+        }
+
+        function processAndPrint() {
+            const mdText = document.getElementById('md-input').value;
+            const blocks = mdText.split('---');
+            const cards = [];
+
+            // Parsing du texte
+            blocks.forEach(block => {
+                if (!block.trim()) return;
+
+                const colorMatch = block.match(/fond:\s*(\w+)/i);
+                const titleMatch = block.match(/##\s*(.*)/);
+
+                if (colorMatch && titleMatch) {
+                    const color = colorMatch[1].trim().toLowerCase();
+                    const q = titleMatch[1].trim();
+
+                    // Extraire la réponse (tout ce qui est après le titre)
+                    let a = block.replace(colorMatch[0], '').replace(titleMatch[0], '').trim();
+                    a = formatMath(a); // Formater les mathématiques
+
+                    cards.push({
+                        color,
+                        q,
+                        a
+                    });
+                }
+            });
+
+            // On divise en deux groupes (Col E et Col H)
+            const half = Math.ceil(cards.length / 2);
+            const colE = cards.slice(0, half); // Cartes de la colonne E (Questions) -> Col A (Réponses)
+            const colH = cards.slice(half); // Cartes de la colonne H (Questions) -> Col B (Réponses)
+
+            // Génération du HTML
+            let html = `
+                <!-- RECTO : PAGE 1 (Colonnes A et B -> Réponses) -->
+                <div class="page">
+                    <!-- Colonne A (Réponses pour E) -->
+                    <div class="col-2">
+                        ${colE.map(c => `
+                            <div class="cell bg-${c.color}">
+                                <span class="label">Réponse</span>
+                                <div class="cell-a">${c.a}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <!-- Colonne B (Réponses pour H) -->
+                    <div class="col-2">
+                        ${colH.map(c => `
+                            <div class="cell bg-${c.color}">
+                                <span class="label">Réponse</span>
+                                <div class="cell-a">${c.a}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <!-- VERSO : PAGE 2 (Colonnes H, G, F, E -> Questions) -->
+                <div class="page">
+                    <!-- Colonne H (Questions du groupe 2) -->
+                    <div class="col-4">
+                        ${colH.map(c => `
+                            <div class="cell bg-${c.color}">
+                                <div class="cell-q">${c.q}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <!-- Colonne G (Vide pour le pli central) -->
+                    <div class="col-4"></div>
+                    <!-- Colonne F (Vide pour le pli central) -->
+                    <div class="col-4"></div>
+                    <!-- Colonne E (Questions du groupe 1) -->
+                    <div class="col-4">
+                        ${colE.map(c => `
+                            <div class="cell bg-${c.color}">
+                                <div class="cell-q">${c.q}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('print-area').innerHTML = html;
+
+            // Lancer l'impression
+            window.print();
+        }
+    </script>
+</body>
+
+</html>

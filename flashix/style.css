@@ -1,0 +1,883 @@
+:root {
+    --card-width: 93mm;
+    --card-height: 65mm;
+    --primary-color: #007bff;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f4f9;
+}
+
+#toolbar {
+    background: #333;
+    color: white;
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#toolbar button {
+    background: #555;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+#about-btn {
+    margin-left: auto;
+    /* Aligne le bouton ? à droite de la toolbar */
+    font-weight: bold;
+    background: #666 !important;
+}
+
+#about-btn:hover {
+    background: #888 !important;
+}
+
+/* Modal Styling */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(3px);
+}
+
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    line-height: 1.6;
+}
+
+.modal-content-excalidraw {
+    background-color: white;
+    padding: 40px 20px 20px 20px;
+    border-radius: 12px;
+    width: 95%;
+    height: 95%;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+}
+
+#excalidraw-container {
+    flex-grow: 1;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+.excalidraw-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.close-modal {
+    position: absolute;
+    right: 20px;
+    top: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #aaa;
+    cursor: pointer;
+}
+
+.close-modal:hover {
+    color: #333;
+}
+
+.source-link {
+    display: inline-block;
+    margin-top: 15px;
+    background: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.source-link:hover {
+    background: #0056b3;
+}
+
+.modal hr {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 20px 0;
+}
+
+#toolbar button:hover {
+    background: #777;
+}
+
+#toolbar button.active {
+    background: var(--primary-color);
+}
+
+#main-container {
+    flex-grow: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+.view-section {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    box-sizing: border-box;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Editor Section */
+#editor-container {
+    padding: 20px;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+#editor-toolbar {
+    background: #eee;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    gap: 10px;
+}
+
+#editor-toolbar button {
+    background: white;
+    border: 1px solid #bbb;
+    padding: 5px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.9em;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+#editor-toolbar button:hover {
+    background: #fdfdfd;
+    border-color: #999;
+}
+
+#markdown-input {
+    width: 100%;
+    height: 100%;
+    padding: 15px;
+    font-family: monospace;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 0 0 4px 4px;
+    resize: none;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+#markdown-input.dragover {
+    border: 2px dashed var(--primary-color);
+    background: #eef7ff;
+}
+
+/* Preview Section (Grid) */
+#preview-container {
+    padding: 20px;
+    overflow-y: auto;
+    background: #eee;
+    display: flex;
+    flex-direction: column;
+    /* On empile les pages verticalement */
+    align-items: center;
+    /* On centre les pages à l'écran */
+    gap: 40px;
+    /* Espace entre chaque "page" */
+}
+
+.grid-wrapper {
+    width: 100%;
+    max-width: 210mm;
+    /* Largeur d'une page A4 pour un aperçu réaliste */
+}
+
+.grid-wrapper h3 {
+    text-align: center;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* 2 colonnes comme à l'impression ! */
+    grid-auto-rows: var(--card-height);
+    gap: 10px;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    /* Joli effet "feuille de papier" */
+}
+
+#revision-container {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+    overflow-y: auto;
+    height: 100%;
+}
+
+
+
+
+#revision-card-wrapper {
+    perspective: 1000px;
+
+    /* On définit la largeur maximale souhaitée */
+    width: 90%;
+    max-width: 900px;
+
+    /* On impose le ratio (Largeur / Hauteur) */
+    aspect-ratio: 900 / 600;
+    max-height: 70vh;
+
+    /* Centrage et espacement */
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px;
+    user-select: none;
+}
+
+.card-flip-container {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.card-flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+}
+
+.card-flip-container.flipped .card-flip-inner {
+    transform: rotateY(180deg);
+}
+
+.card-front,
+.card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    border-radius: 12px;
+    border: 2px solid #ccc;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.card-back {
+    transform: rotateY(180deg);
+}
+
+#leitner-controls {
+    display: none;
+    /* Masqué par défaut */
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    padding: 10px 20px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+}
+
+
+#leitner-selector {
+    padding: 15px 25px;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-weight: 500;
+}
+
+#leitner-selector label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+#leitner-selector label:hover {
+    background: #f0f4f8;
+}
+
+#leitner-selector input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+#start-session-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#start-session-btn:hover {
+    background: #0056b3;
+    transform: translateY(-1px);
+}
+
+
+
+#leitner-controls button {
+    border: none;
+    background: #eee;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+#leitner-controls button:hover {
+    background: #ddd;
+}
+
+#revision-controls {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    align-items: center;
+    background: white;
+    padding: 15px 30px;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 20px;
+}
+
+#revision-controls button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#revision-controls button:hover {
+    transform: scale(1.1);
+    background: #0056b3;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+#revision-controls button:active {
+    transform: scale(0.95);
+}
+
+#shuffle-btn.active {
+    background: #28a745;
+    /* Vert pour indiquer que le mélange est actif */
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+#card-counter {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #555;
+    min-width: 80px;
+    text-align: center;
+}
+
+#revision-print-btn {
+    margin-left: 20px;
+}
+
+/* Card Styling (shared between Grid and Revision) */
+.card {
+    position: relative;
+    background: #f0f1f5;
+    border: 1.5pt solid #8c8f9f;
+    border-radius: 8px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*margin: 5px;*/
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.card-content {
+    background: white;
+    color: #333;
+    /* Force dark text on white background */
+    padding: 10px;
+    border-radius: 6px;
+    width: 94%;
+    height: 94%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    /*word-break: break-word;*/
+    word-break: normal;
+    object-fit: contain;
+}
+
+.card-content h1,
+.card-content h2,
+.card-content h3,
+.card-content h4,
+.card-content h5,
+.card-content h6,
+.card-content p {
+    margin: 0.2em 0;
+    width: 100%;
+}
+
+.card-content p:has(img) {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 0;
+    /* La propriété clé ! Elle autorise le conteneur à rétrécir */
+    flex: 1;
+    /* Permet d'occuper l'espace disponible sans déborder */
+    height: 100%;
+}
+
+.card-content img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Force LaTeX and math to stay on a single line */
+.katex-display,
+.katex {
+    white-space: nowrap !important;
+}
+
+/* Ensure math containers don't break lines */
+.card-content .katex-display {
+    margin: 0.2em 0 !important;
+    width: 100%;
+    overflow: visible;
+}
+
+/* Colors from FlashMD - More pronounced versions */
+.card.fond-bleu {
+    background-color: #2196f3;
+    color: white;
+}
+
+.card.fond-bleu .card-content {
+    border: 2px solid #1976d2;
+}
+
+.card.fond-rouge {
+    background-color: #f44336;
+    color: white;
+}
+
+.card.fond-rouge .card-content {
+    border: 2px solid #d32f2f;
+}
+
+.card.fond-vert {
+    background-color: #4caf50;
+    color: white;
+}
+
+.card.fond-vert .card-content {
+    border: 2px solid #388e3c;
+}
+
+.card.fond-jaune {
+    background-color: #ffeb3b;
+    color: #333;
+}
+
+.card.fond-jaune .card-content {
+    border: 2px solid #fbc02d;
+}
+
+.card.fond-orange {
+    background-color: #ff9800;
+    color: white;
+}
+
+.card.fond-orange .card-content {
+    border: 2px solid #f57c00;
+}
+
+.card.fond-violet {
+    background-color: #9c27b0;
+    color: white;
+}
+
+.card.fond-violet .card-content {
+    border: 2px solid #7b1fa2;
+}
+
+.card.fond-gris {
+    background-color: #757575;
+    color: white;
+}
+
+.card.fond-gris .card-content {
+    border: 2px solid #616161;
+}
+
+/* Labels */
+.card-label {
+    position: absolute;
+    font-size: 0.5em;
+    font-weight: bold;
+    background: white;
+    color: #333;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1.5pt solid #333;
+    max-width: 45%;
+    z-index: 0;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    /* Empêche de voir l'étiquette à travers ou à l'envers lors du flip */
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+#revision-container .card-label {
+    font-size: 0.8em;
+}
+
+.label-bottom-right {
+    bottom: 4px;
+    right: 4px;
+}
+
+#revision-container .label-bottom-right {
+    bottom: 8px;
+    right: 8px;
+}
+
+.label-top-left {
+    top: 4px;
+    left: 4px;
+}
+
+#revision-container .label-top-left {
+    top: 8px;
+    left: 8px;
+}
+
+
+
+/* --- NOUVEAU : Mode écran divisé (Éditeur + Aperçu) --- */
+#main-container.split-view {
+    flex-direction: row;
+}
+
+#main-container.split-view #editor-container {
+    width: 40%;
+    border-right: 2px solid #ccc;
+}
+
+#main-container.split-view #preview-container {
+    width: 60%;
+}
+
+/* Sur les petits écrans, on empile l'éditeur en haut et l'aperçu en bas */
+@media (max-width: 850px) {
+    #main-container.split-view {
+        flex-direction: column;
+    }
+
+    #main-container.split-view #editor-container,
+    #main-container.split-view #preview-container {
+        width: 100%;
+        height: 50%;
+        border-right: none;
+    }
+
+    #main-container.split-view #editor-container {
+        border-bottom: 2px solid #ccc;
+    }
+}
+
+
+@media (max-width: 600px) {
+    #revision-container {
+        padding: 10px;
+    }
+
+    #leitner-selector {
+        padding: 10px;
+        gap: 10px;
+        font-size: 0.9em;
+    }
+
+    #revision-controls {
+        padding: 10px 20px;
+        gap: 15px;
+    }
+
+    #leitner-controls {
+        padding: 8px 15px;
+        gap: 10px;
+    }
+
+    #revision-card-wrapper {
+        margin-bottom: 10px;
+        width: 95%;
+    }
+}
+
+@media print {
+
+    /* Styles pour l'impression standard Flashix */
+    body:not(.fichix-printing) #toolbar,
+    body:not(.fichix-printing) #editor-container,
+    body:not(.fichix-printing) #revision-container,
+    body:not(.fichix-printing) h3,
+    body:not(.fichix-printing) #screen-grid-wrapper {
+        display: none !important;
+    }
+
+    body:not(.fichix-printing) #preview-container,
+    body:not(.fichix-printing) #print-grid-wrapper {
+        display: block !important;
+        visibility: visible !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    body:not(.fichix-printing) #print-grid-wrapper .print-page {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+        /* 🔴 Strictement 1/4 de page */
+        gap: 2mm !important;
+        width: 190mm !important;
+        height: 270mm !important;
+        /* 🔴 Marge de sécurité */
+        margin: 0 auto !important;
+        padding: 0 !important;
+        page-break-after: always !important;
+        break-after: page !important;
+        float: none !important;
+    }
+
+    body:not(.fichix-printing) .card {
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: 1pt solid #000 !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    /* Styles spécifiques pour le mode Fichix */
+    body.fichix-printing #toolbar,
+    body.fichix-printing #main-container,
+    body.fichix-printing #excalidraw-modal {
+        display: none !important;
+    }
+
+    #fichix-print-area {
+        display: none;
+    }
+
+    body.fichix-printing #fichix-print-area {
+        display: block !important;
+        visibility: visible !important;
+    }
+
+    body.fichix-printing #fichix-print-area .page {
+        width: 210mm;
+        height: 297mm;
+        display: flex;
+        page-break-after: always;
+        box-sizing: border-box;
+        padding: 10mm;
+        margin: 0;
+        font-family: 'Trebuchet MS', sans-serif;
+    }
+
+    /* ... le reste des styles Fichix ... */
+    #fichix-print-area .col-2 {
+        width: 50%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #fichix-print-area .col-4 {
+        width: 25%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #fichix-print-area .cell {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 15px;
+        text-align: center;
+        box-sizing: border-box;
+        border-bottom: 1px dashed #ccc;
+    }
+
+    #fichix-print-area .cell:last-child {
+        border-bottom: none;
+    }
+
+    #fichix-print-area .col-2:first-child {
+        border-right: 1px dashed #999;
+    }
+
+    #fichix-print-area .col-4:nth-child(2) {
+        border-right: 1px solid #000;
+    }
+
+    #fichix-print-area .col-4:first-child .cell {
+        border-right: 1px dashed #999;
+    }
+
+    #fichix-print-area .col-4:nth-child(3) .cell {
+        border-right: 1px dashed #999;
+    }
+
+    #fichix-print-area .cell-q {
+        font-weight: bold;
+        font-size: 13pt;
+    }
+
+    #fichix-print-area .cell-a {
+        font-size: 11pt;
+        line-height: 1.4;
+    }
+
+    #fichix-print-area .label {
+        font-size: 8pt;
+        text-transform: uppercase;
+        opacity: 0.6;
+        margin-bottom: 8px;
+    }
+
+    #fichix-print-area .frac {
+        display: inline-block;
+        vertical-align: middle;
+        text-align: center;
+        font-family: 'Times New Roman', serif;
+        font-style: italic;
+        margin: 0 3px;
+    }
+
+    #fichix-print-area .frac span {
+        display: block;
+        padding: 0 4px;
+    }
+
+    #fichix-print-area .frac .top {
+        border-bottom: 1px solid black;
+    }
+
+    #fichix-print-area .bg-vert {
+        background-color: #e8f5e9 !important;
+        color: #2e7d32 !important;
+        border-left: 5px solid #2e7d32;
+    }
+
+    #fichix-print-area .bg-orange {
+        background-color: #fff3e0 !important;
+        color: #ef6c00 !important;
+        border-left: 5px solid #ef6c00;
+    }
+
+    #fichix-print-area .bg-rouge {
+        background-color: #ffebee !important;
+        color: #c62828 !important;
+        border-left: 5px solid #c62828;
+    }
+
+    #fichix-print-area .col-4 .cell {
+        border-left: none;
+    }
+}

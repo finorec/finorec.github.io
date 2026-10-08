@@ -1,0 +1,1497 @@
+// State Management
+let cards = [];
+let shuffledCards = [];
+let currentCardIndex = 0;
+let isShuffled = false;
+let leitnerBoxes = [
+    [],
+    [],
+    []
+];
+let activeSessionCards = [];
+let isSessionActive = false;
+let decoupage_fiche_double_question_par_page = 8
+// DOM Elements
+const leitnerSelector = document.getElementById('leitner-selector');
+const input = document.getElementById('markdown-input');
+const cardsGrid = document.getElementById('cards-grid');
+const printGridWrapper = document.getElementById('print-grid-wrapper');
+const revisionCard = document.getElementById('revision-card');
+const cardCounter = document.getElementById('card-counter');
+const views = {
+    editor: document.getElementById('editor-container'),
+    preview: document.getElementById('preview-container'),
+    revision: document.getElementById('revision-container')
+};
+const buttons = {
+    editor: document.getElementById('view-editor-btn'),
+    revision: document.getElementById('view-revision-btn'),
+    shuffle: document.getElementById('shuffle-btn'),
+    print: document.getElementById('print-btn'),
+    copyLink: document.getElementById('copy-link-btn')
+};
+
+const DEFAULT_CONTENT = `fond: bleu
+## Bienvenue sur FlashiX
+C'est votre outil pour créer des flashcards en Markdown !
+#### Intro
+---
+fond: vert
+## Les formules mathématiques
+Vous pouvez utiliser LaTeX : 
+
+$x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$
+#### Math
+---
+fond: orange
+## Les Images
+![Logo](logo.webp)
+#### Médias
+---
+fond: violet
+## Les fiches pliables pour apprendre
+Cliquez sur "Imprimer Fiche" 
+#### Étiquette
+
+---
+fond: violet
+## Les fiches pliables pour apprendre en noir et blanc
+Cliquez sur "Imprimer Fiche NB" 
+#### Étiquette
+
+---
+fond: orange
+## Des Images dessinées
+![dessin](data:image/webp;base64,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)
+#### Médias`;
+
+// Initialize
+async function init() {
+    marked.setOptions({
+        breaks: true,
+        gfm: true
+    });
+    input.addEventListener('input', () => {
+        updateCards();
+        saveToURL();
+    });
+    // --- NOUVEAU : Défilement synchronisé entre Éditeur et Aperçu ---
+    let isScrollingLeft = false;
+    let isScrollingRight = false;
+
+    input.addEventListener('scroll', () => {
+        if (!views.preview.classList.contains('hidden')) {
+            if (isScrollingRight) {
+                isScrollingRight = false;
+                return;
+            }
+            // Calcul du % de défilement pour éviter les divisions par zéro
+            const maxScrollLeft = input.scrollHeight - input.clientHeight;
+            if (maxScrollLeft <= 0) return;
+
+            isScrollingLeft = true;
+            const percentage = input.scrollTop / maxScrollLeft;
+            const maxScrollRight = views.preview.scrollHeight - views.preview.clientHeight;
+            views.preview.scrollTop = percentage * maxScrollRight;
+        }
+    });
+
+    views.preview.addEventListener('scroll', () => {
+        if (!views.editor.classList.contains('hidden')) {
+            if (isScrollingLeft) {
+                isScrollingLeft = false;
+                return;
+            }
+            const maxScrollRight = views.preview.scrollHeight - views.preview.clientHeight;
+            if (maxScrollRight <= 0) return;
+
+            isScrollingRight = true;
+            const percentage = views.preview.scrollTop / maxScrollRight;
+            const maxScrollLeft = input.scrollHeight - input.clientHeight;
+            input.scrollTop = percentage * maxScrollLeft;
+        }
+    });
+    // --- FIN NOUVEAU ---
+    // Editor Toolbar
+    document.getElementById('insert-image-btn').addEventListener('click', () => document.getElementById('image-input').click());
+    document.getElementById('image-input').addEventListener('change', handleImageUpload);
+    document.getElementById('insert-image-link-btn').addEventListener('click', insertImageLink);
+    document.getElementById('insert-excalidraw-btn').addEventListener('click', openExcalidraw);
+    document.getElementById('insert-math-btn').addEventListener('click', insertMath);
+
+    // Excalidraw Modal
+    document.getElementById('close-excalidraw').addEventListener('click', closeExcalidraw);
+    document.getElementById('save-excalidraw-btn').addEventListener('click', saveExcalidraw);
+    window.addEventListener('click', (e) => {
+        if (e.target === document.getElementById('excalidraw-modal')) closeExcalidraw();
+    });
+
+    // Drag and Drop for Editor
+    input.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        input.classList.add('dragover');
+    });
+    input.addEventListener('dragleave', () => input.classList.remove('dragover'));
+    input.addEventListener('drop', (e) => {
+        e.preventDefault();
+        input.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type.startsWith('image/')) {
+            processImageFile(files[0]);
+        }
+    });
+
+    // Navigation
+    buttons.editor.addEventListener('click', () => switchView('editor'));
+    buttons.revision.addEventListener('click', () => switchView('revision'));
+    document.getElementById('fichix-print-btn').addEventListener('click', fichixPrint);
+    document.getElementById('fichix-print-nb-btn').addEventListener('click', fichixPrintNB);
+    // Controls
+    buttons.shuffle.addEventListener('click', toggleShuffle);
+    buttons.print.addEventListener('click', printCards);
+    buttons.copyLink.addEventListener('click', copyShareLink);
+    document.getElementById('copy-revision-link-btn').addEventListener('click', copyRevisionLink);
+    document.getElementById('revision-print-btn').addEventListener('click', printCards);
+
+    // About Modal Logic
+    const aboutBtn = document.getElementById('about-btn');
+    const aboutModal = document.getElementById('about-modal');
+    const closeBtn = document.querySelector('.close-modal');
+
+    aboutBtn.addEventListener('click', () => aboutModal.classList.remove('hidden'));
+    closeBtn.addEventListener('click', () => aboutModal.classList.add('hidden'));
+    window.addEventListener('click', (e) => {
+        if (e.target === aboutModal) aboutModal.classList.add('hidden');
+    });
+
+    // Revision Controls
+    document.getElementById('prev-card-btn').addEventListener('click', prevCard);
+    document.getElementById('next-card-btn').addEventListener('click', nextCard);
+    document.getElementById('start-session-btn').addEventListener('click', startSession);
+    document.getElementById('leitner-fail-btn').addEventListener('click', () => handleLeitner(false));
+    document.getElementById('leitner-success-btn').addEventListener('click', () => handleLeitner(true));
+    document.getElementById('box1-sel').addEventListener('change', renderRevisionCard);
+    document.getElementById('box2-sel').addEventListener('change', renderRevisionCard);
+    document.getElementById('box3-sel').addEventListener('change', renderRevisionCard);
+    // Dans init(), modifier le comportement de retournement de carte pour afficher les boutons
+    revisionCard.addEventListener('click', () => {
+        revisionCard.classList.toggle('flipped');
+        if (isSessionActive && revisionCard.classList.contains('flipped')) {
+            document.getElementById('leitner-controls').style.display = 'flex';
+        } else {
+            document.getElementById('leitner-controls').style.display = 'none';
+        }
+    });
+
+    // Keyboard Controls for Revision
+    document.addEventListener('keydown', (e) => {
+        if (!views.revision.classList.contains('hidden')) {
+            if (isSessionActive) {
+                // Bloquer les flèches pendant la série
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    return;
+                }
+            }
+            if (e.key === 'ArrowLeft') {
+                prevCard();
+            } else if (e.key === 'ArrowRight') {
+                nextCard();
+            } else if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                revisionCard.classList.toggle('flipped');
+                if (isSessionActive && revisionCard.classList.contains('flipped')) {
+                    document.getElementById('leitner-controls').style.display = 'flex';
+                } else {
+                    document.getElementById('leitner-controls').style.display = 'none';
+                }
+            }
+        }
+    });
+
+    // Handle Query Parameters
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('e') && params.get('e') === '0') {
+        document.getElementById('view-editor-btn').classList.add('hidden');
+        // Logique spécifique pour afficher UNIQUEMENT l'aperçu (mode lecture seule)
+        views.editor.classList.add('hidden');
+        views.preview.classList.remove('hidden');
+        views.revision.classList.add('hidden');
+
+        const mainContainer = document.getElementById('main-container');
+        mainContainer.classList.remove('split-view');
+        views.preview.style.width = '100%';
+
+        autoScaleText(document.getElementById('preview-container'));
+    }
+    if (params.has('r') && params.get('r') === '1') {
+        document.getElementById('toolbar').style.display = 'none';
+
+        // 1. Sélectionner visuellement toutes les boîtes dans le DOM
+        document.getElementById('box1-sel').checked = true;
+        document.getElementById('box2-sel').checked = true;
+        document.getElementById('box3-sel').checked = true;
+
+        // 2. Basculer vers la vue révision
+        switchView('revision');
+    }
+    if (params.has('aléatoire')) {
+        toggleShuffle();
+    }
+    if (params.has('révision')) {
+        switchView('revision');
+    }
+
+    // Load from URL or Set Default
+    const loaded = await loadFromURL();
+    if (!loaded) {
+        input.value = DEFAULT_CONTENT;
+    }
+    updateCards();
+    initLeitner();
+}
+
+// Card Parsing
+function updateCards() {
+    const text = input.value;
+    const oldCardCount = cards.length;
+    cards = parseMarkdown(text);
+    shuffledCards = [...cards];
+    if (isShuffled) shuffleArray(shuffledCards);
+
+    renderGrids();
+
+    // Si le nombre de cartes a changé, on recalibre Leitner
+    if (cards.length !== oldCardCount) {
+        initLeitner();
+    } else {
+        renderRevisionCard();
+    }
+}
+
+function parseMarkdown(text) {
+    const parsedCards = [];
+    // Découpage par séparateur --- OU par changement de couleur (fond:)
+    // On utilise un lookahead pour découper sans perdre les séparateurs si nécessaire, 
+    // mais ici un découpage simple par `---` est suffisant, 
+    // et on va aussi découper au niveau des `fond:` si `---` est absent.
+    const segments = text.split(/^---$/gm);
+
+    let currentColor = 'gris';
+
+    segments.forEach((seg) => {
+        // Sous-découpage si on trouve plusieurs 'fond:' dans un segment (cas où --- était absent)
+        const subSegments = seg.split(/(?=^fond:\s*\w+)/m);
+
+        subSegments.forEach(s => {
+            const trimmedS = s.trim();
+            if (!trimmedS) return;
+
+            // Détection de la couleur au sein du bloc
+            const colorMatch = trimmedS.match(/^fond:\s*(\w+)/m);
+            if (colorMatch) {
+                currentColor = colorMatch[1].toLowerCase();
+            }
+
+            const lines = trimmedS.split('\n');
+            let rectoText = null;
+            let versoLines = [];
+            let labelText = '';
+            let foundRecto = false;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const trimmedLine = line.trim();
+
+                // On saute la ligne de fond:
+                if (trimmedLine.startsWith('fond:')) continue;
+
+                if (!foundRecto && trimmedLine.startsWith('## ')) {
+                    rectoText = trimmedLine.substring(3).trim();
+                    foundRecto = true;
+                    continue;
+                }
+
+                if (foundRecto) {
+                    if (trimmedLine.startsWith('#### ')) {
+                        labelText = trimmedLine.substring(5).trim();
+                        break;
+                    }
+                    versoLines.push(line);
+                }
+            }
+
+            if (rectoText !== null) {
+                parsedCards.push({
+                    recto: rectoText,
+                    verso: versoLines.join('\n').trim(),
+                    label: labelText,
+                    color: currentColor
+                });
+            }
+        });
+    });
+    return parsedCards;
+}
+
+// Rendering
+function renderGrids() {
+    cardsGrid.innerHTML = '';
+    printGridWrapper.innerHTML = '';
+
+    const displayCards = isShuffled ? shuffledCards : cards;
+
+    displayCards.forEach(card => {
+        cardsGrid.appendChild(createCardElement(card, 'recto'));
+        cardsGrid.appendChild(createCardElement(card, 'verso'));
+    });
+
+    const printList = [...displayCards];
+    while (printList.length % 8 !== 0) {
+        printList.push({
+            recto: '',
+            verso: '',
+            label: '',
+            color: ''
+        });
+    }
+
+    for (let i = 0; i < printList.length; i += 8) {
+        const chunk = printList.slice(i, i + 8);
+
+        const pageRecto = document.createElement('div');
+        pageRecto.className = 'grid print-page';
+        chunk.forEach(card => pageRecto.appendChild(createCardElement(card, 'recto')));
+        printGridWrapper.appendChild(pageRecto);
+
+        const pageVerso = document.createElement('div');
+        pageVerso.className = 'grid print-page';
+        const swappedChunk = [];
+        for (let j = 0; j < 8; j += 2) {
+            swappedChunk.push(chunk[j + 1]);
+            swappedChunk.push(chunk[j]);
+        }
+        swappedChunk.forEach(card => pageVerso.appendChild(createCardElement(card, 'verso')));
+        printGridWrapper.appendChild(pageVerso);
+    }
+
+    if (typeof renderMathInElement !== 'undefined') {
+        // Centralise la configuration pour éviter de te répéter
+        const mathConfig = {
+            delimiters: [{
+                left: "$$",
+                right: "$$",
+                display: true
+            }, {
+                left: "$",
+                right: "$",
+                display: false
+            }]
+        };
+
+        // Rendu pour l'aperçu écran actuel
+        renderMathInElement(document.getElementById('preview-container'), mathConfig);
+
+        // AJOUT : Rendu pour le conteneur d'impression caché
+        renderMathInElement(document.getElementById('print-grid-wrapper'), mathConfig);
+    }
+
+    if (!views.preview.classList.contains('hidden')) {
+        autoScaleText(document.getElementById('preview-container'));
+    }
+}
+
+function createCardElement(card, side) {
+    const cardDiv = document.createElement('div');
+    cardDiv.className = 'card';
+    if (card.color) cardDiv.classList.add(`fond-${card.color}`);
+    if (!card.recto && !card.verso) cardDiv.style.visibility = 'hidden';
+
+    // Étiquette automatique de côté (Haut Gauche)
+    const sideLabel = document.createElement('div');
+    sideLabel.className = 'card-label label-top-left';
+    sideLabel.textContent = side === 'recto' ? 'Q' : 'R';
+    cardDiv.appendChild(sideLabel);
+
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'card-content';
+
+    const rawContent = side === 'recto' ? card.recto : card.verso;
+    contentDiv.innerHTML = marked.parse(rawContent);
+
+    if (side === 'recto' && card.label) {
+        const labelBottom = document.createElement('div');
+        labelBottom.className = 'card-label label-bottom-right';
+        labelBottom.textContent = card.label;
+        cardDiv.appendChild(labelBottom);
+    }
+
+    cardDiv.appendChild(contentDiv);
+    return cardDiv;
+}
+
+// Affiche une carte en révision en gardant l'animation de retournement.
+// Le recto est mis à jour tout de suite (il est caché pendant la 1re moitié de l'animation),
+// le verso n'est remplacé qu'une fois la carte repassée côté question.
+let pendingBackTimer = null;
+
+function setRevisionCardContent(card) {
+    const front = revisionCard.querySelector('.card-front');
+    const back = revisionCard.querySelector('.card-back');
+    const mathOptions = {
+        delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "$", right: "$", display: false }
+        ]
+    };
+
+    const renderSide = (container, side) => {
+        container.innerHTML = '';
+        container.appendChild(createCardElement(card, side));
+        if (typeof renderMathInElement !== 'undefined') {
+            renderMathInElement(container, mathOptions);
+        }
+    };
+
+    const fillBack = () => {
+        pendingBackTimer = null;
+        renderSide(back, 'verso');
+        autoScaleText(back);
+    };
+
+    const backMustWait = revisionCard.classList.contains('flipped') || pendingBackTimer !== null;
+    clearTimeout(pendingBackTimer);
+    pendingBackTimer = null;
+
+    renderSide(front, 'recto');
+    revisionCard.classList.remove('flipped');
+
+    if (backMustWait) {
+        // ~350 ms : le verso est alors déjà masqué (rotation > 90°), la transition dure 600 ms
+        pendingBackTimer = setTimeout(fillBack, 350);
+    } else {
+        fillBack();
+    }
+}
+
+function renderRevisionCard() {
+    // Filtrage des cartes par boîtes sélectionnées
+    const selectedBoxes = [];
+    if (document.getElementById('box1-sel').checked) selectedBoxes.push(0);
+    if (document.getElementById('box2-sel').checked) selectedBoxes.push(1);
+    if (document.getElementById('box3-sel').checked) selectedBoxes.push(2);
+
+    let filteredIndices = [];
+    selectedBoxes.forEach(boxIdx => {
+        filteredIndices.push(...leitnerBoxes[boxIdx]);
+    });
+
+    // Si aucune boîte sélectionnée, on affiche rien
+    if (filteredIndices.length === 0) {
+        cardCounter.textContent = '0 / 0';
+        revisionCard.querySelector('.card-front').innerHTML = 'Sélectionnez au moins une boîte';
+        revisionCard.querySelector('.card-back').innerHTML = '';
+        return;
+    }
+
+    // Mélange ou ordre original
+    if (isShuffled) shuffleArray(filteredIndices);
+
+    if (currentCardIndex >= filteredIndices.length) currentCardIndex = 0;
+
+    const originalIndex = filteredIndices[currentCardIndex];
+    const card = cards[originalIndex];
+    setRevisionCardContent(card);
+
+    cardCounter.textContent = `${currentCardIndex + 1} / ${filteredIndices.length}`;
+
+    if (!views.revision.classList.contains('hidden')) {
+        autoScaleText(revisionCard);
+    }
+}
+
+function nextCard() {
+    const displayCards = isShuffled ? shuffledCards : cards;
+    if (displayCards.length === 0) return;
+    currentCardIndex = (currentCardIndex + 1) % displayCards.length;
+    renderRevisionCard();
+}
+
+function prevCard() {
+    const displayCards = isShuffled ? shuffledCards : cards;
+    if (displayCards.length === 0) return;
+    currentCardIndex = (currentCardIndex - 1 + displayCards.length) % displayCards.length;
+    renderRevisionCard();
+}
+
+function switchView(viewName) {
+    const mainContainer = document.getElementById('main-container');
+
+    if (viewName === 'editor') {
+        // Mode Édition & Aperçu (Split View)
+        views.editor.classList.remove('hidden');
+        views.preview.classList.remove('hidden');
+        views.revision.classList.add('hidden');
+
+        buttons.editor.classList.add('active');
+        buttons.revision.classList.remove('active');
+
+        mainContainer.classList.add('split-view');
+        views.preview.style.width = ''; // Réinitialise la largeur si on revient du mode lecture seule
+
+        autoScaleText(document.getElementById('preview-container'));
+
+    } else if (viewName === 'revision') {
+        // Mode Révision (Plein écran)
+        views.editor.classList.add('hidden');
+        views.preview.classList.add('hidden');
+        views.revision.classList.remove('hidden');
+
+        buttons.editor.classList.remove('active');
+        buttons.revision.classList.add('active');
+
+        mainContainer.classList.remove('split-view');
+
+        renderRevisionCard(); // Refléter les boîtes sélectionnées
+        autoScaleText(revisionCard);
+    }
+}
+
+function toggleShuffle() {
+    isShuffled = !isShuffled;
+    buttons.shuffle.classList.toggle('active', isShuffled);
+    if (isShuffled) {
+        shuffleArray(shuffledCards);
+    }
+    currentCardIndex = 0;
+    renderGrids();
+    renderRevisionCard();
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
+function autoScaleText(container) {
+    const contents = container.querySelectorAll('.card-content');
+    if (contents.length === 0) return;
+
+    const isVisible = container.offsetWidth > 0 || container.offsetHeight > 0;
+    if (!isVisible) return;
+
+    contents.forEach(content => {
+        let min = 8;
+        let max = 60;
+        let lastBest = min;
+
+        while (min <= max) {
+            let mid = Math.floor((min + max) / 2);
+            content.style.fontSize = mid + 'px';
+            if (content.scrollHeight <= content.offsetHeight && content.scrollWidth <= content.offsetWidth) {
+                lastBest = mid;
+                min = mid + 1;
+            } else {
+                max = mid - 1;
+            }
+        }
+        content.style.fontSize = lastBest + 'px';
+    });
+}
+
+function printCards() {
+    const printGridWrapper = document.getElementById('print-grid-wrapper');
+    const previewContainer = document.getElementById('preview-container');
+
+    const wasPreviewHidden = previewContainer.classList.contains('hidden');
+    const wasPrintHidden = printGridWrapper.classList.contains('hidden');
+
+    const tempStyle = document.createElement('style');
+    tempStyle.innerHTML = `
+        /* --- 1. MODE CALCUL INVISIBLE SUR ECRAN --- */
+        #preview-container.measure-mode, 
+        #print-grid-wrapper.measure-mode {
+            display: block !important;
+            visibility: hidden !important; 
+            position: absolute !important;
+            left: -9999px !important;
+            top: 0 !important;
+            height: auto !important;
+            width: 210mm !important;
+        }
+        
+        #print-grid-wrapper.measure-mode .print-page {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            grid-template-rows: repeat(4, minmax(0, 1fr)) !important; /* 🔴 Strictement 1/4 de page */
+            gap: 2mm !important;
+            width: 190mm !important;
+            height: 270mm !important; /* 🔴 Marge de sécurité pour éviter le saut de page */
+            padding: 0 !important; 
+        }
+        
+        /* --- 2. MODE IMPRESSION PAPIER --- */
+        @media print {
+            @page { size: A4 portrait; margin: 10mm; }
+            
+            body, html, #main-container, #preview-container, #print-grid-wrapper {
+                height: auto !important; max-height: none !important; overflow: visible !important; position: static !important; width: 100% !important; margin: 0 !important; padding: 0 !important; background: white !important;
+            }
+            
+            #toolbar, #editor-container, #revision-container, #screen-grid-wrapper, #fichix-print-area, #about-modal { display: none !important; }
+            #preview-container, #print-grid-wrapper { display: block !important; visibility: visible !important; }
+            
+            #print-grid-wrapper .print-page {
+                page-break-after: always !important;
+                break-after: page !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                grid-template-rows: repeat(4, minmax(0, 1fr)) !important; /* 🔴 Strictement 1/4 de page */
+                gap: 2mm !important; 
+                width: 190mm !important;
+                height: 270mm !important; /* 🔴 Marge de sécurité */
+                margin: 0 auto !important; 
+                padding: 0 !important; 
+                background: transparent !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            
+            #print-grid-wrapper .card {
+                width: 100% !important;
+                height: 100% !important;
+                margin: 0 !important;
+                box-sizing: border-box !important;
+            }
+        }
+    `;
+    document.head.appendChild(tempStyle);
+
+    previewContainer.classList.add('measure-mode');
+    printGridWrapper.classList.add('measure-mode');
+
+    const cards = printGridWrapper.querySelectorAll('.card');
+    cards.forEach(card => {
+        card.style.width = '85mm';
+        card.style.height = '60mm';
+    });
+
+    setTimeout(() => {
+        autoScaleText(printGridWrapper);
+
+        previewContainer.classList.remove('measure-mode');
+        printGridWrapper.classList.remove('measure-mode');
+
+        window.print();
+
+        setTimeout(() => {
+            document.head.removeChild(tempStyle);
+            if (wasPreviewHidden) previewContainer.classList.add('hidden');
+            if (wasPrintHidden) printGridWrapper.classList.add('hidden');
+
+            cards.forEach(card => {
+                card.style.width = '';
+                card.style.height = '';
+            });
+        }, 500);
+    }, 200);
+}
+
+function saveToURL() {
+    const text = input.value;
+    const compressed = LZString.compressToEncodedURIComponent(text);
+    window.location.hash = compressed;
+}
+
+async function loadFromURL() {
+    // Check for ?f= parameter
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('f')) {
+        const url = params.get('f');
+        try {
+            const response = await fetch(url);
+            const text = await response.text();
+            if (text) {
+                input.value = text;
+                updateCards();
+                return true;
+            }
+        } catch (e) {
+            console.error('Failed to fetch from external file URL', e);
+        }
+    }
+
+    if (window.location.hash) {
+        const hash = window.location.hash.substring(1);
+        if (!hash) return false;
+
+        if (hash.startsWith('http')) {
+            try {
+                const response = await fetch(hash);
+                const text = await response.text();
+                if (text) {
+                    input.value = text;
+                    updateCards();
+                    return true;
+                }
+            } catch (e) {
+                console.error('Failed to fetch from external URL', e);
+            }
+        }
+
+        try {
+            const decompressed = LZString.decompressFromEncodedURIComponent(hash);
+            if (decompressed) {
+                input.value = decompressed;
+                updateCards();
+                return true;
+            }
+        } catch (e) {
+            console.log("Not LZ-String, trying Base64 fallback...");
+        }
+
+        try {
+            const decoded = decodeURIComponent(escape(atob(hash)));
+            if (decoded) {
+                input.value = decoded;
+                updateCards();
+                return true;
+            }
+        } catch (e) {
+            console.error('Failed to decode from hash', e);
+        }
+    }
+    return false;
+}
+
+function copyShareLink() {
+    saveToURL();
+    // Supprimer le paramètre ?f= s'il existe
+    const urlObj = new URL(window.location.href);
+    urlObj.searchParams.delete('f');
+    const url = urlObj.toString();
+
+    navigator.clipboard.writeText(url).then(() => {
+        const originalText = buttons.copyLink.textContent;
+        buttons.copyLink.textContent = 'Lien copié ! ✓';
+        buttons.copyLink.classList.add('active');
+        setTimeout(() => {
+            buttons.copyLink.textContent = originalText;
+            buttons.copyLink.classList.remove('active');
+        }, 2000);
+    }).catch(err => {
+        console.error('Erreur lors de la copie : ', err);
+        alert("Impossible de copier le lien.");
+    });
+}
+
+function copyRevisionLink() {
+    saveToURL();
+    const urlObj = new URL(window.location.href);
+    urlObj.searchParams.delete('f');
+    urlObj.searchParams.set('r', '1');
+    const revisionUrl = urlObj.toString();
+
+    const btn = document.getElementById('copy-revision-link-btn');
+    navigator.clipboard.writeText(revisionUrl).then(() => {
+        const originalText = btn.textContent;
+        btn.textContent = 'Lien Révision copié ! ✓';
+        btn.classList.add('active');
+
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.classList.remove('active');
+        }, 2000);
+    }).catch(err => {
+        console.error('Erreur lors de la copie : ', err);
+        alert("Impossible de copier le lien.");
+    });
+}
+
+function insertAtCursor(text) {
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    const val = input.value;
+    input.value = val.substring(0, start) + text + val.substring(end);
+    input.selectionStart = input.selectionEnd = start + text.length;
+    input.focus();
+    updateCards();
+    saveToURL();
+}
+
+function insertMath() {
+    insertAtCursor('$ E= {1 \\over 2} \\times m \\times v^2 $');
+}
+
+// Excalidraw Integration
+let excalidrawAPI = null;
+let excalidrawRoot = null;
+
+function openExcalidraw() {
+    const modal = document.getElementById('excalidraw-modal');
+    modal.classList.remove('hidden');
+
+    if (typeof ExcalidrawLib === 'undefined') {
+        alert("La bibliothèque Excalidraw n'est pas encore chargée. Veuillez patienter ou rafraîchir la page.");
+        return;
+    }
+
+    if (!excalidrawRoot) {
+        const {
+            Excalidraw
+        } = ExcalidrawLib;
+        const container = document.getElementById('excalidraw-container');
+        excalidrawRoot = ReactDOM.createRoot(container);
+
+        const App = () => {
+            return React.createElement(
+                "div", {
+                    style: {
+                        height: "100%"
+                    }
+                },
+                React.createElement(Excalidraw, {
+                    excalidrawAPI: (api) => {
+                        excalidrawAPI = api;
+                    },
+                    langCode: "fr-FR",
+                    scrollToContent: true,
+                    UIOptions: {
+                        canvasActions: {
+                            loadScene: false,
+                            saveToActiveFile: false,
+                            export: false,
+                            saveAsImage: false
+                        }
+                    }
+                })
+            );
+        };
+        excalidrawRoot.render(React.createElement(App));
+    }
+}
+
+function closeExcalidraw() {
+    document.getElementById('excalidraw-modal').classList.add('hidden');
+}
+
+async function saveExcalidraw() {
+    if (!excalidrawAPI) {
+        alert("L'éditeur n'est pas prêt.");
+        return;
+    }
+
+    const elements = excalidrawAPI.getSceneElements();
+    if (!elements || elements.length === 0) {
+        alert("Le dessin est vide !");
+        return;
+    }
+
+    const {
+        exportToBlob
+    } = ExcalidrawLib;
+
+    try {
+        const blob = await exportToBlob({
+            elements: elements,
+            appState: excalidrawAPI.getAppState(),
+            files: excalidrawAPI.getFiles(),
+            mimeType: "image/webp",
+            quality: 0.8
+        });
+
+        const reader = new FileReader();
+        reader.onloadend = function() {
+            const img = new Image();
+            img.onload = function() {
+                const resizedBase64 = resizeImage(img);
+                insertAtCursor(`![dessin](${resizedBase64})`);
+                closeExcalidraw();
+                excalidrawAPI.updateScene({
+                    elements: []
+                });
+            };
+            img.src = reader.result;
+        }
+        reader.readAsDataURL(blob);
+    } catch (error) {
+        console.error("Erreur lors de l'export Excalidraw:", error);
+        alert("Erreur lors de la génération de l'image.");
+    }
+}
+
+function resizeImage(img) {
+    const canvas = document.createElement('canvas');
+    const maxWidth = 400;
+    const maxHeight = 300;
+
+    let scale = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
+
+    canvas.width = img.width * scale;
+    canvas.height = img.height * scale;
+
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    let base64 = canvas.toDataURL('image/webp', 0.65);
+    if (!base64.startsWith('data:image/webp')) {
+        base64 = canvas.toDataURL('image/jpeg', 0.7);
+    }
+    return base64;
+}
+
+// Leitner Logic
+function initLeitner() {
+    const key = 'leitner_' + window.location.hash;
+    const saved = localStorage.getItem(key);
+    let currentLeitner = [
+        [],
+        [],
+        []
+    ];
+
+    if (saved) {
+        currentLeitner = JSON.parse(saved);
+    }
+
+    // Mise à jour / Réconciliation :
+    // 1. On crée un set des indices valides actuels
+    const validIndices = new Set(cards.map((_, i) => i));
+
+    // 2. On filtre les indices qui n'existent plus
+    for (let i = 0; i < 3; i++) {
+        currentLeitner[i] = currentLeitner[i].filter(idx => validIndices.has(idx));
+    }
+
+    // 3. On ajoute les nouveaux indices qui ne sont dans aucune boîte (dans la boîte 1)
+    const assignedIndices = new Set([...currentLeitner[0], ...currentLeitner[1], ...currentLeitner[2]]);
+    cards.forEach((_, i) => {
+        if (!assignedIndices.has(i)) {
+            currentLeitner[0].push(i);
+        }
+    });
+
+    leitnerBoxes = currentLeitner;
+    saveLeitner();
+    updateLeitnerUI();
+    renderRevisionCard();
+}
+
+function saveLeitner() {
+    const key = 'leitner_' + window.location.hash;
+    localStorage.setItem(key, JSON.stringify(leitnerBoxes));
+    updateLeitnerUI();
+}
+
+function updateLeitnerUI() {
+    const c1 = document.getElementById('count-b1');
+    const c2 = document.getElementById('count-b2');
+    const c3 = document.getElementById('count-b3');
+    if (c1) c1.textContent = leitnerBoxes[0].length;
+    if (c2) c2.textContent = leitnerBoxes[1].length;
+    if (c3) c3.textContent = leitnerBoxes[2].length;
+}
+
+function startSession() {
+    const selectedBoxes = [];
+    if (document.getElementById('box1-sel').checked) selectedBoxes.push(0);
+    if (document.getElementById('box2-sel').checked) selectedBoxes.push(1);
+    if (document.getElementById('box3-sel').checked) selectedBoxes.push(2);
+
+    activeSessionCards = [];
+    selectedBoxes.forEach(boxIdx => {
+        activeSessionCards.push(...leitnerBoxes[boxIdx]);
+    });
+
+    if (activeSessionCards.length === 0) {
+        revisionCard.querySelector('.card-front').innerHTML = '<div class="card"><div class="card-content">Aucune carte à réviser !</div></div>';
+        revisionCard.querySelector('.card-back').innerHTML = '';
+        cardCounter.textContent = '0 / 0';
+        return;
+    }
+
+    if (isShuffled) shuffleArray(activeSessionCards);
+    isSessionActive = true;
+    currentCardIndex = 0;
+
+    document.getElementById('prev-card-btn').disabled = true;
+    document.getElementById('next-card-btn').disabled = true;
+    document.getElementById('revision-controls').classList.add('hidden');
+    leitnerSelector.classList.add('hidden');
+    renderSessionCard();
+}
+
+function renderSessionCard() {
+    const originalIndex = activeSessionCards[currentCardIndex];
+    const card = cards[originalIndex];
+
+    setRevisionCardContent(card);
+
+    cardCounter.textContent = `${currentCardIndex + 1} / ${activeSessionCards.length}`;
+
+    autoScaleText(revisionCard);
+}
+
+function handleLeitner(success) {
+    if (!isSessionActive) {
+        alert("Veuillez cliquer sur 'Lancer la série' pour commencer.");
+        return;
+    }
+
+    // Cacher les boutons
+    document.getElementById('leitner-controls').style.display = 'none';
+
+    const originalIndex = activeSessionCards[currentCardIndex];
+
+    let sourceBox = -1;
+    for (let i = 0; i < 3; i++) {
+        if (leitnerBoxes[i].includes(originalIndex)) {
+            sourceBox = i;
+            break;
+        }
+    }
+
+    leitnerBoxes[sourceBox].splice(leitnerBoxes[sourceBox].indexOf(originalIndex), 1);
+
+    if (success) {
+        let nextBox = Math.min(sourceBox + 1, 2);
+        leitnerBoxes[nextBox].push(originalIndex);
+    } else {
+        let prevBox = Math.max(sourceBox - 1, 0);
+        leitnerBoxes[prevBox].push(originalIndex);
+    }
+
+    saveLeitner();
+
+    currentCardIndex++;
+    if (currentCardIndex >= activeSessionCards.length) {
+        endSession();
+    } else {
+        renderSessionCard();
+    }
+}
+
+function endSession() {
+    isSessionActive = false;
+    document.getElementById('prev-card-btn').disabled = false;
+    document.getElementById('next-card-btn').disabled = false;
+    document.getElementById('revision-controls').classList.remove('hidden');
+    document.getElementById('leitner-controls').style.display = 'none';
+    leitnerSelector.classList.remove('hidden');
+    revisionCard.querySelector('.card-front').innerHTML = 'Série terminée !';
+    revisionCard.querySelector('.card-back').innerHTML = '';
+    cardCounter.textContent = '0 / 0';
+}
+
+function insertImageLink() {
+    const url = prompt("Entrez l'URL de l'image :");
+    if (url) {
+        insertAtCursor(`![image](${url})`);
+    }
+}
+
+function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    processImageFile(file);
+    e.target.value = '';
+}
+
+function processImageFile(file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            const base64 = resizeImage(img);
+            insertAtCursor(`![image](${base64})`);
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function formatMath(text) {
+    text = text.replace(/\\frac\{([^}]+)\}\{([^}]+)\}/g, '<span class="frac"><span class="top">$1</span><span class="bottom">$2</span></span>');
+    text = text.replace(/\$/g, '');
+    text = text.replace(/\\times/g, '×').replace(/\\div/g, '÷');
+    return text;
+}
+
+function choix_du_decoupage(nbcartes) //permet de réduire le nombre de cartes blanches, le découpage varie de 8 à 4 
+{
+    // recherche si multiple ie pas de carte blanche
+    pas_carte_blanche = Math.min(nbcartes % (7 * 2), nbcartes % (6 * 2), nbcartes % (5 * 2), nbcartes % (4 * 2), nbcartes % (3 * 2), nbcartes % (2 * 2))
+    if (pas_carte_blanche == 0) {
+        var choix = 7;
+
+        while ((nbcartes % (choix * 2) != 0)) {
+            choix = choix - 1;
+        }
+        return choix
+    } else {
+
+        //on recherche le minimum de carte blanche
+        min_carte_blanche = Math.min(7 * 2 - nbcartes % (7 * 2), 6 * 2 - nbcartes % (6 * 2), 5 * 2 - nbcartes % (5 * 2), 4 * 2 - nbcartes % (4 * 2), 3 * 2 - nbcartes % (3 * 2), 2 * 2 - nbcartes % (2 * 2))
+        var choix = 7;
+        while (((choix * 2 - nbcartes % (choix * 2)) > min_carte_blanche)) {
+            choix = choix - 1;
+
+        }
+        return choix
+    }
+}
+
+function fichixPrint() {
+    const mdText = input.value;
+    // 1. On utilise parseMarkdown
+    const parsedCards = parseMarkdown(mdText);
+
+    // 2. On map les données
+    const printedCards = parsedCards.map(card => ({
+        color: card.color || 'gris',
+        q: marked.parse(card.recto),
+        a: marked.parse(card.verso),
+        isEmpty: false
+    }));
+    decoupage_fiche_double_question_par_page = choix_du_decoupage(printedCards.length);
+    // 3. On ajoute des cases blanches vides pour avoir un multiple
+    while (printedCards.length % (decoupage_fiche_double_question_par_page * 2) !== 0) {
+        printedCards.push({
+            color: 'blanc',
+            q: '',
+            a: '',
+            isEmpty: true
+        });
+    }
+
+    let html = '';
+
+    // 🔴 NOUVEAU : On découpe par blocs de 8 cartes (qui créent 1 page Recto + 1 page Verso)
+    for (let i = 0; i < printedCards.length; i += decoupage_fiche_double_question_par_page * 2) {
+        const chunk = printedCards.slice(i, i + decoupage_fiche_double_question_par_page * 2);
+        const colE = chunk.slice(0, decoupage_fiche_double_question_par_page); // 4 cartes pour la colonne E
+        const colH = chunk.slice(decoupage_fiche_double_question_par_page, decoupage_fiche_double_question_par_page * 2); // 4 cartes pour la colonne H
+
+        html += `
+            <!-- RECTO -->
+            <div class="page">
+                <div class="col-2">
+                    ${colE.map(c => `
+                        <div class="cell bg-${c.color}">
+                            ${!c.isEmpty ? `<span class="label">Réponse</span><div class="cell-a">${c.a}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="col-2">
+                    ${colH.map(c => `
+                        <div class="cell bg-${c.color}">
+                            ${!c.isEmpty ? `<span class="label">Réponse</span><div class="cell-a">${c.a}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <!-- VERSO -->
+            <div class="page">
+                <div class="col-4">
+                    ${colH.map(c => `
+                        <div class="cell bg-${c.color}">
+                            ${!c.isEmpty ? `<div class="cell-q">${c.q}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="col-4"></div>
+                <div class="col-4"></div>
+                <div class="col-4">
+                    ${colE.map(c => `
+                        <div class="cell bg-${c.color}">
+                            ${!c.isEmpty ? `<div class="cell-q">${c.q}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    const printArea = document.getElementById('fichix-print-area');
+    printArea.innerHTML = html;
+
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(printArea, {
+            delimiters: [{
+                    left: "$$",
+                    right: "$$",
+                    display: true
+                },
+                {
+                    left: "$",
+                    right: "$",
+                    display: false
+                }
+            ]
+        });
+    }
+
+    const tempFichixStyle = document.createElement('style');
+    tempFichixStyle.innerHTML = `
+        @media print {
+            @page { size: A4 portrait; margin: 0; }
+            body { margin: 0; padding: 0; font-family: 'Trebuchet MS', sans-serif; background-color: white !important; }    
+            
+            #toolbar, #about-modal, #main-container, #excalidraw-modal { display: none !important; }
+            #fichix-print-area { display: block !important; width: 210mm !important; }
+            
+            #fichix-print-area img { max-width: 100%; max-height: 40mm; object-fit: contain; display: block; margin: 0 auto; }
+
+            #fichix-print-area .page { 
+                width: 210mm !important; 
+                height: 297mm !important; 
+                display: flex !important; 
+                page-break-after: always !important; 
+                box-sizing: border-box !important; 
+                padding: 10mm !important; 
+                margin: 0 !important;
+                background-color: white !important;
+                justify-content: center !important;
+                align-items: center !important;
+                background-color: white !important;
+            }
+            
+            
+            #fichix-print-area .col-2 { width: 50% !important; height: 277mm !important; display: grid !important; grid-auto-rows: 1fr !important; }
+            #fichix-print-area .col-4 { width: 25% !important; height: 277mm !important; display: grid !important; grid-auto-rows: 1fr !important; }
+            
+            #fichix-print-area .cell {
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                align-items: center !important;
+                padding: 10px !important;
+                text-align: center !important;
+                box-sizing: border-box !important;
+                
+                border-width: 1.5pt !important;
+                border-style: dashed !important;
+                border-color: #000 !important;
+                background-color: white !important;
+                overflow: hidden !important;
+            }
+            
+            #fichix-print-area .col-4:nth-child(2) { 
+                border-right-width: 2.5pt !important; 
+                border-right-style: solid !important; 
+                border-right-color: #000 !important; 
+            }
+            
+            #fichix-print-area .cell p { margin: 0 0 5px 0 !important; width: 100% !important; }
+            #fichix-print-area .cell p:last-child { margin: 0 !important; }
+            
+            #fichix-print-area .cell-q { font-weight: bold !important; font-size: 11pt !important; width: 100% !important; }
+            #fichix-print-area .cell-a { font-size: 10pt !important; line-height: 1.3 !important; width: 100% !important; }
+            #fichix-print-area .label { font-size: 8pt !important; text-transform: uppercase !important; opacity: 0.6 !important; margin-bottom: 4px !important; }
+            
+            /* Couleurs */
+            #fichix-print-area .bg-vert { background-color: #e8f5e9 !important; color: #2e7d32 !important; }
+            #fichix-print-area .bg-orange { background-color: #fff3e0 !important; color: #ef6c00 !important; }
+            #fichix-print-area .bg-rouge { background-color: #ffebee !important; color: #c62828 !important; }
+            #fichix-print-area .bg-bleu { background-color: #e3f2fd !important; color: #1565c0 !important; }
+            #fichix-print-area .bg-violet { background-color: #f3e5f5 !important; color: #6a1b9a !important; }
+            #fichix-print-area .bg-gris { background-color: #f5f5f5 !important; color: #424242 !important; }
+        }
+    `;
+
+    document.head.appendChild(tempFichixStyle);
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+            document.head.removeChild(tempFichixStyle);
+            printArea.innerHTML = '';
+        }, 500);
+    }, 300);
+}
+
+function fichixPrintNB() {
+    const mdText = input.value;
+    // 1. On utilise parseMarkdown pour récupérer les données proprement
+    const parsedCards = parseMarkdown(mdText);
+
+    // 2. On transforme le tableau pour l'adapter au format attendu par l'impression
+    const printedCards = parsedCards.map(card => ({
+        color: card.color || 'gris',
+        q: marked.parse(card.recto),
+        a: marked.parse(card.verso),
+        isEmpty: false
+    }));
+    decoupage_fiche_double_question_par_page = choix_du_decoupage(printedCards.length);
+
+    // 3. On ajoute des cartes vides pour toujours avoir un multiple de la grille
+    while (printedCards.length % (decoupage_fiche_double_question_par_page * 2) !== 0) {
+        printedCards.push({
+            color: 'gris',
+            q: '',
+            a: '',
+            isEmpty: true
+        });
+    }
+
+    let html = '';
+
+    // 🔴 NOUVEAU : On découpe par blocs de 8 cartes
+    for (let i = 0; i < printedCards.length; i += decoupage_fiche_double_question_par_page * 2) {
+        const chunk = printedCards.slice(i, i + decoupage_fiche_double_question_par_page * 2);
+        const colE = chunk.slice(0, decoupage_fiche_double_question_par_page);
+        const colH = chunk.slice(decoupage_fiche_double_question_par_page, decoupage_fiche_double_question_par_page * 2);
+
+        html += `
+            <!-- RECTO -->
+            <div class="page">
+                <div class="col-2">
+                    ${colE.map(c => `
+                        <div class="cell">
+                            ${!c.isEmpty ? `<span class="label">Réponse</span><div class="cell-a">${c.a}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="col-2">
+                    ${colH.map(c => `
+                        <div class="cell">
+                            ${!c.isEmpty ? `<span class="label">Réponse</span><div class="cell-a">${c.a}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <!-- VERSO -->
+            <div class="page">
+                <div class="col-4">
+                    ${colH.map(c => `
+                        <div class="cell">
+                            ${!c.isEmpty ? `<div class="cell-q">${c.q}</div><div class="color-badge">${c.color}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="col-4"></div>
+                <div class="col-4"></div>
+                <div class="col-4">
+                    ${colE.map(c => `
+                        <div class="cell">
+                            ${!c.isEmpty ? `<div class="cell-q">${c.q}</div><div class="color-badge">${c.color}</div>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    const printArea = document.getElementById('fichix-print-area');
+    printArea.innerHTML = html;
+
+    if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(printArea, {
+            delimiters: [{
+                    left: "$$",
+                    right: "$$",
+                    display: true
+                },
+                {
+                    left: "$",
+                    right: "$",
+                    display: false
+                }
+            ]
+        });
+    }
+
+    const tempFichixStyle = document.createElement('style');
+    tempFichixStyle.innerHTML = `
+        @media print {
+            @page { size: A4 portrait; margin: 0; }
+            body { margin: 0; padding: 0; font-family: 'Trebuchet MS', sans-serif; }
+            
+            #toolbar, #about-modal, #main-container, #excalidraw-modal { display: none !important; }
+            #fichix-print-area { display: block !important; width: 210mm !important; }
+            
+            #fichix-print-area img { max-width: 100%; max-height: 40mm; object-fit: contain; display: block; margin: 0 auto; }
+
+            #fichix-print-area .page { 
+                width: 210mm !important; 
+                height: 297mm !important; 
+                display: flex !important; 
+                page-break-after: always !important; 
+                box-sizing: border-box !important; 
+                padding: 10mm !important; 
+                margin: 0 !important;
+                background-color: white !important;
+            }
+            
+            #fichix-print-area .col-2 { width: 50% !important; height: 277mm !important; display: grid !important; grid-auto-rows: 1fr !important; }
+            #fichix-print-area .col-4 { width: 25% !important; height: 277mm !important; display: grid !important; grid-auto-rows: 1fr !important; }
+            
+            #fichix-print-area .cell {
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                align-items: center !important;
+                padding: 10px !important;
+                text-align: center !important;
+                box-sizing: border-box !important;
+                
+                border-width: 1.5pt !important;
+                border-style: dashed !important;
+                border-color: #000 !important;
+                background-color: white !important;
+                overflow: hidden !important;
+                position: relative !important; 
+                background-color: transparent !important; 
+                color: black !important; 
+            }
+            
+            #fichix-print-area .col-4:nth-child(2) { 
+                border-right-width: 2.5pt !important; 
+                border-right-style: solid !important; 
+                border-right-color: #000 !important; 
+            }
+            
+            #fichix-print-area .cell p { margin: 0 0 5px 0 !important; width: 100% !important; }
+            #fichix-print-area .cell p:last-child { margin: 0 !important; }
+            
+            #fichix-print-area .cell-q { font-weight: bold !important; font-size: 11pt !important; width: 100% !important; }
+            #fichix-print-area .cell-a { font-size: 10pt !important; line-height: 1.3 !important; width: 100% !important; }
+            #fichix-print-area .label { font-size: 8pt !important; text-transform: uppercase !important; opacity: 0.6 !important; margin-bottom: 4px !important; }
+            
+            #fichix-print-area .color-badge {
+                position: absolute !important;
+                bottom: 4px !important;
+                right: 4px !important;
+                font-size: 7pt !important;
+                font-weight: bold !important;
+                text-transform: uppercase !important;
+                
+                border-width: 1pt !important;
+                border-style: solid !important;
+                border-color: #000 !important;
+                
+                padding: 2px 4px !important;
+                background-color: white !important;
+                color: black !important;
+            }
+        }
+    `;
+
+    document.head.appendChild(tempFichixStyle);
+    setTimeout(() => {
+        window.print();
+        setTimeout(() => {
+            document.head.removeChild(tempFichixStyle);
+            printArea.innerHTML = '';
+        }, 500);
+    }, 300);
+}
+
+window.addEventListener('load', () => {
+    init();
+});

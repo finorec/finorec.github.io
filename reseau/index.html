@@ -1,0 +1,2628 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simulateur réseau</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Disposition : barre d'outils en haut, palette à gauche (bandeau sur mobile), canevas au centre, réglages en bas. */
+  --ink:#1b2331; --muted:#566277; --chrome:#dfe3e9; --edge:#8d99ab; --panel:#c8ddf2;
+  --canvas:#f1f4f8; --accent:#1d5fa6; --good:#14923a; --bad:#c62f27; --field:#ffffff;
+  --f-ui:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,"Courier New",monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--canvas);color:var(--ink);font:14px/1.35 var(--f-ui);-webkit-text-size-adjust:100%;overscroll-behavior:none}
+button,input,select,textarea{font:inherit;color:inherit}
+#cv,.dev,.pal,.tb{-webkit-tap-highlight-color:transparent}
+#app{display:flex;flex-direction:column;height:100%}
+/* barre d'outils */
+#toolbar{display:flex;align-items:center;gap:6px;padding:6px 8px;background:linear-gradient(#f4f6f9,#d3d8e0);border-bottom:1px solid var(--edge);overflow-x:auto;flex:none}
+.tb{display:flex;align-items:center;gap:6px;min-height:42px;min-width:42px;padding:4px 10px;border:1px solid var(--edge);border-radius:6px;background:linear-gradient(#fff,#e3e8ee);cursor:pointer;white-space:nowrap;font-weight:500}
+.tb:disabled{opacity:.45;cursor:default}
+.tb[aria-pressed=true]{background:linear-gradient(#bcd5f2,#8db5e6);border-color:var(--accent)}
+.tb svg{width:26px;height:26px;flex:none}
+.sep{width:1px;align-self:stretch;background:var(--edge);margin:0 4px;flex:none}
+.spacer{flex:1}
+#speedbox{display:flex;align-items:center;gap:8px;font-weight:500;white-space:nowrap}
+#speed{width:140px}
+/* zone centrale */
+#mid{flex:1;display:flex;min-height:0}
+#palette{display:flex;flex-direction:column;width:136px;flex:none;overflow-y:auto;background:linear-gradient(90deg,#f2f4f7,#d2d7de);border-right:1px solid var(--edge)}
+.pal{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:0;background:none;cursor:pointer;font-weight:600;font-size:12.5px;text-align:center;color:var(--ink)}
+.pal svg{width:54px;height:54px}
+.pal[aria-pressed=true]{background:#bcd5f2;outline:2px solid var(--accent);outline-offset:-2px}
+#stage{position:relative;flex:1;min-width:0;min-height:0;overflow:hidden;touch-action:none;background-color:var(--canvas);background-image:radial-gradient(circle,#a3aebf 1px,transparent 1.2px);background-size:24px 24px}
+#cv{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-select:none}
+#hint{position:absolute;left:10px;top:10px;right:10px;max-width:520px;padding:6px 10px;background:rgba(255,255,255,.92);border:1px solid var(--edge);border-radius:6px;font-weight:500;pointer-events:none}
+#hint:empty{display:none}
+.dev{cursor:pointer}
+.dev .ring{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-dasharray:5 4;display:none}
+.dev.sel .ring{display:block}
+.dev.from .ring{display:block;stroke:var(--good)}
+.dlabel{font:600 13px var(--f-ui);fill:var(--ink);paint-order:stroke;stroke:var(--canvas);stroke-width:4px;stroke-linejoin:round;text-anchor:middle}
+.lnk{stroke:#c0281f;stroke-width:3;stroke-linecap:round}
+.lnk.sel{stroke:var(--accent);stroke-width:5}
+.lnk.wifi{stroke:#4a6e9c;stroke-width:2;stroke-dasharray:2 6}
+.lnk.hit{stroke:transparent;stroke-width:22;cursor:pointer}
+.pkt{stroke:#fff;stroke-width:1.5}
+.pkt.arp{fill:#e08a00}.pkt.icmp{fill:#14923a}.pkt.tcp{fill:#1d5fa6}.pkt.udp{fill:#8a3fc0}
+.dot{fill:#22b04a;stroke:#fff;stroke-width:2}
+/* panneau de réglages */
+#pwrap{position:relative;flex:none}
+#ptab{position:absolute;left:50%;top:-18px;transform:translateX(-50%);width:96px;height:18px;border:0;border-radius:7px 7px 0 0;background:#14171c;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:5}
+#ptab svg{width:12px;height:12px;transition:transform .15s}
+#pwrap.collapsed #ptab svg{transform:rotate(180deg)}
+#props{max-height:42vh;overflow:auto;background:linear-gradient(#cdd1d7,#eceef2);border-top:1px solid var(--edge)}
+#pwrap.collapsed #props{display:none}
+.pempty{padding:14px 16px;color:var(--muted)}
+.pg{display:grid;grid-template-columns:minmax(250px,1fr) minmax(230px,1fr) minmax(230px,1fr);gap:6px 28px;padding:12px 16px;align-items:start}
+.pg>div{display:flex;flex-direction:column;gap:6px}
+.row{display:grid;grid-template-columns:132px 1fr;align-items:center;gap:6px}
+.row>label,.lbl{font-weight:600}
+.in{width:100%;min-height:36px;padding:4px 8px;border:1px solid var(--edge);background:var(--field);border-radius:2px}
+.in:disabled,.in[readonly]{background:#e2e6ec;color:#788498}
+.in.bad{border-color:var(--bad);outline:1px solid var(--bad)}
+textarea.in{resize:vertical;min-height:90px;font-family:var(--f-mono);font-size:13px}
+.chk{display:flex;align-items:center;gap:8px;min-height:34px;font-weight:600}
+.chk input{width:19px;height:19px;flex:none}
+.chk.dis{color:#788498}
+.btn{min-height:36px;padding:4px 14px;border:1px solid #7388a3;background:linear-gradient(#f5f9fd,#cbdbee);font-weight:600;border-radius:3px;cursor:pointer}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.go{border-color:#127a30;background:linear-gradient(#bff0cc,#7fd197)}
+.btn.stop{border-color:#9d231c;background:linear-gradient(#f7c9c5,#e49993)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
+.radios{display:flex;gap:16px;flex-wrap:wrap;font-weight:600;align-items:center;min-height:34px}
+.radios label{display:flex;align-items:center;gap:6px}
+.radios input{width:18px;height:18px}
+.note{color:var(--muted);font-size:13px}
+.status{font-weight:600;display:flex;align-items:center;gap:8px}
+.status i{width:12px;height:12px;border-radius:50%;background:#aab3c1;display:inline-block}
+.status.ok i{background:#22b04a}
+/* onglets */
+.tabbar{display:flex;gap:2px;padding:6px 8px 0;background:linear-gradient(#cdd1d7,#d9dce1);overflow-x:auto}
+.tab{display:flex;align-items:center;gap:6px;padding:6px 12px;min-height:34px;border:1px solid var(--edge);border-bottom:0;border-radius:5px 5px 0 0;background:#e8eaee;cursor:pointer;font-weight:600;white-space:nowrap}
+.tab svg{width:34px;height:22px}
+.tab[aria-selected=true]{background:var(--panel)}
+.tabbody{background:var(--panel);padding:12px 16px;min-height:120px}
+.tabbody .col{max-width:520px;margin-left:auto;display:flex;flex-direction:column;gap:6px}
+/* tableaux */
+.tbl{width:100%;border-collapse:collapse;background:#fff}
+.tbl th{background:#ececee;border:1px solid #b4bcc8;padding:5px 6px;font-weight:600;text-align:center;position:sticky;top:0}
+.tbl td{border:1px solid #d3d8e0;padding:2px 4px;min-height:30px}
+.tbl tr.sel td{background:#b8d2ee}
+.tbl tr.auto td{color:#8b93a1}
+.tbl select.in{min-width:100px}
+.tbl .cell{min-width:90px;width:100%;min-height:30px;border:0;background:transparent;padding:2px 4px}
+.tbl .cell:focus{outline:2px solid var(--accent);outline-offset:-2px}
+.tblwrap{overflow:auto;border:1px solid #b4bcc8;background:#fff;min-height:110px}
+/* fenêtres */
+#winlayer{position:fixed;inset:0;z-index:30;pointer-events:none}
+.backdrop{position:absolute;inset:0;background:rgba(10,20,40,.38);pointer-events:auto}
+.win{position:absolute;pointer-events:auto;display:flex;flex-direction:column;background:#efeff1;border:1px solid #6e7a8c;border-radius:8px;box-shadow:0 12px 34px rgba(0,0,0,.38);max-width:100vw;max-height:100%}
+.wtitle{display:flex;align-items:center;gap:8px;padding:4px 4px 4px 10px;background:#f5f7fa;border-bottom:1px solid #c5ccd7;border-radius:8px 8px 0 0;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none}
+.wtitle svg{width:22px;height:22px;flex:none}
+.wtitle b{flex:1;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wx{border:0;background:none;font-size:24px;line-height:1;width:38px;height:36px;cursor:pointer;border-radius:4px}
+.wx:hover{background:#e0524a;color:#fff}
+.wbody{flex:1;min-height:0;overflow:auto;position:relative}
+.dlg{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.dlg .btns{justify-content:flex-end}
+.tabbar.light{background:#e6e9ee}
+.tabbar.light .tab[aria-selected=true]{background:#c8ddf2}
+.tabpane{background:#c8ddf2;padding:14px 16px;min-height:200px}
+/* bureau d'une machine */
+.desk{display:flex;flex-direction:column;height:100%;min-height:0;background:#ececec}
+.desk-main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+.desk-home{flex:1;overflow:auto;background:linear-gradient(#0a2744,#0f7bd6);padding:14px}
+.icons{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:flex-start}
+.icon{width:104px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:0;background:none;color:#fff;font-weight:700;font-size:13px;text-align:center;cursor:pointer;border-radius:6px}
+.icon:hover,.icon:focus-visible{background:rgba(255,255,255,.16)}
+.icon svg{width:62px;height:62px}
+.apptitle{display:flex;align-items:center;justify-content:center;gap:8px;background:#3b3b3d;color:#e6e6e6;font-weight:600;padding:6px 10px}
+.apptitle svg{width:22px;height:22px}
+.appbody{flex:1;min-height:0;overflow:auto;background:#eeeeee;position:relative}
+.deskbar{display:flex;align-items:center;background:#b2b2b4;border-top:1px solid #8b8b8d}
+.deskbar button{flex:1;min-height:40px;border:0;background:#bdbdc0;font-weight:700;cursor:pointer}
+.deskbar button:hover{background:#cfcfd2}
+.apad{padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-height:100%}
+.cols{display:flex;gap:14px;align-items:stretch}
+.cols>.grow{flex:1;min-width:0}
+.swlist{border:1px solid #7f8ba0;background:#fff;height:min(46vh,300px);overflow:auto;padding:4px}
+.swlist div{padding:5px 6px;font-weight:600;cursor:pointer;border-radius:2px}
+.swlist div.sel{background:#8fb3dc}
+.arrows{display:flex;flex-direction:column;justify-content:center;gap:14px}
+.arrows .btn{min-width:46px;min-height:46px;font-size:20px;padding:0}
+.term{background:#0f1720;color:#d7e3f2;font-family:var(--f-mono);font-size:13px;height:100%;display:flex;flex-direction:column}
+.term pre{margin:0;padding:10px;overflow:auto;flex:1;white-space:pre-wrap;word-break:break-word;font:inherit}
+.term .line{display:flex;align-items:center;border-top:1px solid #243246;padding-left:10px;color:#8fe3a2}
+.term input{flex:1;background:transparent;border:0;color:#d7e3f2;padding:11px 8px;font:inherit;outline:none;min-width:0}
+.logbox{background:#fff;border:1px solid #7f8ba0;font-family:var(--f-mono);font-size:13px;padding:6px 8px;overflow:auto;min-height:120px;flex:1;white-space:pre-wrap;word-break:break-word}
+.browserframe{flex:1;border:1px solid #7f8ba0;background:#fff;min-height:200px;width:100%}
+.inline{display:flex;gap:8px;align-items:center}
+.inline .in{flex:1;min-width:0}
+.mail{border:1px solid #9aa5b6;background:#fff;max-height:180px;overflow:auto}
+.mail div{padding:6px 8px;border-bottom:1px solid #e2e6ec;cursor:pointer}
+.mail div:hover{background:#eaf2fb}
+#toast{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);max-width:92vw;padding:10px 16px;background:#1b2331;color:#fff;border-radius:8px;font-weight:500;z-index:60;pointer-events:none;opacity:0;transition:opacity .2s}
+#toast.on{opacity:1}
+:focus-visible{outline:3px solid #f2a900;outline-offset:1px}
+@media (prefers-reduced-motion:reduce){#toast,#ptab svg{transition:none}}
+@media (max-width:720px){
+  #mid{flex-direction:column}
+  #palette{flex-direction:row;width:auto;overflow-x:auto;overflow-y:hidden;border-right:0;border-bottom:1px solid var(--edge)}
+  .pal{min-width:80px;flex:0 0 auto;padding:4px 2px;font-size:11.5px}
+  .pal svg{width:38px;height:38px}
+  .tb .lbl{display:none}
+  #speed{width:96px}
+  .pg{grid-template-columns:1fr;padding:10px 12px}
+  .row{grid-template-columns:112px 1fr}
+  #props{max-height:46vh}
+  .win.big{left:6px!important;top:6px!important;width:calc(100% - 12px)!important;height:calc(100% - 12px)!important}
+  .cols{flex-direction:column}
+  .tabbody .col{max-width:none}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<defs>
+  <linearGradient id="gBlk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4c4f55"/><stop offset="1" stop-color="#101114"/></linearGradient>
+  <linearGradient id="gGry" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2e5e9"/><stop offset="1" stop-color="#8a919c"/></linearGradient>
+  <linearGradient id="gTower" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f6f7f9"/><stop offset=".7" stop-color="#d0d4da"/><stop offset="1" stop-color="#959ca6"/></linearGradient>
+</defs>
+<symbol id="ico-cable" viewBox="0 0 64 64">
+  <path d="M30 14C12 8 4 30 16 43s34 9 40-9S46 12 30 14z" fill="none" stroke="#6e0000" stroke-width="7" stroke-linecap="round"/>
+  <path d="M30 14C12 8 4 30 16 43s34 9 40-9S46 12 30 14z" fill="none" stroke="#f22d24" stroke-width="4.4" stroke-linecap="round"/>
+  <path d="M26 18C16 18 12 30 20 38s24 4 28-6" fill="none" stroke="#f22d24" stroke-width="4" stroke-linecap="round"/>
+  <rect x="22" y="5" width="9" height="13" rx="2" fill="#f2f3f5" stroke="#7b828d"/><rect x="34" y="5" width="9" height="13" rx="2" fill="#f2f3f5" stroke="#7b828d"/>
+  <path d="M25 8v5M28 8v5M37 8v5M40 8v5" stroke="#d9a21b" stroke-width="1.4"/>
+</symbol>
+<symbol id="ico-computer" viewBox="0 0 64 64">
+  <path d="M46 10l8 4v38l-8 4z" fill="#5a616c"/>
+  <path d="M18 6h24a4 4 0 0 1 4 4v42a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4V10a4 4 0 0 1 4-4z" fill="url(#gTower)" stroke="#6a717c"/>
+  <rect x="19" y="12" width="22" height="9" rx="1.5" fill="#2b3039"/><rect x="19" y="24" width="22" height="9" rx="1.5" fill="#2b3039"/>
+  <path d="M21 17h18M21 29h18" stroke="#58606c" stroke-width="1.5"/>
+  <circle cx="21" cy="48" r="2" fill="#2fb14d"/><circle cx="27" cy="48" r="2" fill="#aab1bb"/>
+</symbol>
+<symbol id="ico-laptop" viewBox="0 0 64 64">
+  <path d="M14 8h36a3 3 0 0 1 3 3v26H11V11a3 3 0 0 1 3-3z" fill="#262b35"/>
+  <rect x="15" y="12" width="34" height="21" fill="#3b7bd0"/><path d="M15 12h34v9L15 33z" fill="#fff" opacity=".18"/>
+  <path d="M5 40h54l-4 13H9z" fill="url(#gGry)" stroke="#69707b"/>
+  <path d="M14 44h36M13 48h38" stroke="#4e5560" stroke-width="2" stroke-dasharray="3 2"/>
+</symbol>
+<symbol id="ico-switch" viewBox="0 0 64 64">
+  <path d="M5 31l9-9h36l9 9v14a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z" fill="url(#gBlk)"/>
+  <path d="M14 22h36l9 9H5z" fill="#6a6e76"/>
+  <g fill="#9aa0aa"><rect x="22" y="35" width="6" height="6"/><rect x="30" y="35" width="6" height="6"/><rect x="38" y="35" width="6" height="6"/><rect x="46" y="35" width="6" height="6"/></g>
+  <g fill="#38d05f"><rect x="10" y="37" width="2.5" height="3"/><rect x="14" y="37" width="2.5" height="3"/><rect x="18" y="37" width="2.5" height="3"/></g>
+</symbol>
+<symbol id="ico-homerouter" viewBox="0 0 64 64">
+  <path d="M6 28L18 14h28l12 14v18a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4z" fill="url(#gBlk)"/>
+  <path d="M18 14h28l12 14H6z" fill="#7a7e87"/>
+  <path d="M10 30h44v3H10z" fill="#23262c"/>
+  <g fill="#55a8ff"><rect x="14" y="40" width="2.5" height="3.5"/><rect x="18" y="40" width="2.5" height="3.5"/><rect x="22" y="40" width="2.5" height="3.5"/></g>
+  <path d="M42 38h10M42 42h10M42 46h10" stroke="#8e939c" stroke-width="1.6"/>
+</symbol>
+<symbol id="ico-router" viewBox="0 0 64 64">
+  <path d="M6 30l10-12h32l10 12v14a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4z" fill="url(#gGry)" stroke="#6a717c"/>
+  <path d="M16 18h32l10 12H6z" fill="#b7bcc4" stroke="#6a717c"/>
+  <g fill="#38d05f"><rect x="12" y="38" width="2.5" height="3.5"/><rect x="16" y="38" width="2.5" height="3.5"/><rect x="20" y="38" width="2.5" height="3.5"/></g>
+  <path d="M40 36h12M40 40h12M40 44h12" stroke="#4a515c" stroke-width="1.8"/>
+</symbol>
+<symbol id="ico-modem" viewBox="0 0 64 64">
+  <path d="M14 22L8 8" stroke="#e0368c" stroke-width="2.4" stroke-linecap="round"/><circle cx="8" cy="8" r="2.6" fill="#f2a900"/><circle cx="11" cy="14" r="1.6" fill="#e0368c"/>
+  <path d="M7 36l9-10h32l9 10v13a3 3 0 0 1-3 3H10a3 3 0 0 1-3-3z" fill="url(#gBlk)"/>
+  <path d="M16 26h32l9 10H7z" fill="#6c7078"/>
+  <g fill="#38d05f"><rect x="14" y="42" width="2.5" height="3.5"/><rect x="18" y="42" width="2.5" height="3.5"/><rect x="22" y="42" width="2.5" height="3.5"/></g>
+</symbol>
+<symbol id="ico-cloud" viewBox="0 0 64 64">
+  <path d="M17 47a10 10 0 0 1 0-20 14 14 0 0 1 27-3 11 11 0 0 1 3 23z" fill="#eaf2fc" stroke="#6b91bf" stroke-width="2.4"/>
+  <path d="M22 36a7 7 0 0 1 8-6" fill="none" stroke="#b6cde8" stroke-width="2.5" stroke-linecap="round"/>
+</symbol>
+<symbol id="ico-port" viewBox="0 0 34 22"><path d="M5 2h24v10l-4 3v5H9v-5l-4-3z" fill="#0f1012" stroke="#444"/><path d="M10 4v4M13 4v4M16 4v4M19 4v4M22 4v4M25 4v4" stroke="#e0ad2b" stroke-width="1.5"/></symbol>
+<symbol id="ico-hammer" viewBox="0 0 64 64"><g transform="rotate(-42 32 32)"><rect x="28" y="16" width="8" height="44" rx="2.5" fill="#9a6730" stroke="#5f3d18"/><rect x="14" y="6" width="36" height="15" rx="2.5" fill="#9aa1ab" stroke="#4d5460" stroke-width="1.5"/><rect x="14" y="6" width="10" height="15" rx="2" fill="#707883"/></g></symbol>
+<symbol id="ico-play" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="#22a447" stroke="#127a30" stroke-width="3"/><path d="M26 18l22 14-22 14z" fill="#fff"/></symbol>
+<symbol id="ico-stop" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="#d0372e" stroke="#8f211b" stroke-width="3"/><rect x="21" y="21" width="22" height="22" rx="2" fill="#fff"/></symbol>
+<symbol id="ico-new" viewBox="0 0 64 64"><path d="M14 6h26l12 12v40H14z" fill="#fff" stroke="#6a7384" stroke-width="3" stroke-linejoin="round"/><path d="M40 6v12h12" fill="#dfe5ee" stroke="#6a7384" stroke-width="3" stroke-linejoin="round"/></symbol>
+<symbol id="ico-open" viewBox="0 0 64 64"><path d="M6 16a4 4 0 0 1 4-4h14l6 6h22a4 4 0 0 1 4 4v6H6z" fill="#e0aa2e"/><path d="M6 26h52l-6 26a3 3 0 0 1-3 2H11a3 3 0 0 1-3-2z" fill="#f4c64f" stroke="#a97b12" stroke-width="2"/></symbol>
+<symbol id="ico-save" viewBox="0 0 64 64"><path d="M8 8h40l8 8v40H8z" fill="#2f66b0" stroke="#1d467f" stroke-width="2.5" stroke-linejoin="round"/><rect x="18" y="8" width="24" height="16" fill="#e8eef7"/><rect x="34" y="11" width="5" height="10" fill="#2f66b0"/><rect x="16" y="34" width="32" height="22" rx="2" fill="#f4f6f9"/></symbol>
+<symbol id="ico-trash" viewBox="0 0 64 64"><path d="M14 18h36l-3 38a3 3 0 0 1-3 3H20a3 3 0 0 1-3-3z" fill="#c7cdd7" stroke="#5d6676" stroke-width="3" stroke-linejoin="round"/><path d="M10 18h44M25 18v-6h14v6M26 28v20M32 28v20M38 28v20" stroke="#5d6676" stroke-width="3" stroke-linecap="round" fill="none"/></symbol>
+<symbol id="ico-license" viewBox="0 0 64 64"><path d="M12 6h30l10 10v42H12z" fill="#fff" stroke="#6a7384" stroke-width="3" stroke-linejoin="round"/><path d="M19 20h20M19 28h24M19 36h12" stroke="#8993a5" stroke-width="3" stroke-linecap="round"/><path d="M36 48l-3 13 8-4 8 4-3-13z" fill="#d0372e"/><circle cx="41" cy="45" r="9" fill="#f2a900" stroke="#8b5e00" stroke-width="2"/></symbol>
+<symbol id="ico-chev" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+<!-- logiciels -->
+<symbol id="app-install" viewBox="0 0 64 64"><path d="M10 12l18-4 0 44-18 4z" fill="#79b84a"/><path d="M28 8l24 4v44l-24-4z" fill="#a8d884"/><path d="M10 12l18-4 24 4-18 4z" fill="#d6efbf"/><text x="35" y="26" font-size="7" font-weight="700" fill="#fff" transform="rotate(8 35 26)">SOFT</text><circle cx="38" cy="40" r="13" fill="#e9ecf2" stroke="#8d95a5" stroke-width="2"/><circle cx="38" cy="40" r="3.5" fill="#6c7585"/></symbol>
+<symbol id="app-cmd" viewBox="0 0 64 64"><rect x="5" y="9" width="54" height="46" rx="6" fill="#1b1f27" stroke="#6f7787" stroke-width="2"/><path d="M16 24l10 8-10 8" stroke="#8fe3a2" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M30 43h15" stroke="#8fe3a2" stroke-width="4.5" stroke-linecap="round"/></symbol>
+<symbol id="app-files" viewBox="0 0 64 64"><path d="M5 18a4 4 0 0 1 4-4h15l6 6h25a4 4 0 0 1 4 4v28a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4z" fill="#f4c64f" stroke="#a97b12" stroke-width="2.5"/><path d="M5 28h54" stroke="#a97b12" stroke-width="2"/></symbol>
+<symbol id="app-editor" viewBox="0 0 64 64"><path d="M12 6h30l10 10v42H12z" fill="#fff" stroke="#6a7384" stroke-width="2.5" stroke-linejoin="round"/><path d="M19 22h24M19 30h24M19 38h16" stroke="#8993a5" stroke-width="3" stroke-linecap="round"/><path d="M40 52l16-16 6 6-16 16-8 2z" fill="#f2a900" stroke="#8b5e00" stroke-width="2" stroke-linejoin="round"/></symbol>
+<symbol id="app-images" viewBox="0 0 64 64"><rect x="6" y="10" width="52" height="44" rx="4" fill="#fff" stroke="#6a7384" stroke-width="2.5"/><rect x="11" y="15" width="42" height="34" fill="#8cc4f0"/><path d="M11 49l14-18 10 11 7-7 11 14z" fill="#4f9a55"/><circle cx="44" cy="25" r="5" fill="#ffd54a"/></symbol>
+<symbol id="app-firewall" viewBox="0 0 64 64"><rect x="6" y="12" width="52" height="42" fill="#c44a2c" stroke="#7d2b16" stroke-width="2"/><path d="M6 26h52M6 40h52M22 12v14M42 12v14M14 26v14M34 26v14M54 26v14M22 40v14M42 40v14" stroke="#f1c9b8" stroke-width="2.4"/></symbol>
+<symbol id="app-dns" viewBox="0 0 64 64"><rect x="6" y="8" width="52" height="48" rx="8" fill="#2f66b0" stroke="#1d467f" stroke-width="2"/><text x="32" y="38" font-size="18" font-weight="700" text-anchor="middle" fill="#fff" font-family="IBM Plex Sans,Arial,sans-serif">DNS</text></symbol>
+<symbol id="app-gensrv" viewBox="0 0 64 64"><rect x="12" y="6" width="40" height="22" rx="3" fill="#8f97a3" stroke="#555d69" stroke-width="2"/><rect x="12" y="32" width="40" height="22" rx="3" fill="#8f97a3" stroke="#555d69" stroke-width="2"/><circle cx="20" cy="17" r="2.5" fill="#38d05f"/><circle cx="20" cy="43" r="2.5" fill="#38d05f"/><path d="M28 17h18M28 43h18" stroke="#3c424c" stroke-width="3"/></symbol>
+<symbol id="app-gencli" viewBox="0 0 64 64"><rect x="8" y="8" width="48" height="34" rx="3" fill="#2a303b"/><rect x="12" y="12" width="40" height="26" fill="#6aa7e6"/><path d="M26 42h12l3 10H23z" fill="#8f97a3"/><rect x="18" y="52" width="28" height="4" rx="2" fill="#6c7480"/></symbol>
+<symbol id="app-websrv" viewBox="0 0 64 64"><circle cx="32" cy="28" r="20" fill="#4a90d9" stroke="#1d5fa6" stroke-width="2.5"/><path d="M12 28h40M32 8c-9 10-9 30 0 40M32 8c9 10 9 30 0 40" fill="none" stroke="#dcecfb" stroke-width="2"/><rect x="14" y="50" width="36" height="9" rx="2" fill="#8f97a3" stroke="#555d69" stroke-width="2"/><circle cx="20" cy="54.5" r="2" fill="#38d05f"/></symbol>
+<symbol id="app-browser" viewBox="0 0 64 64"><circle cx="32" cy="32" r="25" fill="#4a90d9" stroke="#1d5fa6" stroke-width="2.5"/><path d="M7 32h50M32 7c-11 12-11 38 0 50M32 7c11 12 11 38 0 50" fill="none" stroke="#dcecfb" stroke-width="2"/><path d="M12 20h40M12 44h40" stroke="#dcecfb" stroke-width="1.6"/></symbol>
+<symbol id="app-mailsrv" viewBox="0 0 64 64"><rect x="8" y="10" width="48" height="32" rx="3" fill="#fff" stroke="#6a7384" stroke-width="2.5"/><path d="M8 14l24 17 24-17" fill="none" stroke="#6a7384" stroke-width="2.5"/><rect x="14" y="46" width="36" height="11" rx="2" fill="#8f97a3" stroke="#555d69" stroke-width="2"/><circle cx="20" cy="51.5" r="2" fill="#38d05f"/></symbol>
+<symbol id="app-mailcli" viewBox="0 0 64 64"><rect x="6" y="14" width="52" height="36" rx="3" fill="#fff" stroke="#6a7384" stroke-width="2.5"/><path d="M6 18l26 20 26-20" fill="none" stroke="#6a7384" stroke-width="2.5"/><circle cx="50" cy="16" r="8" fill="#d0372e"/></symbol>
+<symbol id="app-p2p" viewBox="0 0 64 64"><path d="M32 14L12 46M32 14l20 32M12 46h40" stroke="#6a7384" stroke-width="3" fill="none"/><circle cx="32" cy="14" r="9" fill="#f2a900" stroke="#8b5e00" stroke-width="2"/><circle cx="12" cy="46" r="9" fill="#4a90d9" stroke="#1d5fa6" stroke-width="2"/><circle cx="52" cy="46" r="9" fill="#79b84a" stroke="#3f7a1d" stroke-width="2"/></symbol>
+<symbol id="app-net" viewBox="0 0 64 64"><rect x="4" y="8" width="24" height="18" fill="#fff" stroke="#333" stroke-width="3"/><rect x="36" y="38" width="24" height="18" fill="#fff" stroke="#333" stroke-width="3"/><path d="M16 26v22h20" fill="none" stroke="#333" stroke-width="3"/></symbol>
+</svg>
+
+<div id="app">
+  <div id="toolbar" role="toolbar" aria-label="Barre d'outils"></div>
+  <div id="mid">
+    <nav id="palette" aria-label="Composants"></nav>
+    <div id="stage">
+      <svg id="cv" role="application" aria-label="Schéma du réseau">
+        <g id="world"><g id="links"></g><g id="devs"></g><g id="packets"></g></g>
+      </svg>
+      <div id="hint"></div>
+    </div>
+  </div>
+  <div id="pwrap">
+    <button id="ptab" type="button" aria-label="Afficher ou masquer les réglages"><svg><use href="#ico-chev"/></svg></button>
+    <div id="props"></div>
+  </div>
+</div>
+<div id="winlayer"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+'use strict';
+/* ===== Outils généraux ===== */
+const $ = (s, r = document) => r.querySelector(s);
+const BCAST = 'FF:FF:FF:FF:FF:FF';
+
+function h(tag, attrs, ...kids) {
+  const svg = tag.startsWith('svg:');
+  const el = svg ? document.createElementNS('http://www.w3.org/2000/svg', tag.slice(4)) : document.createElement(tag);
+  let value;
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (v == null || v === false) continue;
+    if (k === 'class') el.setAttribute('class', v);
+    else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v);
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'value') value = v;
+    else if (k === 'checked' || k === 'disabled' || k === 'selected' || k === 'readOnly') el[k] = true;
+    else el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat(9)) {
+    if (c == null || c === false) continue;
+    el.append(c.nodeType ? c : document.createTextNode(String(c)));
+  }
+  if (value !== undefined) el.value = value;
+  return el;
+}
+const icon = (id, cls) => h('svg', { class: cls, 'aria-hidden': 'true' }, h('svg:use', { href: '#' + id }));
+/* h() crée des éléments HTML : l'icône SVG est donc construite avec le bon espace de noms */
+function svgIcon(id, cls) {
+  const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  if (cls) s.setAttribute('class', cls);
+  s.setAttribute('aria-hidden', 'true');
+  const u = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+  u.setAttribute('href', '#' + id);
+  s.append(u);
+  return s;
+}
+
+/* ===== Adresses ===== */
+const ipRe = /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
+const isIp = s => ipRe.test(String(s == null ? '' : s).trim());
+const ip2n = s => String(s).trim().split('.').reduce((a, b) => a * 256 + (+b), 0) >>> 0;
+const n2ip = n => [24, 16, 8, 0].map(sh => (n >>> sh) & 255).join('.');
+const netOf = (ip, mask) => (ip2n(ip) & ip2n(mask)) >>> 0;
+const sameNet = (a, b, mask) => isIp(a) && isIp(b) && isIp(mask) && netOf(a, mask) === netOf(b, mask);
+const popcount = n => { let c = 0; n = n >>> 0; while (n) { c += n & 1; n >>>= 1; } return c; };
+const macRe = /^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$/;
+function genMac() {
+  for (;;) {
+    const b = Array.from({ length: 6 }, () => Math.floor(Math.random() * 256));
+    b[0] = (b[0] & 0xFC) | 0x02;
+    const m = b.map(x => x.toString(16).padStart(2, '0').toUpperCase()).join(':');
+    if (!S.devices.some(d => d.ifs && d.ifs.some(i => i.mac === m))) return m;
+  }
+}
+const hex6 = () => Array.from({ length: 6 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+const hhmmss = t => new Date(t).toLocaleTimeString('fr-FR');
+
+/* ===== État ===== */
+const S = {
+  devices: [], links: [], nextId: 1,
+  sel: null,            // {kind:'dev'|'link', id}
+  mode: 'design',       // 'design' | 'sim'
+  tool: null,           // null | 'cable' | type d'appareil à poser
+  cableFrom: null,
+  view: { x: 0, y: 0, k: 1 },
+  tabIdx: {}
+};
+const dev = id => S.devices.find(d => d.id === id);
+const TYPES = {
+  computer:   { label: 'Ordinateur',         ico: 'computer' },
+  laptop:     { label: 'Portable',           ico: 'laptop' },
+  switch:     { label: 'Switch / Wi-Fi',     ico: 'switch' },
+  homerouter: { label: 'Routeur Domestique', ico: 'homerouter' },
+  router:     { label: 'Routeur',            ico: 'router' },
+  modem:      { label: 'Modem',              ico: 'modem' }
+};
+const isHost = d => d.type === 'computer' || d.type === 'laptop';
+
+/* ===== Valeurs par défaut ===== */
+const newFirewall = () => ({ active: false, icmp: false, synOnly: true, def: 'rejeter', rules: [] });
+const newDhcp = () => ({ enabled: false, start: '0.0.0.0', end: '0.0.0.0', manual: false, gw: '0.0.0.0', dns: '0.0.0.0', statics: [] });
+const uniqName = base => {
+  const names = S.devices.map(d => d.name);
+  if (!names.includes(base)) return base;
+  let n = 2; while (names.includes(base + ' ' + n)) n++;
+  return base + ' ' + n;
+};
+function newDevice(type, x, y, nics) {
+  const d = { id: S.nextId++, type, name: uniqName(TYPES[type].label), x, y };
+  const mk = () => ({ ip: '192.168.0.10', mask: '255.255.255.0', mac: genMac() });
+  if (isHost(d)) {
+    d.ifs = [mk()];
+    Object.assign(d, {
+      gw: '', dns: '', wifi: false, ssid: '', dhcpClient: false, routing: false, nameMode: 'name',
+      dhcp: newDhcp(), apps: [], fs: [], firewall: newFirewall(), dnsRecords: [],
+      web: { port: 80, pages: [{ path: '/', html: '<h1>Bienvenue</h1>\n<p>Page d’accueil de ce serveur web.</p>' }] },
+      mailSrv: { domain: 'exemple.fr', users: [] },
+      mailCli: { user: '', pass: '', server: '' },
+      gen: { sport: 12345, sproto: 'TCP', chost: '', cport: 12345, cproto: 'TCP' },
+      p2p: { port: 6346 }
+    });
+  } else if (type === 'switch') {
+    Object.assign(d, { ssid: hex6(), retention: 300, cloud: false });
+  } else if (type === 'homerouter') {
+    d.ifs = [mk(), { ip: '42.0.0.10', mask: '255.0.0.0', mac: genMac(), dhcp: false }];
+    Object.assign(d, { gw: '', dhcp: newDhcp(), firewall: newFirewall(), forwards: [] });
+  } else if (type === 'router') {
+    d.ifs = Array.from({ length: nics || 2 }, mk);
+    Object.assign(d, { gw: '', auto: false, routes: [], firewall: newFirewall() });
+  } else if (type === 'modem') {
+    d.ifs = [{ mac: genMac() }];
+    Object.assign(d, { listen: false, host: 'localhost', port: 12345 });
+  }
+  S.devices.push(d);
+  return d;
+}
+
+/* ===== Liens ===== */
+const linkAt = (id, port) => S.links.find(l => (l.a === id && l.ap === port) || (l.b === id && l.bp === port));
+const linksOf = id => S.links.filter(l => l.a === id || l.b === id);
+const SWITCH_PORTS = 24;
+function portCount(d) {
+  if (d.type === 'switch') return SWITCH_PORTS;
+  if (d.type === 'homerouter') return 2;
+  if (d.ifs) return d.ifs.length;
+  return 1;
+}
+function freePort(d, other) {
+  const n = portCount(d);
+  const free = i => !linkAt(d.id, i);
+  if (d.type === 'homerouter') {
+    const wanFirst = ['modem', 'router', 'homerouter'].includes(other.type);
+    const order = wanFirst ? [1, 0] : [0, 1];
+    for (const i of order) if (free(i)) return i;
+    return null;
+  }
+  for (let i = 0; i < n; i++) if (free(i)) return i;
+  return null;
+}
+function connectDevices(a, b) {
+  if (a === b) return 'Un appareil ne peut pas être relié à lui-même.';
+  const A = dev(a), B = dev(b);
+  for (const X of [A, B]) if (isHost(X) && X.wifi) return X.name + ' est en mode Wi-Fi : repassez-le en mode filaire pour y brancher un câble.';
+  const pa = freePort(A, B), pb = freePort(B, A);
+  if (pa == null) return 'Aucune interface libre sur ' + A.name + '.';
+  if (pb == null) return 'Aucune interface libre sur ' + B.name + '.';
+  S.links.push({ id: S.nextId++, a, ap: pa, b, bp: pb });
+  return null;
+}
+function removeLink(id) { S.links = S.links.filter(l => l.id !== id); }
+function removeDevice(id) {
+  S.links = S.links.filter(l => l.a !== id && l.b !== id);
+  S.devices = S.devices.filter(d => d.id !== id);
+}
+function remoteOf(d, port) {
+  const l = linkAt(d.id, port);
+  if (!l) return null;
+  return l.a === d.id && l.ap === port ? dev(l.b) : dev(l.a);
+}
+function swapPorts(d, p, q) {
+  const lp = linkAt(d.id, p), lq = linkAt(d.id, q);
+  const set = (l, from, to) => { if (!l) return; if (l.a === d.id && l.ap === from) l.ap = to; else if (l.b === d.id && l.bp === from) l.bp = to; };
+  set(lp, p, q); set(lq, q, p);
+}
+function setNicCount(d, n) {
+  n = Math.max(1, Math.min(8, n));
+  while (d.ifs.length < n) d.ifs.push({ ip: '192.168.0.10', mask: '255.255.255.0', mac: genMac() });
+  while (d.ifs.length > n) {
+    const i = d.ifs.length - 1;
+    const l = linkAt(d.id, i); if (l) removeLink(l.id);
+    d.ifs.pop();
+  }
+}
+
+/* ===== Sauvegarde ===== */
+function serialize() {
+  return JSON.stringify({ v: 1, devices: S.devices, links: S.links, nextId: S.nextId, view: S.view }, (k, v) => k === 'rt' ? undefined : v);
+}
+function loadState(txt) {
+  const o = typeof txt === 'string' ? JSON.parse(txt) : txt;
+  if (!o || !Array.isArray(o.devices) || !Array.isArray(o.links)) throw new Error('Fichier non reconnu.');
+  for (const d of o.devices) {
+    if (!TYPES[d.type] || typeof d.id !== 'number') throw new Error('Appareil invalide dans le fichier.');
+  }
+  S.devices = o.devices; S.links = o.links; S.nextId = o.nextId || (Math.max(0, ...o.devices.map(d => d.id), ...o.links.map(l => l.id)) + 1);
+  S.view = o.view || { x: 0, y: 0, k: 1 };
+  S.sel = null; S.tool = null; S.cableFrom = null; S.tabIdx = {};
+}
+let saveTimer = 0;
+function saveSoon() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { try { localStorage.setItem('simulateur-reseau-v1', serialize()); } catch (e) { /* stockage indisponible */ } }, 400);
+}
+function loadEmpty() {
+  S.devices = []; S.links = []; S.nextId = 1; S.sel = null; S.tool = null; S.cableFrom = null; S.tabIdx = {};
+  S.view = { x: 0, y: 0, k: 1 };
+}
+/* ===== Moteur de simulation ===== */
+const Sim = { on: false, epoch: 0, speed: 55, timers: new Set(), pid: 1, notify: () => {} };
+const D = () => 60 * Math.pow(2000 / 60, 1 - Sim.speed / 100);        // durée d'un saut (ms)
+const tmo = () => Math.max(2600, D() * 30);                              // délai d'attente
+function later(ms, fn) {
+  const ep = Sim.epoch;
+  const t = setTimeout(() => { Sim.timers.delete(t); if (Sim.on && ep === Sim.epoch) fn(); }, ms);
+  Sim.timers.add(t);
+  return t;
+}
+function cancel(t) { clearTimeout(t); Sim.timers.delete(t); }
+
+/* --- animation des paquets --- */
+const anims = []; let raf = 0;
+function animate(a, b, kind) {
+  const el = h('svg:circle', { r: 6, class: 'pkt ' + kind, cx: a.x, cy: a.y });
+  $('#packets').append(el);
+  anims.push({ el, a: { x: a.x, y: a.y }, b: { x: b.x, y: b.y }, t0: performance.now(), dur: D() });
+  if (!raf) raf = requestAnimationFrame(tick);
+}
+function tick(now) {
+  raf = 0;
+  for (let i = anims.length - 1; i >= 0; i--) {
+    const p = anims[i], k = Math.max(0, Math.min(1, (now - p.t0) / p.dur));
+    p.el.setAttribute('cx', p.a.x + (p.b.x - p.a.x) * k);
+    p.el.setAttribute('cy', p.a.y + (p.b.y - p.a.y) * k);
+    if (k >= 1) { p.el.remove(); anims.splice(i, 1); }
+  }
+  if (anims.length) raf = requestAnimationFrame(tick);
+}
+function clearAnims() { anims.splice(0).forEach(p => p.el.remove()); }
+
+/* --- exécution --- */
+const newRt = () => ({ arp: {}, pend: {}, pings: {}, sat: {}, nat: [], natPort: 49152, leases: {}, lease: null,
+  udp: {}, tcpL: {}, conns: {}, eph: 49151, srv: {}, ui: {}, auto: [], peer: null, listening: false });
+
+function startSim() {
+  Sim.on = true; Sim.epoch++;
+  S.devices.forEach(d => { d.rt = newRt(); });
+  computeAuto();
+  S.devices.filter(d => d.type === 'modem').forEach(modemApply);
+  let k = 0;
+  S.devices.forEach(d => {
+    if (isHost(d) && d.dhcpClient) dhcpStart(d, 0, k++);
+    if (d.type === 'homerouter' && d.ifs[1].dhcp) dhcpStart(d, 1, k++);
+  });
+}
+function stopSim() {
+  S.devices.filter(d => d.type === 'modem').forEach(modemShutdown);
+  Sim.on = false; Sim.epoch++;
+  Sim.timers.forEach(clearTimeout); Sim.timers.clear();
+  clearAnims();
+  S.devices.forEach(d => { delete d.rt; });
+}
+
+/* --- configuration effective --- */
+function ifc(d, i = 0) {
+  const f = d.ifs[i];
+  const l = d.rt && d.rt.lease;
+  if ((isHost(d) && d.dhcpClient) || (d.type === 'homerouter' && i === 1 && f.dhcp)) {
+    return { ip: l ? l.ip : '0.0.0.0', mask: l ? l.mask : '0.0.0.0', mac: f.mac };
+  }
+  return f;
+}
+function leaseActive(d) { return (isHost(d) && d.dhcpClient) || (d.type === 'homerouter' && d.ifs[1].dhcp); }
+function gwOf(d) { const l = d.rt && d.rt.lease; return (l && leaseActive(d) && isIp(l.gw) && l.gw !== '0.0.0.0') ? l.gw : d.gw; }
+function dnsOf(d) { const l = d.rt && d.rt.lease; return (l && leaseActive(d) && isIp(l.dns) && l.dns !== '0.0.0.0') ? l.dns : d.dns; }
+
+/* --- envoi et réception de trames --- */
+const kindOf = f => f.type === 'arp' ? 'arp' : ((f.pkt && f.pkt.proto) || 'udp');
+function peerOf(d, port) {
+  if (d.type === 'switch' && typeof port === 'string') {
+    const c = dev(+port.slice(2)); return c ? { dev: c, port: 0 } : null;
+  }
+  if (isHost(d) && d.wifi) {
+    const ap = apFor(d); return ap ? { dev: ap, port: 'w:' + d.id } : null;
+  }
+  const l = linkAt(d.id, port);
+  if (!l) return null;
+  return l.a === d.id && l.ap === port ? { dev: dev(l.b), port: l.bp } : { dev: dev(l.a), port: l.ap };
+}
+const apFor = d => d.ssid ? S.devices.find(x => x.type === 'switch' && x.ssid === d.ssid) : null;
+function xmit(d, port, frame) {
+  if (!Sim.on) return;
+  const p = peerOf(d, port);
+  if (!p || !p.dev) return;
+  const f = Object.assign({}, frame, { h: (frame.h || 0) + 1 });
+  if (f.h > 48) return;
+  animate(d, p.dev, kindOf(f));
+  later(D(), () => recv(p.dev, p.port, f));
+}
+function recv(d, port, f) {
+  if (!d.rt) return;
+  switch (d.type) {
+    case 'switch': return switchRecv(d, port, f);
+    case 'computer': case 'laptop': return hostRecv(d, f);
+    case 'router': return routerRecv(d, port, f);
+    case 'homerouter': return homeRecv(d, port, f);
+    case 'modem': return modemRecv(d, f);
+  }
+}
+
+/* --- switch / Wi-Fi --- */
+function switchPorts(d) {
+  const out = [];
+  S.links.forEach(l => { if (l.a === d.id) out.push(l.ap); else if (l.b === d.id) out.push(l.bp); });
+  S.devices.forEach(x => { if (isHost(x) && x.wifi && apFor(x) === d) out.push('w:' + x.id); });
+  return out;
+}
+function switchRecv(d, port, f) {
+  const sat = d.rt.sat, now = Date.now();
+  sat[f.src] = { port, t: now };
+  if (f.dst !== BCAST) {
+    const e = sat[f.dst];
+    if (e && now - e.t < d.retention * 1000) { if (e.port !== port) xmit(d, e.port, f); return; }
+  }
+  for (const p of switchPorts(d)) if (p !== port) xmit(d, p, f);
+}
+
+/* --- ARP et envoi IP couche 3 --- */
+function arpReq(d, i, tip) {
+  const c = ifc(d, i);
+  xmit(d, i, { src: c.mac, dst: BCAST, type: 'arp', op: 'req', sip: c.ip, smac: c.mac, tip });
+}
+function arpIn(d, i, f) {
+  const c = ifc(d, i), rt = d.rt;
+  if (f.sip && f.sip !== '0.0.0.0') {
+    rt.arp[f.sip] = f.smac;
+    const q = rt.pend[f.sip];
+    if (q) { delete rt.pend[f.sip]; q.forEach(x => xmit(d, x.i, { src: ifc(d, x.i).mac, dst: f.smac, type: 'ip', pkt: x.pkt })); }
+  }
+  if (f.op === 'req' && c.ip !== '0.0.0.0' && f.tip === c.ip) {
+    xmit(d, i, { src: c.mac, dst: f.smac, type: 'arp', op: 'rep', sip: c.ip, smac: c.mac, tip: f.sip, tmac: f.smac });
+  }
+}
+function l3send(d, i, nh, pkt) {
+  const rt = d.rt, c = ifc(d, i), mac = rt.arp[nh];
+  if (mac) { xmit(d, i, { src: c.mac, dst: mac, type: 'ip', pkt }); return; }
+  const q = rt.pend[nh] || (rt.pend[nh] = []);
+  q.push({ i, pkt });
+  if (q.length === 1) {
+    arpReq(d, i, nh);
+    later(Math.max(1800, D() * 20), () => { if (rt.pend[nh]) delete rt.pend[nh]; });
+  }
+}
+
+/* --- pare-feu --- */
+function ruleMatch(r, p) {
+  if (r.src) { if (!isIp(r.src) || !isIp(r.srcMask) || !sameNet(p.src, r.src, r.srcMask)) return false; }
+  if (r.dst) { if (!isIp(r.dst) || !isIp(r.dstMask) || !sameNet(p.dst, r.dst, r.dstMask)) return false; }
+  if (r.proto !== 'TOUS' && r.proto.toLowerCase() !== p.proto) return false;
+  if (String(r.port).trim() !== '') { if (p.proto === 'icmp' || +r.port !== p.dport) return false; }
+  return true;
+}
+function fwOk(d, pkt) {
+  if (isHost(d) && !d.apps.includes('firewall')) return true;
+  const f = d.firewall;
+  if (!f || !f.active) return true;
+  if (pkt.proto === 'icmp' && f.icmp) return false;
+  if (pkt.proto === 'tcp' && f.synOnly && !(pkt.flags && pkt.flags.syn && !pkt.flags.ack)) return true;
+  for (const r of f.rules) if (ruleMatch(r, pkt)) return r.action === 'accepter';
+  return f.def === 'accepter';
+}
+
+/* --- ICMP --- */
+function originate(d, pkt) {
+  if (isHost(d)) return hostSend(d, pkt);
+  if (d.type === 'router') return routerSend(d, pkt);
+  if (d.type === 'homerouter') return homeSend(d, pkt);
+  return false;
+}
+function icmpIn(d, pkt) {
+  if (pkt.type === 'echo-req') {
+    originate(d, { proto: 'icmp', type: 'echo-rep', src: pkt.dst, dst: pkt.src, id: pkt.id, seq: pkt.seq, ttl: 64 });
+    return;
+  }
+  const e = d.rt.pings[pkt.id];
+  if (e) { cancel(e.timer); delete d.rt.pings[pkt.id]; e.cb(pkt, performance.now() - e.t0); }
+}
+function icmpErr(d, i, pkt, type) {
+  if (pkt.proto !== 'icmp' || pkt.type !== 'echo-req') return;
+  originate(d, { proto: 'icmp', type, src: ifc(d, i).ip, dst: pkt.src, id: pkt.id, seq: pkt.seq, ttl: 64 });
+}
+function sendEcho(d, dst, ttl, cb) {
+  const rt = d.rt, id = Sim.pid++;
+  const e = { cb, t0: performance.now() };
+  rt.pings[id] = e;
+  const pkt = { proto: 'icmp', type: 'echo-req', src: null, dst, ttl, id, seq: id };
+  if (!originate(d, pkt)) { delete rt.pings[id]; later(10, () => cb({ type: 'noroute' })); return; }
+  e.timer = later(tmo(), () => { if (rt.pings[id]) { delete rt.pings[id]; cb({ type: 'timeout' }); } });
+}
+
+/* --- machines --- */
+function hostRecv(d, f) {
+  const c = ifc(d, 0);
+  if (f.dst !== c.mac && f.dst !== BCAST) return;
+  if (f.type === 'arp') return arpIn(d, 0, f);
+  hostIpIn(d, f.pkt);
+}
+function hostSend(d, pkt) {
+  const c = ifc(d, 0);
+  if (c.ip === '0.0.0.0') return false;
+  pkt = Object.assign({}, pkt, { src: pkt.src || c.ip, ttl: pkt.ttl == null ? 64 : pkt.ttl });
+  if (pkt.dst === '255.255.255.255') { xmit(d, 0, { src: c.mac, dst: BCAST, type: 'ip', pkt }); return true; }
+  if (pkt.dst === c.ip || pkt.dst.startsWith('127.')) { later(1, () => hostIpIn(d, pkt)); return true; }
+  let nh;
+  if (sameNet(pkt.dst, c.ip, c.mask)) nh = pkt.dst;
+  else { const g = gwOf(d); if (isIp(g) && sameNet(g, c.ip, c.mask)) nh = g; else return false; }
+  l3send(d, 0, nh, pkt);
+  return true;
+}
+function hostIpIn(d, pkt) {
+  const c = ifc(d, 0), rt = d.rt;
+  if (pkt.proto === 'udp' && pkt.dport === 67) return dhcpServe(d, 0, pkt);
+  if (pkt.proto === 'udp' && pkt.dport === 68) { dhcpReply(d, pkt); return; }
+  const mine = pkt.dst === c.ip || pkt.dst === '255.255.255.255' || pkt.dst.startsWith('127.');
+  if (!mine) {
+    if (d.routing && c.ip !== '0.0.0.0') {
+      if (pkt.ttl <= 1) icmpErr(d, 0, pkt, 'ttl'); else hostSend(d, Object.assign({}, pkt, { ttl: pkt.ttl - 1 }));
+    }
+    return;
+  }
+  if (!fwOk(d, pkt)) return;
+  if (pkt.proto === 'icmp') icmpIn(d, pkt);
+  else if (pkt.proto === 'udp') { const fn = rt.udp[pkt.dport]; if (fn) fn(pkt); }
+  else if (pkt.proto === 'tcp') tcpIn(d, pkt);
+}
+
+/* --- UDP / TCP pour les logiciels --- */
+const eph = d => ++d.rt.eph;
+function udpSend(d, dst, dport, sport, data) { return hostSend(d, { proto: 'udp', src: null, dst, sport, dport, data, ttl: 64 }); }
+function udpListen(d, port, fn) { d.rt.udp[port] = fn; }
+function udpUnlisten(d, port) { delete d.rt.udp[port]; }
+function tcpListen(d, port, onConn) { d.rt.tcpL[port] = onConn; }
+function tcpUnlisten(d, port) {
+  delete d.rt.tcpL[port];
+  Object.values(d.rt.conns).filter(c => c.lport === port && c.passive).forEach(c => c.close());
+}
+function mkConn(d, lip, lport, rip, rport, passive) {
+  const key = lport + '|' + rip + ':' + rport;
+  const c = { d, key, lip, lport, rip, rport, passive, state: 'new', onData: null, onClose: null };
+  c.send = data => {
+    if (c.state !== 'est') return false;
+    return hostSend(d, { proto: 'tcp', src: c.lip, dst: c.rip, sport: c.lport, dport: c.rport, flags: { psh: true, ack: true }, data, ttl: 64 });
+  };
+  c.close = () => {
+    if (c.state === 'closed') return;
+    const was = c.state; c.state = 'closed'; delete d.rt.conns[key];
+    if (was === 'est') hostSend(d, { proto: 'tcp', src: c.lip, dst: c.rip, sport: c.lport, dport: c.rport, flags: { fin: true, ack: true }, data: null, ttl: 64 });
+  };
+  d.rt.conns[key] = c;
+  return c;
+}
+function tcpConnect(d, ip, port, cb) {
+  const lip = ifc(d, 0).ip, lport = eph(d);
+  const c = mkConn(d, lip, lport, ip, port, false);
+  c.state = 'syn'; c.cb = cb;
+  const ok = hostSend(d, { proto: 'tcp', src: lip, dst: ip, sport: lport, dport: port, flags: { syn: true }, data: null, ttl: 64 });
+  if (!ok) { delete d.rt.conns[c.key]; later(10, () => cb(null, 'Hôte inaccessible : aucune route vers ' + ip + '.')); return; }
+  c.timer = later(tmo() * 1.5, () => { if (c.state === 'syn') { delete d.rt.conns[c.key]; cb(null, 'Délai de connexion dépassé.'); } });
+}
+function tcpIn(d, pkt) {
+  const rt = d.rt, f = pkt.flags || {};
+  const key = pkt.dport + '|' + pkt.src + ':' + pkt.sport, c = rt.conns[key];
+  const reply = flags => hostSend(d, { proto: 'tcp', src: pkt.dst, dst: pkt.src, sport: pkt.dport, dport: pkt.sport, flags, data: null, ttl: 64 });
+  if (f.syn && !f.ack) {
+    const l = rt.tcpL[pkt.dport];
+    if (!l) { reply({ rst: true }); return; }
+    const nc = mkConn(d, pkt.dst, pkt.dport, pkt.src, pkt.sport, true);
+    nc.state = 'est'; reply({ syn: true, ack: true }); l(nc);
+    return;
+  }
+  if (!c) return;
+  if (f.syn && f.ack && c.state === 'syn') { cancel(c.timer); c.state = 'est'; reply({ ack: true }); c.cb(c); return; }
+  if (f.rst) {
+    delete rt.conns[key];
+    if (c.state === 'syn') { cancel(c.timer); c.cb(null, 'Connexion refusée (aucun service sur le port ' + c.rport + ').'); }
+    else { c.state = 'closed'; if (c.onClose) c.onClose(); }
+    return;
+  }
+  if (f.fin) { c.state = 'closed'; delete rt.conns[key]; if (c.onClose) c.onClose(); return; }
+  if (c.state === 'est' && pkt.data != null && c.onData) c.onData(pkt.data);
+}
+
+/* --- DNS --- */
+function resolveName(d, name, cb) {
+  name = String(name).trim();
+  if (isIp(name)) return cb(name);
+  if (name.toLowerCase() === 'localhost') return cb('127.0.0.1');
+  const dns = dnsOf(d);
+  if (!isIp(dns)) return cb(null, 'Aucun serveur DNS n’est configuré sur cette machine.');
+  const sport = eph(d); let done = false;
+  const end = (ip, err) => { if (done) return; done = true; cancel(tm); udpUnlisten(d, sport); cb(ip, err); };
+  const tm = later(tmo(), () => end(null, 'Le serveur DNS ne répond pas.'));
+  udpListen(d, sport, pkt => end(pkt.data.a || null, pkt.data.a ? null : 'Nom de domaine introuvable : ' + name));
+  if (!udpSend(d, dns, 53, sport, { q: name })) later(5, () => end(null, 'Serveur DNS injoignable.'));
+}
+function dnsServerStart(d) {
+  const st = d.rt.srv.dns = d.rt.srv.dns || { log: [] };
+  st.running = true;
+  udpListen(d, 53, pkt => {
+    const q = String(pkt.data.q || '').trim().toLowerCase();
+    const r = d.dnsRecords.find(x => x.name.trim().toLowerCase() === q);
+    st.log.push(q + ' → ' + (r && isIp(r.ip) ? r.ip : 'introuvable') + '  (demandé par ' + pkt.src + ')');
+    if (d.rt.ui.dns) d.rt.ui.dns();
+    udpSend(d, pkt.src, pkt.sport, 53, { q, a: r && isIp(r.ip) ? r.ip : null });
+  });
+}
+function dnsServerStop(d) { if (d.rt.srv.dns) d.rt.srv.dns.running = false; udpUnlisten(d, 53); }
+
+/* --- DHCP --- */
+function dhcpStart(d, i, k) {
+  const go = () => {
+    if (d.rt.lease) return;
+    const mac = d.ifs[i].mac;
+    xmit(d, i, { src: mac, dst: BCAST, type: 'ip', pkt: { proto: 'udp', src: '0.0.0.0', dst: '255.255.255.255', sport: 68, dport: 67, data: { mac, name: d.name }, ttl: 64 } });
+  };
+  later(200 + k * 70, go); later(3600, go); later(9000, go);
+}
+function dhcpReply(d, pkt) {
+  const own = isHost(d) ? (d.dhcpClient ? d.ifs[0] : null) : (d.type === 'homerouter' && d.ifs[1].dhcp ? d.ifs[1] : null);
+  if (!own || pkt.data.mac !== own.mac) return;
+  d.rt.lease = { ip: pkt.data.ip, mask: pkt.data.mask, gw: pkt.data.gw, dns: pkt.data.dns };
+  Sim.notify('lease', d);
+}
+function dhcpServe(d, i, pkt) {
+  const cfg = d.dhcp;
+  if (!cfg || !cfg.enabled) return;
+  const c = ifc(d, i), mac = pkt.data.mac;
+  let ip = (cfg.statics.find(s => s.mac.toLowerCase() === mac.toLowerCase()) || {}).ip || d.rt.leases[mac];
+  if (!ip) {
+    if (!isIp(cfg.start) || !isIp(cfg.end)) return;
+    const a = ip2n(cfg.start), b = ip2n(cfg.end);
+    if (a === 0 && b === 0) return;
+    for (let n = a; n <= b && n - a < 1024; n++) {
+      const cand = n2ip(n);
+      if (cand === c.ip || Object.values(d.rt.leases).includes(cand) || cfg.statics.some(s => s.ip === cand)) continue;
+      ip = cand; break;
+    }
+    if (!ip) return;
+    d.rt.leases[mac] = ip;
+  }
+  if (!sameNet(ip, c.ip, c.mask)) return;
+  const gw = cfg.manual ? cfg.gw : (d.type === 'homerouter' ? c.ip : (d.gw || '0.0.0.0'));
+  const dns = cfg.manual ? cfg.dns : (d.type === 'homerouter' ? '0.0.0.0' : (d.dns || '0.0.0.0'));
+  xmit(d, i, { src: c.mac, dst: mac, type: 'ip', pkt: { proto: 'udp', src: c.ip, dst: '255.255.255.255', sport: 67, dport: 68, data: { mac, ip, mask: c.mask, gw, dns }, ttl: 64 } });
+}
+function dhcpShown(d) {
+  /* valeurs affichées (non modifiables) dans la boîte DHCP quand la configuration n'est pas manuelle */
+  const c = d.ifs[0];
+  return { gw: d.type === 'homerouter' ? c.ip : (d.gw || '0.0.0.0'), dns: d.type === 'homerouter' ? '0.0.0.0' : (d.dns || '0.0.0.0') };
+}
+
+/* --- routeurs --- */
+function routeEntries(d) {
+  const e = [];
+  d.ifs.forEach((x, i) => { if (isIp(x.ip) && isIp(x.mask)) e.push({ net: netOf(x.ip, x.mask), mask: ip2n(x.mask), gw: null, i }); });
+  (d.routes || []).forEach(r => {
+    if (!isIp(r.dest) || !isIp(r.mask)) return;
+    let i = d.ifs.findIndex(x => x.ip === r.via);
+    if (i < 0 && isIp(r.gw)) i = d.ifs.findIndex(x => sameNet(r.gw, x.ip, x.mask));
+    if (i < 0) return;
+    const direct = !isIp(r.gw) || d.ifs.some(x => x.ip === r.gw);
+    e.push({ net: netOf(r.dest, r.mask), mask: ip2n(r.mask), gw: direct ? null : r.gw, i });
+  });
+  ((d.rt && d.rt.auto) || []).forEach(a => e.push(a));
+  if (isIp(d.gw)) {
+    const i = d.ifs.findIndex(x => sameNet(d.gw, x.ip, x.mask));
+    if (i >= 0) e.push({ net: 0, mask: 0, gw: d.gw, i });
+  }
+  return e;
+}
+function routeLookup(d, dst) {
+  const n = ip2n(dst); let best = null, bl = -1;
+  for (const r of routeEntries(d)) {
+    if (((n & r.mask) >>> 0) !== r.net) continue;
+    const l = popcount(r.mask);
+    if (l > bl) { bl = l; best = r; }
+  }
+  return best ? { i: best.i, nh: best.gw || dst } : null;
+}
+function computeAuto() {
+  const routers = S.devices.filter(x => x.type === 'router');
+  const nets = x => x.ifs.map((f, i) => isIp(f.ip) && isIp(f.mask) ? { i, net: netOf(f.ip, f.mask), mask: f.mask, ip: f.ip } : null).filter(Boolean);
+  for (const r of routers) {
+    r.rt.auto = [];
+    if (!r.auto) continue;
+    const have = new Set(nets(r).map(n => n.net + '/' + n.mask));
+    const seen = new Set([r.id]);
+    const q = [{ x: r, gw: null, i: null }];
+    while (q.length) {
+      const cur = q.shift();
+      for (const y of routers) {
+        if (seen.has(y.id)) continue;
+        let hop = null;
+        for (const a of nets(cur.x)) for (const b of nets(y)) if (a.net === b.net && a.mask === b.mask) hop = { a, b };
+        if (!hop) continue;
+        seen.add(y.id);
+        const first = cur.x === r ? { gw: hop.b.ip, i: hop.a.i } : { gw: cur.gw, i: cur.i };
+        for (const n of nets(y)) {
+          const k = n.net + '/' + n.mask;
+          if (have.has(k)) continue;
+          have.add(k);
+          r.rt.auto.push({ net: n.net, mask: ip2n(n.mask), gw: first.gw, i: first.i, auto: true });
+        }
+        q.push({ x: y, gw: first.gw, i: first.i });
+      }
+    }
+  }
+}
+function routerRecv(d, port, f) {
+  const c = d.ifs[port];
+  if (!c || (f.dst !== c.mac && f.dst !== BCAST)) return;
+  if (f.type === 'arp') return arpIn(d, port, f);
+  routerIpIn(d, port, f.pkt);
+}
+function routerIpIn(d, i, pkt) {
+  if (!fwOk(d, pkt)) return;
+  if (d.ifs.some(x => x.ip === pkt.dst)) return localIn(d, pkt);
+  if (pkt.dst === '255.255.255.255') return;
+  if (pkt.ttl <= 1) return icmpErr(d, i, pkt, 'ttl');
+  const r = routeLookup(d, pkt.dst);
+  if (!r) return icmpErr(d, i, pkt, 'unreach');
+  l3send(d, r.i, r.nh, Object.assign({}, pkt, { ttl: pkt.ttl - 1 }));
+}
+function localIn(d, pkt) { if (pkt.proto === 'icmp') icmpIn(d, pkt); }
+function routerSend(d, pkt) {
+  if (d.ifs.some(x => x.ip === pkt.dst) || pkt.dst.startsWith('127.')) { later(1, () => localIn(d, pkt)); return true; }
+  const r = routeLookup(d, pkt.dst);
+  if (!r) return false;
+  l3send(d, r.i, r.nh, Object.assign({}, pkt, { src: pkt.src || d.ifs[r.i].ip, ttl: pkt.ttl == null ? 64 : pkt.ttl }));
+  return true;
+}
+
+/* --- routeur domestique (NAT) --- */
+function homeRecv(d, port, f) {
+  const c = ifc(d, port);
+  if (f.dst !== c.mac && f.dst !== BCAST) return;
+  if (f.type === 'arp') return arpIn(d, port, f);
+  homeIn(d, port, f.pkt);
+}
+function homeSend(d, pkt) {
+  const lan = ifc(d, 0), wan = ifc(d, 1);
+  if (pkt.dst === lan.ip || pkt.dst === wan.ip || pkt.dst.startsWith('127.')) { later(1, () => localIn(d, pkt)); return true; }
+  let i, nh;
+  if (sameNet(pkt.dst, lan.ip, lan.mask)) { i = 0; nh = pkt.dst; }
+  else if (wan.ip !== '0.0.0.0') {
+    i = 1;
+    if (sameNet(pkt.dst, wan.ip, wan.mask)) nh = pkt.dst; else { nh = gwOf(d); if (!isIp(nh)) return false; }
+  } else return false;
+  l3send(d, i, nh, Object.assign({}, pkt, { src: pkt.src || ifc(d, i).ip, ttl: pkt.ttl == null ? 64 : pkt.ttl }));
+  return true;
+}
+function natOut(d, pkt) {
+  const wan = ifc(d, 1), rt = d.rt;
+  const now = Date.now();
+  rt.nat = rt.nat.filter(e => now - e.t < 300000);
+  if (pkt.proto !== 'icmp') {
+    /* réponse d'une connexion arrivée par une redirection de port */
+    const fw = (d.forwards || []).find(x => x.proto.toLowerCase() === pkt.proto && x.lan === pkt.src && +x.lport === pkt.sport);
+    if (fw) return Object.assign({}, pkt, { src: wan.ip, sport: +fw.port });
+  }
+  let key;
+  if (pkt.proto === 'icmp') { if (pkt.type !== 'echo-req') return null; key = pkt.id; } else key = pkt.sport;
+  let e = rt.nat.find(x => x.proto === pkt.proto && x.lanIp === pkt.src && x.lport === key);
+  if (!e) { e = { proto: pkt.proto, pport: rt.natPort++, lanIp: pkt.src, lport: key }; rt.nat.push(e); }
+  e.t = Date.now(); e.wan = wan.ip;
+  return pkt.proto === 'icmp' ? Object.assign({}, pkt, { src: wan.ip, id: e.pport }) : Object.assign({}, pkt, { src: wan.ip, sport: e.pport });
+}
+function natIn(d, pkt) {
+  const rt = d.rt;
+  if (pkt.proto === 'icmp') {
+    if (pkt.type === 'echo-req') return 'local';
+    const e = rt.nat.find(x => x.proto === 'icmp' && x.pport === pkt.id);
+    if (!e) return false;
+    e.t = Date.now();
+    return Object.assign({}, pkt, { dst: e.lanIp, id: e.lport });
+  }
+  const e = rt.nat.find(x => x.proto === pkt.proto && x.pport === pkt.dport);
+  if (e) { e.t = Date.now(); return Object.assign({}, pkt, { dst: e.lanIp, dport: e.lport }); }
+  const fw = (d.forwards || []).find(x => x.proto.toLowerCase() === pkt.proto && +x.port === pkt.dport && isIp(x.lan));
+  if (fw) return Object.assign({}, pkt, { dst: fw.lan, dport: +fw.lport || pkt.dport });
+  return false;
+}
+function homeIn(d, i, pkt) {
+  const lan = ifc(d, 0), wan = ifc(d, 1);
+  if (i === 0 && pkt.proto === 'udp' && pkt.dport === 67) return dhcpServe(d, 0, pkt);
+  if (i === 1 && pkt.proto === 'udp' && pkt.dport === 68) return dhcpReply(d, pkt);
+  if (!fwOk(d, pkt)) return;
+  if (i === 0) {
+    if (pkt.dst === lan.ip || pkt.dst === wan.ip) return localIn(d, pkt);
+    if (pkt.dst === '255.255.255.255' || sameNet(pkt.dst, lan.ip, lan.mask)) return;
+    if (pkt.ttl <= 1) return icmpErr(d, 0, pkt, 'ttl');
+    const nh = sameNet(pkt.dst, wan.ip, wan.mask) ? pkt.dst : gwOf(d);
+    if (!isIp(nh) || wan.ip === '0.0.0.0') return icmpErr(d, 0, pkt, 'unreach');
+    const out = natOut(d, pkt);
+    if (out) l3send(d, 1, nh, Object.assign({}, out, { ttl: pkt.ttl - 1 }));
+  } else {
+    if (pkt.dst !== wan.ip) return;
+    const t = natIn(d, pkt);
+    if (t === false) return;
+    if (t === 'local') return localIn(d, pkt);
+    l3send(d, 0, t.dst, t);
+  }
+}
+
+/* --- modem : liaison entre deux pages (BroadcastChannel) --- */
+const MB = { uid: Math.random().toString(36).slice(2), chans: {} };
+function modemChan(port) {
+  if (!MB.chans[port]) {
+    const c = new BroadcastChannel('simulateur-reseau-modem-' + port);
+    c.onmessage = e => modemMsg(port, e.data);
+    MB.chans[port] = c;
+  }
+  return MB.chans[port];
+}
+function modemApply(d) {
+  const rt = d.rt; if (!rt) return;
+  const port = +d.port;
+  const was = rt.listening && rt.listenPort;
+  if (was && (!d.listen || was !== port)) { rt.listening = false; rt.listenPort = null; }
+  if (d.listen && port > 0 && port < 65536) { rt.listening = true; rt.listenPort = port; try { modemChan(port); } catch (e) { /* indisponible */ } }
+  Sim.notify('modem', d);
+}
+function modemShutdown(d) {
+  const rt = d.rt; if (!rt) return;
+  const p = rt.peer;
+  if (p) {
+    if (p.local) { if (p.dev.rt) { p.dev.rt.peer = null; } }
+    else { try { modemChan(p.port).postMessage({ t: 'bye', to: p.uid, mid: p.mid }); } catch (e) { /* ignoré */ } }
+  }
+  rt.peer = null; rt.listening = false;
+}
+function modemMsg(port, m) {
+  if (!Sim.on || !m) return;
+  if (m.t === 'conn') {
+    const d = S.devices.find(x => x.type === 'modem' && x.rt && x.rt.listening && x.rt.listenPort === port && !x.rt.peer);
+    if (!d) return;
+    d.rt.peer = { local: false, uid: m.uid, mid: m.mid, port };
+    modemChan(port).postMessage({ t: 'ok', to: m.uid, uid: MB.uid, mid: d.id, tomid: m.mid, port });
+    Sim.notify('modem', d);
+  } else if (m.to === MB.uid) {
+    const d = dev(m.t === 'ok' ? m.tomid : m.mid);
+    if (!d || !d.rt) return;
+    if (m.t === 'ok') { d.rt.peer = { local: false, uid: m.uid, mid: m.mid, port }; Sim.notify('modem', d); }
+    else if (m.t === 'bye') { d.rt.peer = null; Sim.notify('modem', d); }
+    else if (m.t === 'frame') modemIn(d, m.f);
+  }
+}
+function modemConnect(d, cb) {
+  const port = +d.port;
+  if (!(port > 0 && port < 65536)) return cb(false, 'Port invalide.');
+  if (d.rt.peer) return cb(true);
+  const t = S.devices.find(x => x !== d && x.type === 'modem' && x.rt && x.rt.listening && x.rt.listenPort === port && !x.rt.peer);
+  if (t) {
+    d.rt.peer = { local: true, dev: t }; t.rt.peer = { local: true, dev: d };
+    Sim.notify('modem', d); Sim.notify('modem', t);
+    return cb(true);
+  }
+  try { modemChan(port).postMessage({ t: 'conn', uid: MB.uid, mid: d.id, port }); } catch (e) { return cb(false, 'La liaison entre pages n’est pas disponible dans ce navigateur.'); }
+  setTimeout(() => { if (Sim.on && d.rt) cb(!!d.rt.peer, d.rt.peer ? null : 'Aucun modem n’attend de connexion sur le port ' + port + '.'); }, 1400);
+}
+function modemDisconnect(d) {
+  const rt = d.rt; if (!rt || !rt.peer) return;
+  const p = rt.peer; rt.peer = null;
+  if (p.local) { if (p.dev.rt) p.dev.rt.peer = null; Sim.notify('modem', p.dev); }
+  else { try { modemChan(p.port).postMessage({ t: 'bye', to: p.uid, mid: p.mid }); } catch (e) { /* ignoré */ } }
+  Sim.notify('modem', d);
+}
+function modemRecv(d, f) {
+  const p = d.rt.peer;
+  if (!p || f.h > 40) return;
+  if (p.local) { const t = p.dev; later(D(), () => { if (t.rt && t.rt.peer) modemIn(t, f); }); }
+  else { try { modemChan(p.port).postMessage({ t: 'frame', to: p.uid, mid: p.mid, f }); } catch (e) { /* ignoré */ } }
+}
+function modemIn(d, f) { xmit(d, 0, f); }
+/* ===== Interface : fenêtres, boîtes de dialogue ===== */
+const WL = $('#winlayer');
+const wins = {}; let zTop = 1, cascade = 0;
+const refreshers = new Set();
+let toastTimer = 0;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 3200);
+}
+function openWin(o) {
+  if (o.id && wins[o.id]) { wins[o.id].focus(); return wins[o.id]; }
+  const body = h('div', { class: 'wbody' });
+  const titleEl = h('b', null, o.title);
+  const xbtn = h('button', { class: 'wx', type: 'button', 'aria-label': 'Fermer' }, '×');
+  const bar = h('div', { class: 'wtitle' }, o.ico ? svgIcon(o.ico) : null, titleEl, xbtn);
+  const w = Math.min(o.w || 460, innerWidth - 12);
+  const win = h('div', { class: 'win' + (o.big ? ' big' : ''), role: 'dialog', 'aria-label': o.title, style: { width: w + 'px' } }, bar, body);
+  if (o.h) win.style.height = Math.min(o.h, innerHeight - 12) + 'px';
+  let backdrop = null;
+  if (o.modal) { backdrop = h('div', { class: 'backdrop' }); WL.append(backdrop); }
+  WL.append(win);
+  const off = (cascade++ % 6) * 26;
+  win.style.left = Math.max(6, (innerWidth - w) / 2 + (o.modal ? 0 : off - 60)) + 'px';
+  win.style.top = Math.max(6, Math.min((innerHeight - win.offsetHeight) / 3 + (o.modal ? 0 : off), innerHeight - win.offsetHeight - 6)) + 'px';
+  win.style.zIndex = ++zTop;
+  /* évite qu'un « clic fantôme » du doigt qui vient d'ouvrir la fenêtre tombe sur son contenu */
+  win.style.pointerEvents = 'none';
+  setTimeout(() => { win.style.pointerEvents = ''; }, 450);
+  const obj = {
+    el: win, body, id: o.id,
+    focus() { win.style.zIndex = ++zTop; },
+    setTitle(t) { titleEl.textContent = t; },
+    close() {
+      if (!win.isConnected) return;
+      win.remove(); if (backdrop) backdrop.remove();
+      if (o.id) delete wins[o.id];
+      if (o.onClose) o.onClose();
+    }
+  };
+  if (o.id) wins[o.id] = obj;
+  xbtn.addEventListener('click', obj.close);
+  win.addEventListener('pointerdown', () => { if (!o.modal) obj.focus(); });
+  let drag = null;
+  bar.addEventListener('pointerdown', e => {
+    if (e.target === xbtn) return;
+    drag = { x: e.clientX - win.offsetLeft, y: e.clientY - win.offsetTop };
+    bar.setPointerCapture(e.pointerId);
+  });
+  bar.addEventListener('pointermove', e => {
+    if (!drag) return;
+    win.style.left = Math.max(-w + 80, Math.min(innerWidth - 80, e.clientX - drag.x)) + 'px';
+    win.style.top = Math.max(0, Math.min(innerHeight - 40, e.clientY - drag.y)) + 'px';
+  });
+  const end = () => { drag = null; };
+  bar.addEventListener('pointerup', end); bar.addEventListener('pointercancel', end);
+  return obj;
+}
+function closeAllWins() {
+  Object.values(wins).forEach(w => w.close());
+  [...WL.children].forEach(c => c.remove());
+  refreshers.clear();
+}
+function dialog(o, build) {
+  const w = openWin(Object.assign({ modal: true }, o));
+  const box = h('div', { class: 'dlg' });
+  w.body.append(box);
+  build(box, w.close);
+  return w;
+}
+function confirmDlg(msg, yes, label) {
+  dialog({ title: 'Confirmation', w: 380 }, (box, close) => {
+    box.append(h('div', null, msg), h('div', { class: 'btns' },
+      h('button', { class: 'btn', type: 'button', onclick: close }, 'Annuler'),
+      h('button', { class: 'btn', type: 'button', onclick: () => { close(); yes(); } }, label || 'OK')));
+  });
+}
+
+/* ===== Champs de formulaire ===== */
+const row = (label, ctrl) => h('div', { class: 'row' }, h('label', null, label), ctrl);
+function ipIn(obj, key, o = {}) {
+  const el = h('input', { class: 'in', type: 'text', autocomplete: 'off', spellcheck: 'false', value: obj[key] == null ? '' : obj[key], disabled: o.disabled, 'aria-label': o.label || key });
+  el.addEventListener('input', () => {
+    const v = el.value.trim(), ok = isIp(v) || (o.optional && v === '');
+    el.classList.toggle('bad', !ok);
+    if (ok) { obj[key] = v; saveSoon(); if (o.onInput) o.onInput(v); }
+  });
+  return el;
+}
+function textIn(obj, key, o = {}) {
+  const el = h('input', { class: 'in', type: o.type || 'text', autocomplete: 'off', spellcheck: 'false', value: obj[key] == null ? '' : obj[key], disabled: o.disabled, readOnly: o.readOnly, 'aria-label': o.label || key });
+  el.addEventListener('input', () => {
+    const v = o.num ? Number(el.value) : el.value;
+    if (o.num && (!Number.isFinite(v) || v < (o.min == null ? 0 : o.min))) { el.classList.add('bad'); return; }
+    el.classList.remove('bad'); obj[key] = v; saveSoon(); if (o.onInput) o.onInput(v);
+  });
+  return el;
+}
+const ro = v => h('input', { class: 'in', type: 'text', value: v, readOnly: true, 'aria-label': 'valeur en lecture seule' });
+function chk(label, checked, set, o = {}) {
+  const input = h('input', { type: 'checkbox', checked, disabled: o.disabled });
+  input.addEventListener('change', () => { set(input.checked); saveSoon(); });
+  return h('label', { class: 'chk' + (o.disabled ? ' dis' : '') }, input, label);
+}
+const btn = (label, fn, cls) => h('button', { class: 'btn' + (cls ? ' ' + cls : ''), type: 'button', onclick: fn }, label);
+const sel = (options, value, set, o = {}) => {
+  const s = h('select', { class: 'in', disabled: o.disabled, 'aria-label': o.label || 'liste' },
+    options.map(x => { const v = Array.isArray(x) ? x[0] : x, t = Array.isArray(x) ? x[1] : x; return h('option', { value: v, selected: String(v) === String(value) }, t); }));
+  s.value = value;
+  s.addEventListener('change', () => { set(s.value); saveSoon(); });
+  return s;
+};
+function tabsUI(key, defs, light) {
+  const wrap = h('div');
+  let idx = Math.min(S.tabIdx[key] || 0, defs.length - 1);
+  const bar = h('div', { class: 'tabbar' + (light ? ' light' : ''), role: 'tablist' });
+  const bodyBox = h('div', { class: light ? 'tabpane' : 'tabbody' });
+  const titles = [];
+  defs.forEach((t, i) => {
+    const sp = h('span', null, t.title());
+    const b = h('button', { class: 'tab', role: 'tab', type: 'button', onclick: () => { idx = i; S.tabIdx[key] = i; show(); } }, t.ico ? svgIcon('ico-port') : null, sp);
+    titles.push({ sp, t }); bar.append(b);
+  });
+  function show() {
+    [...bar.children].forEach((b, i) => b.setAttribute('aria-selected', String(i === idx)));
+    bodyBox.textContent = ''; bodyBox.append(defs[idx].build());
+  }
+  wrap.append(bar, bodyBox); show();
+  wrap.refreshTitles = () => titles.forEach(x => { x.sp.textContent = x.t.title(); });
+  return wrap;
+}
+
+/* ===== Boîtes de dialogue de configuration ===== */
+function openNics(cb) {
+  dialog({ title: 'Nombre d’interfaces', w: 400 }, (box, close) => {
+    const s = h('select', { class: 'in', 'aria-label': 'Nombre d’interfaces' }, [2, 3, 4, 5, 6, 7, 8].map(n => h('option', { value: n }, n)));
+    box.append(h('div', null, 'Sélectionnez le nombre d’interfaces du routeur.'), s,
+      h('div', { class: 'btns' }, btn('Annuler', close), btn('OK', () => { close(); cb(+s.value); })));
+  });
+}
+function openDhcp(d) {
+  const lanIdx = 0, c = d.ifs[lanIdx];
+  dialog({ title: 'Configuration du service DHCP', w: 440 }, (box, close) => {
+    const cfg = d.dhcp;
+    const base = () => {
+      const p = h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px' } });
+      const shown = dhcpShown(d);
+      p.append(
+        row('Début de plage', ipIn(cfg, 'start')),
+        row('Fin de plage', ipIn(cfg, 'end')),
+        row('Masque', ro(c.mask)),
+        h('div', { style: { border: '2px solid #777', padding: '10px', display: 'flex', flexDirection: 'column', gap: '8px' } },
+          row('Passerelle', cfg.manual ? ipIn(cfg, 'gw') : ro(shown.gw)),
+          row('Serveur DNS', cfg.manual ? ipIn(cfg, 'dns') : ro(shown.dns)),
+          chk('Configuration manuelle', cfg.manual, v => { cfg.manual = v; pane(); })),
+        chk('Activer le service DHCP', cfg.enabled, v => { cfg.enabled = v; }));
+      return p;
+    };
+    const stat = () => {
+      const p = h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px' } });
+      const mac = h('input', { class: 'in', placeholder: 'AA:BB:CC:DD:EE:FF', 'aria-label': 'Adresse MAC' });
+      const ip = h('input', { class: 'in', placeholder: '192.168.0.50', 'aria-label': 'Adresse IP' });
+      const tb = h('tbody');
+      const fill = () => {
+        tb.textContent = '';
+        cfg.statics.forEach((s, i) => tb.append(h('tr', { class: i === stat.selIdx ? 'sel' : '', onclick: () => { stat.selIdx = i; fill(); } }, h('td', null, s.mac), h('td', null, s.ip))));
+      };
+      stat.selIdx = -1;
+      p.append(row('Adresse MAC', mac), row('Adresse IP', ip),
+        h('div', { class: 'btns' },
+          btn('Ajouter', () => {
+            if (!macRe.test(mac.value.trim())) return toast('Adresse MAC invalide (exemple : AA:BB:CC:DD:EE:FF).');
+            if (!isIp(ip.value)) return toast('Adresse IP invalide.');
+            cfg.statics.push({ mac: mac.value.trim().toUpperCase(), ip: ip.value.trim() }); mac.value = ''; ip.value = ''; fill(); saveSoon();
+          }),
+          btn('Supprimer', () => { if (stat.selIdx >= 0) { cfg.statics.splice(stat.selIdx, 1); stat.selIdx = -1; fill(); saveSoon(); } })),
+        h('div', { class: 'tblwrap', style: { height: '150px' } }, h('table', { class: 'tbl' }, h('thead', null, h('tr', null, h('th', null, 'Adresse MAC'), h('th', null, 'Adresse IP'))), tb)));
+      fill();
+      return p;
+    };
+    const holder = h('div');
+    const pane = () => { holder.textContent = ''; holder.append(tabsUI('dhcp-' + d.id, [{ title: () => 'Paramètres de base', build: base }, { title: () => 'Adressage statique', build: stat }], true)); };
+    pane();
+    box.append(holder, h('div', { class: 'btns' }, btn('OK', close)));
+  });
+}
+function openForwards(d) {
+  dialog({ title: 'Redirection de port', w: 560 }, (box, close) => {
+    let selIdx = -1;
+    const tb = h('tbody');
+    const fill = () => {
+      tb.textContent = '';
+      d.forwards.forEach((f, i) => {
+        tb.append(h('tr', { class: i === selIdx ? 'sel' : '', onclick: () => { selIdx = i; [...tb.children].forEach((r, j) => r.classList.toggle('sel', j === i)); } },
+          h('td', null, sel(['TCP', 'UDP'], f.proto, v => { f.proto = v; }, { label: 'Protocole' })),
+          h('td', null, textIn(f, 'port', { num: true, min: 1, label: 'Port redirigé', onInput: () => {} })),
+          h('td', null, ipIn(f, 'lan', { label: 'Adresse LAN' })),
+          h('td', null, textIn(f, 'lport', { num: true, min: 1, label: 'Port LAN' }))));
+      });
+    };
+    fill();
+    box.append(
+      h('div', { class: 'tblwrap', style: { height: '220px' } }, h('table', { class: 'tbl' },
+        h('thead', null, h('tr', null, ['Protocole', 'Port redirigé', 'Adresse LAN', 'Port LAN'].map(t => h('th', null, t)))), tb)),
+      h('div', { class: 'btns' },
+        btn('nouvelle entrée', () => { d.forwards.push({ proto: 'TCP', port: 80, lan: '', lport: 80 }); selIdx = d.forwards.length - 1; fill(); saveSoon(); }),
+        btn('Supprimer l’entrée', () => { if (selIdx >= 0) { d.forwards.splice(selIdx, 1); selIdx = -1; fill(); saveSoon(); } }),
+        btn('Fermer', close)));
+  });
+}
+function renderFirewall(root, d) {
+  const f = d.firewall;
+  const tab1 = () => h('div', { style: { display: 'flex', flexDirection: 'column', gap: '10px' } },
+    h('div', null, chk('Activer le parefeu', f.active, v => { f.active = v; }), h('div', { class: 'note' }, 'Les règles ne sont appliquées que lorsque le parefeu est actif.')),
+    h('div', null, chk('Filtrer les paquets ICMP', f.icmp, v => { f.icmp = v; }), h('div', { class: 'note' }, 'Tous les paquets ICMP seront rejetés (ceux d’un ping, par exemple).')),
+    h('div', null, chk('Ne filtrer que les paquets SYN', f.synOnly, v => { f.synOnly = v; }),
+      h('div', { class: 'note' }, 'Les requêtes vers les ports bloqués seront rejetées.', h('br'), 'Le canal de retour pour les requêtes de connexion autorisées sera ouvert.')));
+  const tab2 = () => {
+    let selIdx = -1;
+    const tb = h('tbody');
+    const fill = () => {
+      tb.textContent = '';
+      f.rules.forEach((r, i) => {
+        const cell = (k, ph) => { const e = textIn(r, k, { label: k }); e.classList.add('cell'); e.classList.remove('in'); e.style.minWidth = '88px'; return h('td', null, e); };
+        tb.append(h('tr', { class: i === selIdx ? 'sel' : '', onclick: () => { selIdx = i; [...tb.children].forEach((x, j) => x.classList.toggle('sel', j === i)); } },
+          h('td', { style: { textAlign: 'center', fontWeight: 700 } }, i + 1),
+          cell('src'), cell('srcMask'), cell('dst'), cell('dstMask'),
+          h('td', null, sel(['TCP', 'UDP', 'ICMP', 'TOUS'], r.proto, v => { r.proto = v; }, { label: 'Protocole' })),
+          cell('port'),
+          h('td', null, sel(['rejeter', 'accepter'], r.action, v => { r.action = v; }, { label: 'Action' }))));
+      });
+    };
+    fill();
+    const move = dir => { const j = selIdx + dir; if (selIdx < 0 || j < 0 || j >= f.rules.length) return; [f.rules[selIdx], f.rules[j]] = [f.rules[j], f.rules[selIdx]]; selIdx = j; fill(); saveSoon(); };
+    return h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px' } },
+      h('div', { class: 'note', style: { color: '#222' } }, 'Les règles sont parcourues du haut vers le bas de la liste. Seule la première règle satisfaite rencontrée est appliquée. Pour chaque règle, tous les champs (excepté Protocole et Action) sont optionnels. Les champs non renseignés ne sont pas pris en compte par le filtrage. Si une adresse IP est renseignée, le masque correspondant doit l’être également. Tout masque différent de 255.255.255.255 permet de représenter un sous-réseau.'),
+      h('div', { class: 'row', style: { gridTemplateColumns: 'auto 180px' } }, h('label', null, 'Règle par défaut (appliquée si aucune règle de la liste n’est satisfaite) :'), sel(['rejeter', 'accepter'], f.def, v => { f.def = v; }, { label: 'Règle par défaut' })),
+      h('div', { class: 'tblwrap', style: { height: '170px' } }, h('table', { class: 'tbl' },
+        h('thead', null, h('tr', null, ['ID', 'IP source', 'Masque', 'IP destination', 'Masque', 'Protocole', 'Port', 'Action'].map(t => h('th', null, t)))), tb)),
+      h('div', { class: 'btns' },
+        btn('Remonter', () => move(-1)), btn('Descendre', () => move(1)),
+        btn('Nouvelle règle', () => { f.rules.push({ src: '', srcMask: '', dst: '', dstMask: '', proto: 'TCP', port: '', action: 'rejeter' }); selIdx = f.rules.length - 1; fill(); saveSoon(); }),
+        btn('Supprimer la règle sélectionnée', () => { if (selIdx >= 0) { f.rules.splice(selIdx, 1); selIdx = -1; fill(); saveSoon(); } })));
+  };
+  root.append(tabsUI('fw-' + d.id, [{ title: () => 'Interfaces réseau', build: tab1 }, { title: () => 'Règles du parefeu', build: tab2 }], true));
+}
+function openFirewall(d) {
+  const w = openWin({ id: 'fw-' + d.id, title: 'Configuration du parefeu', w: 780, modal: true });
+  renderFirewall(w.body, d);
+}
+function openConnections(d) {
+  dialog({ title: 'Gérer les connexions', w: 560, id: 'conn-' + d.id }, (box, close) => {
+    let pick = -1;
+    const holder = h('div');
+    const draw = () => {
+      holder.textContent = '';
+      const rows = [];
+      for (let i = 0; i < 8; i++) {
+        const exists = i < d.ifs.length, remote = exists ? remoteOf(d, i) : null;
+        const bg = !exists ? '#bdbdbd' : (pick === i ? '#f2d21b' : (remote ? '#2fb14d' : '#f01010'));
+        const jack = h('button', { type: 'button', 'aria-label': 'Connecteur ' + (i + 1), disabled: !exists, style: { width: '56px', height: '40px', border: '1px solid #777', background: bg, cursor: exists ? 'pointer' : 'default', padding: 0 }, onclick: () => {
+          if (pick < 0) { pick = i; } else { if (pick !== i) { swapPorts(d, pick, i); saveSoon(); Sim.notify('x', d); render(); } pick = -1; }
+          draw();
+        } }, svgIcon('ico-port'));
+        jack.firstChild.style.cssText = 'width:44px;height:28px';
+        rows.push(h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 56px 1fr', gap: '10px', alignItems: 'center', minHeight: '44px' } },
+          h('div', { style: { fontWeight: 600, textAlign: 'right' } }, remote ? remote.name : ''),
+          jack,
+          h('div', { style: { fontWeight: 600 } }, exists ? 'NIC ' + (i + 1) + ': ' + d.ifs[i].ip : '')));
+      }
+      holder.append(
+        h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 56px 1fr', gap: '10px', fontWeight: 700, textAlign: 'center' } }, h('div', null, 'Composants distants'), h('div'), h('div', null, 'Interfaces locales')),
+        ...rows,
+        h('div', { class: 'btns', style: { justifyContent: 'flex-end' } },
+          btn('+', () => { if (d.ifs.length < 8) { setNicCount(d, d.ifs.length + 1); saveSoon(); refreshProps(); draw(); } }),
+          btn('-', () => { if (d.ifs.length > 1) { setNicCount(d, d.ifs.length - 1); pick = -1; saveSoon(); render(); refreshProps(); draw(); } })),
+        h('div', { class: 'note' }, 'Réorganisation des câbles : pour permuter les câbles de deux connecteurs (rouges ou verts), 1. sélectionnez un premier connecteur en cliquant dessus (il devient jaune) 2. cliquez ensuite sur un second connecteur. Rouge : interface libre. Vert : câble branché.'));
+    };
+    draw();
+    box.append(holder, h('div', { class: 'btns' }, btn('Fermer', close)));
+  });
+}
+
+/* ===== Tables en direct (SAT, NAT, routage) ===== */
+function liveTable(cols, rowsFn) {
+  const tb = h('tbody');
+  const draw = () => {
+    tb.textContent = '';
+    const rows = rowsFn();
+    rows.forEach(r => tb.append(h('tr', null, r.map(c => h('td', { style: { padding: '5px 8px' } }, c)))));
+  };
+  draw();
+  refreshers.add(draw);
+  const t = h('div', { class: 'tblwrap', style: { height: '100%', border: 0 } }, h('table', { class: 'tbl' }, h('thead', null, h('tr', null, cols.map(c => h('th', null, c)))), tb));
+  t.draw = draw;
+  return t;
+}
+function openSat(d) {
+  const w = openWin({ id: 'sat-' + d.id, title: 'Table SAT ' + d.name, ico: 'ico-switch', w: 560, h: 380 });
+  const t = liveTable(['MAC', 'Port', 'Dernière mise à jour'], () => {
+    const now = Date.now();
+    return Object.entries(d.rt ? d.rt.sat : {}).filter(([, e]) => now - e.t < d.retention * 1000)
+      .map(([mac, e]) => [mac, typeof e.port === 'number' ? e.port + 1 : 'Wi-Fi', hhmmss(e.t)]);
+  });
+  w.body.append(t);
+  const iv = setInterval(() => { if (!w.el.isConnected) clearInterval(iv); else t.draw(); }, 700);
+}
+function openNat(d) {
+  const w = openWin({ id: 'nat-' + d.id, title: 'Table NAT ' + d.name, ico: 'ico-homerouter', w: 760, h: 380 });
+  const t = liveTable(['Protocole', 'Port redirigé', 'Adresse WAN', 'Adresse LAN', 'Port LAN', 'Dernière mise à jour'], () => {
+    const wan = ifc(d, 1).ip;
+    const dyn = d.rt ? d.rt.nat.map(e => [e.proto.toUpperCase(), e.pport, wan, e.lanIp, e.lport, hhmmss(e.t)]) : [];
+    const st = (d.forwards || []).filter(f => isIp(f.lan)).map(f => [f.proto, f.port, wan, f.lan, f.lport, 'statique']);
+    return st.concat(dyn);
+  });
+  w.body.append(t);
+  const iv = setInterval(() => { if (!w.el.isConnected) clearInterval(iv); else t.draw(); }, 700);
+}
+function sysRows(d) {
+  const rows = [];
+  d.ifs.forEach(f => rows.push({ dest: f.ip, mask: '255.255.255.255', gw: '127.0.0.1', via: '127.0.0.1' }));
+  d.ifs.forEach(f => rows.push({ dest: isIp(f.ip) && isIp(f.mask) ? n2ip(netOf(f.ip, f.mask)) : '', mask: f.mask, gw: f.ip, via: f.ip }));
+  rows.push({ dest: '127.0.0.0', mask: '255.0.0.0', gw: '127.0.0.1', via: '127.0.0.1' });
+  ((d.rt && d.rt.auto) || []).forEach(a => rows.push({ dest: n2ip(a.net), mask: n2ip(a.mask), gw: a.gw, via: d.ifs[a.i].ip }));
+  if (isIp(d.gw)) { const i = d.ifs.findIndex(x => sameNet(d.gw, x.ip, x.mask)); if (i >= 0) rows.push({ dest: '0.0.0.0', mask: '0.0.0.0', gw: d.gw, via: d.ifs[i].ip }); }
+  return rows;
+}
+function routingTable(d, o = {}) {
+  const wrap = h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px' } });
+  let all = true, selIdx = -1;
+  const tb = h('tbody');
+  const cellIn = (r, k, label) => { const e = textIn(r, k, { label, readOnly: o.readonly }); e.classList.add('cell'); e.classList.remove('in'); e.addEventListener('input', () => e.classList.toggle('bad', e.value.trim() !== '' && !isIp(e.value))); return h('td', null, e); };
+  const fill = () => {
+    tb.textContent = '';
+    if (all) sysRows(d).forEach(r => tb.append(h('tr', { class: 'auto' }, h('td', { style: { padding: '5px 8px' } }, r.dest), h('td', { style: { padding: '5px 8px' } }, r.mask), h('td', { style: { padding: '5px 8px' } }, r.gw), h('td', { style: { padding: '5px 8px' } }, r.via))));
+    (d.routes || []).forEach((r, i) => {
+      tb.append(h('tr', { class: i === selIdx ? 'sel' : '', onclick: () => { selIdx = i; [...tb.querySelectorAll('tr:not(.auto)')].forEach((x, j) => x.classList.toggle('sel', j === i)); } },
+        cellIn(r, 'dest', 'IP de destination'), cellIn(r, 'mask', 'Masque'), cellIn(r, 'gw', 'Passerelle suivante'),
+        h('td', null, o.readonly ? r.via : sel(d.ifs.map(x => x.ip), r.via, v => { r.via = v; }, { label: 'Via l’interface' }))));
+    });
+  };
+  fill();
+  const tools = o.readonly ? null : h('div', { class: 'btns', style: { alignItems: 'center' } },
+    chk('Afficher toutes les lignes', all, v => { all = v; fill(); }),
+    btn('Nouvelle ligne', () => { d.routes.push({ dest: '', mask: '', gw: '', via: d.ifs[0].ip }); selIdx = d.routes.length - 1; fill(); saveSoon(); }),
+    btn('Supprimer la ligne sélectionnée', () => { if (selIdx >= 0) { d.routes.splice(selIdx, 1); selIdx = -1; fill(); saveSoon(); } }),
+    o.noWindow ? null : btn('Ouvrir dans une nouvelle fenêtre', () => {
+      const w = openWin({ id: 'rt-' + d.id, title: 'Table de routage ' + d.name, ico: 'ico-router', w: 720, h: 360 });
+      if (!w.body.firstChild) { const p = h('div', { style: { padding: '10px' } }); p.append(routingTable(d, { noWindow: true })); w.body.append(p); }
+    }));
+  wrap.append(tools, h('div', { class: 'tblwrap', style: { height: o.tall || '170px' } }, h('table', { class: 'tbl' },
+    h('thead', null, h('tr', null, ['IP de destination', 'Masque', 'Passerelle suivante', 'Via l’interface'].map(t => h('th', null, t)))), tb)));
+  return wrap;
+}
+
+/* ===== Modem ===== */
+function modemForm(d, sim) {
+  const rt = d.rt;
+  const st = h('div', { class: 'status' });
+  const paint = () => {
+    const ok = !!(d.rt && d.rt.peer);
+    st.className = 'status' + (ok ? ' ok' : '');
+    st.textContent = '';
+    st.append(h('i'), ok ? 'Connecté' : (d.rt && d.rt.listening ? 'En attente d’une connexion entrante sur le port ' + d.port : 'Non connecté'));
+  };
+  const msg = h('div', { class: 'note' });
+  const host = textIn(d, 'host', { label: 'Adresse IP' });
+  const port = textIn(d, 'port', { num: true, min: 1, label: 'Port', onInput: () => { if (d.rt) modemApply(d); } });
+  const c = btn('Connecter', () => {
+    msg.textContent = 'Connexion en cours…'; c.disabled = true;
+    modemConnect(d, (ok, err) => { c.disabled = false; msg.textContent = ok ? 'Liaison établie avec un autre réseau.' : err; paint(); });
+  });
+  const dis = btn('Déconnecter', () => { modemDisconnect(d); msg.textContent = ''; paint(); });
+  const listen = chk('Attendre les connexions entrantes', d.listen, v => { d.listen = v; if (d.rt) modemApply(d); host.disabled = v; port.disabled = false; c.disabled = v || !d.rt; paint(); });
+  host.disabled = d.listen; c.disabled = d.listen || !Sim.on;
+  paint();
+  refreshers.add(paint);
+  const box = h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px' } },
+    listen, row('Adresse IP', host), row('Port', port), h('div', { class: 'btns' }, c, dis), st, msg,
+    Sim.on ? null : h('div', { class: 'note' }, 'La connexion se fait en mode simulation : ouvrez ce même simulateur dans un autre onglet, lancez la simulation, puis connectez les deux modems sur le même port.'));
+  return box;
+}
+
+/* ===== Panneau de réglages ===== */
+let curTabs = null;
+const refreshProps = () => renderProps();
+const refreshTabTitles = () => { if (curTabs && curTabs.refreshTitles) curTabs.refreshTitles(); };
+function devLabel(d) {
+  if (isHost(d)) { if (d.nameMode === 'ip') return ifc(d, 0).ip; if (d.nameMode === 'mac') return d.ifs[0].mac; }
+  return d.name;
+}
+function nameField(d, o = {}) {
+  return textIn(d, 'name', { label: 'Nom', disabled: o.disabled, onInput: () => render() });
+}
+function propsHost(d) {
+  const c = d.ifs[0], dh = d.dhcpClient;
+  const ssids = [...new Set(S.devices.filter(x => x.type === 'switch').map(x => x.ssid))];
+  const ssidSel = sel([['', 'Sélectionner'], ...ssids.map(s => [s, s])], d.ssid || '', v => { d.ssid = v; render(); }, { disabled: !d.wifi, label: 'Réseau sans fil (SSID)' });
+  const mk = (value) => h('label', null, h('input', { type: 'radio', name: 'mode-' + d.id, checked: (value === 'wifi') === d.wifi, onchange: () => {
+    d.wifi = value === 'wifi';
+    if (d.wifi) { const l = linkAt(d.id, 0); if (l) { removeLink(l.id); toast('Le câble de ' + d.name + ' a été retiré (mode Wi-Fi).'); } }
+    render(); renderProps();
+  } }), value === 'wifi' ? 'Sans fil (Wi-Fi)' : 'Filaire (LAN)');
+  return h('div', { class: 'pg' },
+    h('div', null,
+      row('Nom', nameField(d, { disabled: d.nameMode !== 'name' })),
+      row('Adresse MAC', ro(c.mac)),
+      row('Adresse IP', ipIn(c, 'ip', { disabled: dh, label: 'Adresse IP', onInput: render })),
+      row('Masque', ipIn(c, 'mask', { disabled: dh, label: 'Masque' })),
+      row('Passerelle', ipIn(d, 'gw', { disabled: dh, optional: true, label: 'Passerelle' })),
+      row('Serveur DNS', ipIn(d, 'dns', { disabled: dh, optional: true, label: 'Serveur DNS' }))),
+    h('div', null,
+      h('div', { class: 'radios' }, mk('lan'), '/', mk('wifi')),
+      h('div', { class: 'lbl' }, 'Réseau sans fil (SSID) :'), ssidSel),
+    h('div', null,
+      chk('Utiliser l’adresse IP comme nom', d.nameMode === 'ip', v => { d.nameMode = v ? 'ip' : 'name'; render(); renderProps(); }),
+      chk('Utiliser l’adresse MAC comme nom', d.nameMode === 'mac', v => { d.nameMode = v ? 'mac' : 'name'; render(); renderProps(); }),
+      chk('Activer routage des paquets', d.routing, v => { d.routing = v; }),
+      chk('Adressage automatique par serveur DHCP', d.dhcpClient, v => { d.dhcpClient = v; renderProps(); }),
+      h('div', { class: 'btns' }, btn('Configuration du service DHCP', () => openDhcp(d)))));
+}
+function propsSwitch(d) {
+  return h('div', { class: 'pg' },
+    h('div', null, row('Nom', nameField(d)), row('Nom Wi-Fi (SSID)', textIn(d, 'ssid', { label: 'Nom Wi-Fi (SSID)', onInput: () => { saveSoon(); } })),
+      chk('Afficher comme un nuage', d.cloud, v => { d.cloud = v; render(); })),
+    h('div'),
+    h('div', null, row('Temps de rétention SAT (en seconds)', textIn(d, 'retention', { num: true, min: 1, type: 'number', label: 'Temps de rétention SAT en secondes' }))));
+}
+function propsModem(d) {
+  return h('div', { class: 'pg' }, h('div', null, row('Nom', nameField(d))), h('div', null, modemForm(d)), h('div'));
+}
+function ifaceTab(d, i, kind) {
+  const f = d.ifs[i], remote = remoteOf(d, i);
+  const dhcpWan = kind === 'wan' && f.dhcp;
+  return h('div', { class: 'col' },
+    h('div', { style: { fontWeight: 600 } }, remote ? 'Connecté à : ' + remote.name : 'Aucune connexion'),
+    row('Adresse IP', ipIn(f, 'ip', { disabled: dhcpWan, label: 'Adresse IP', onInput: refreshTabTitles })),
+    row('Masque', ipIn(f, 'mask', { disabled: dhcpWan, label: 'Masque' })),
+    row('Adresse Mac', ro(f.mac)),
+    kind === 'lan' ? h('div', { class: 'btns' }, btn('Configuration du service DHCP', () => openDhcp(d))) : null,
+    kind === 'wan' ? chk('Adressage automatique par serveur DHCP', f.dhcp, v => { f.dhcp = v; renderProps(); }) : null);
+}
+function propsHomeRouter(d) {
+  const general = () => h('div', { class: 'col' },
+    row('Nom', nameField(d)),
+    row('Passerelle', ipIn(d, 'gw', { optional: true, label: 'Passerelle' })),
+    chk('Activer routage des paquets', true, () => {}, { disabled: true }),
+    h('div', { class: 'btns' }, btn('Configurer le parefeu', () => openFirewall(d)), btn('Redirection de port', () => openForwards(d))));
+  return curTabs = tabsUI('home-' + d.id, [
+    { title: () => 'Général', build: general },
+    { title: () => 'LAN: ' + d.ifs[0].ip, ico: true, build: () => ifaceTab(d, 0, 'lan') },
+    { title: () => 'WAN: ' + d.ifs[1].ip, ico: true, build: () => ifaceTab(d, 1, 'wan') }]);
+}
+function propsRouter(d) {
+  const general = () => h('div', { class: 'col' },
+    row('Nom', nameField(d)),
+    row('Passerelle', ipIn(d, 'gw', { optional: true, label: 'Passerelle' })),
+    chk('Routage automatique', d.auto, v => { d.auto = v; }),
+    chk('Activer routage des paquets', true, () => {}, { disabled: true }),
+    h('div', { class: 'btns' }, btn('Configurer le parefeu', () => openFirewall(d)), btn('Gérer les connexions', () => openConnections(d))));
+  const defs = [{ title: () => 'Général', build: general }];
+  d.ifs.forEach((f, i) => defs.push({ title: () => f.ip, ico: true, build: () => ifaceTab(d, i, 'nic') }));
+  defs.push({ title: () => 'Table de routage', build: () => routingTable(d) });
+  return curTabs = tabsUI('router-' + d.id + '-' + d.ifs.length, defs);
+}
+function renderProps() {
+  const root = $('#props');
+  root.textContent = ''; curTabs = null; refreshers.clear();
+  if (S.mode !== 'design') return;
+  const s = S.sel;
+  if (!s) { root.append(h('div', { class: 'pempty' }, 'Touchez un composant pour modifier ses réglages. Choisissez un élément dans la palette pour en ajouter un au schéma.')); return; }
+  if (s.kind === 'link') {
+    const l = S.links.find(x => x.id === s.id); if (!l) { root.append(h('div', { class: 'pempty' }, '')); return; }
+    root.append(h('div', { class: 'pg' }, h('div', null, h('div', { style: { fontWeight: 600 } }, 'Câble entre ' + dev(l.a).name + ' et ' + dev(l.b).name), h('div', { class: 'btns' }, btn('Supprimer le câble', deleteSel))), h('div'), h('div')));
+    return;
+  }
+  const d = dev(s.id); if (!d) return;
+  const el = isHost(d) ? propsHost(d) : d.type === 'switch' ? propsSwitch(d) : d.type === 'modem' ? propsModem(d) : d.type === 'homerouter' ? propsHomeRouter(d) : propsRouter(d);
+  root.append(el);
+}
+/* ===== Schéma : dessin, gestes, palette, barre d'outils ===== */
+const stage = $('#stage'), cv = $('#cv');
+const toWorld = (cx, cy) => { const r = stage.getBoundingClientRect(); return { x: (cx - r.left - S.view.x) / S.view.k, y: (cy - r.top - S.view.y) / S.view.k }; };
+const iconId = d => d.type === 'switch' && d.cloud ? 'ico-cloud' : 'ico-' + TYPES[d.type].ico;
+
+function render() {
+  const gl = $('#links'), gd = $('#devs');
+  gl.textContent = ''; gd.textContent = '';
+  const k = S.view.k;
+  $('#world').setAttribute('transform', 'translate(' + S.view.x + ' ' + S.view.y + ') scale(' + k + ')');
+  stage.style.backgroundPosition = S.view.x + 'px ' + S.view.y + 'px';
+  stage.style.backgroundSize = 24 * k + 'px ' + 24 * k + 'px';
+  for (const l of S.links) {
+    const a = dev(l.a), b = dev(l.b); if (!a || !b) continue;
+    const sel = S.sel && S.sel.kind === 'link' && S.sel.id === l.id;
+    const at = { x1: a.x, y1: a.y, x2: b.x, y2: b.y };
+    gl.append(h('svg:line', Object.assign({ class: 'lnk' + (sel ? ' sel' : '') }, at)));
+    if (S.mode === 'design') gl.append(h('svg:line', Object.assign({ class: 'lnk hit', 'data-kind': 'link', 'data-id': l.id }, at)));
+  }
+  for (const d of S.devices) if (isHost(d) && d.wifi) {
+    const ap = apFor(d);
+    if (ap) gl.append(h('svg:line', { class: 'lnk wifi', x1: d.x, y1: d.y, x2: ap.x, y2: ap.y }));
+  }
+  for (const d of S.devices) {
+    const sel = S.sel && S.sel.kind === 'dev' && S.sel.id === d.id;
+    const g = h('svg:g', { class: 'dev' + (sel ? ' sel' : '') + (S.cableFrom === d.id ? ' from' : ''), 'data-kind': 'dev', 'data-id': d.id, transform: 'translate(' + d.x + ' ' + d.y + ')', role: 'button', 'aria-label': devLabel(d) },
+      h('svg:rect', { x: -44, y: -44, width: 88, height: 104, fill: 'transparent' }),
+      h('svg:rect', { class: 'ring', x: -38, y: -38, width: 76, height: 76, rx: 10 }),
+      h('svg:use', { href: '#' + iconId(d), x: -32, y: -32, width: 64, height: 64 }),
+      h('svg:text', { class: 'dlabel', y: 54 }, devLabel(d)));
+    if (d.type === 'modem' && d.rt && d.rt.peer) g.append(h('svg:circle', { class: 'dot', cx: 28, cy: -26, r: 7 }));
+    if (isHost(d) && d.wifi) g.append(h('svg:text', { x: 24, y: -22, 'font-size': 16, 'font-weight': 700, fill: '#2a5d9f' }, '))'));
+    gd.append(g);
+  }
+  updateHint();
+}
+function updateHint() {
+  const hint = $('#hint');
+  if (S.mode === 'sim') hint.textContent = 'Simulation en cours. Touchez une machine pour ouvrir son bureau, un switch pour voir sa table SAT, le routeur domestique pour sa table NAT.';
+  else if (S.tool === 'cable') hint.textContent = S.cableFrom ? 'Touchez le deuxième appareil à relier.' : 'Connexion : touchez deux appareils pour les relier. Touchez « Connexion » pour terminer.';
+  else if (S.tool) hint.textContent = 'Touchez le schéma pour poser : ' + TYPES[S.tool].label + '.';
+  else hint.textContent = '';
+}
+
+/* --- gestes --- */
+const ptrs = new Map(); let gesture = null;
+const canDrag = () => S.mode === 'design' && !S.tool;
+cv.addEventListener('pointerdown', e => {
+  cv.setPointerCapture(e.pointerId);
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (ptrs.size === 1) {
+    const t = e.target.closest ? e.target.closest('[data-id]') : null;
+    const kind = t ? t.dataset.kind : null, id = t ? +t.dataset.id : null;
+    gesture = { type: 'pan', kind, id, moved: false, sx: e.clientX, sy: e.clientY, vx: S.view.x, vy: S.view.y, cx: e.clientX, cy: e.clientY };
+    if (kind === 'dev' && canDrag()) {
+      const d = dev(id), w = toWorld(e.clientX, e.clientY);
+      gesture.type = 'drag'; gesture.ox = d.x - w.x; gesture.oy = d.y - w.y;
+    }
+  } else if (ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()];
+    gesture = { type: 'pinch', moved: true, dist: Math.hypot(a.x - b.x, a.y - b.y), k: S.view.k, vx: S.view.x, vy: S.view.y, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
+  }
+});
+cv.addEventListener('pointermove', e => {
+  if (!ptrs.has(e.pointerId) || !gesture) return;
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (gesture.type === 'pinch') {
+    if (ptrs.size < 2) return;
+    const [a, b] = [...ptrs.values()];
+    const dist = Math.hypot(a.x - b.x, a.y - b.y), r = stage.getBoundingClientRect();
+    const k = Math.max(0.3, Math.min(2.5, gesture.k * dist / gesture.dist));
+    const mx = gesture.mx - r.left, my = gesture.my - r.top;
+    S.view.x = mx - (mx - gesture.vx) * k / gesture.k; S.view.y = my - (my - gesture.vy) * k / gesture.k; S.view.k = k;
+    render(); return;
+  }
+  const dx = e.clientX - gesture.sx, dy = e.clientY - gesture.sy;
+  if (!gesture.moved && Math.hypot(dx, dy) < 6) return;
+  gesture.moved = true;
+  if (gesture.type === 'drag') {
+    const d = dev(gesture.id), w = toWorld(e.clientX, e.clientY);
+    d.x = Math.round(w.x + gesture.ox); d.y = Math.round(w.y + gesture.oy);
+  } else { S.view.x = gesture.vx + dx; S.view.y = gesture.vy + dy; }
+  render();
+});
+const endPtr = e => {
+  if (!ptrs.has(e.pointerId)) return;
+  ptrs.delete(e.pointerId);
+  const g = gesture;
+  if (ptrs.size === 0) gesture = null;
+  if (!g || g.type === 'pinch') { if (ptrs.size === 0) gesture = null; return; }
+  if (e.type === 'pointerup' && !g.moved) onTap(g.kind, g.id, e.clientX, e.clientY);
+  else if (g.moved) saveSoon();
+};
+cv.addEventListener('pointerup', endPtr);
+cv.addEventListener('pointercancel', endPtr);
+cv.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = stage.getBoundingClientRect(), f = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+  const k = Math.max(0.3, Math.min(2.5, S.view.k * f)), mx = e.clientX - r.left, my = e.clientY - r.top;
+  S.view.x = mx - (mx - S.view.x) * k / S.view.k; S.view.y = my - (my - S.view.y) * k / S.view.k; S.view.k = k;
+  render();
+}, { passive: false });
+
+function openDeviceWindow(d) {
+  if (isHost(d)) return openDesktop(d);
+  if (d.type === 'switch') return openSat(d);
+  if (d.type === 'homerouter') return openNat(d);
+  if (d.type === 'router') {
+    const w = openWin({ id: 'rt-' + d.id, title: 'Table de routage ' + d.name, ico: 'ico-router', w: 720, h: 360 });
+    if (!w.body.firstChild) { const p = h('div', { style: { padding: '10px' } }); p.append(routingTable(d, { readonly: true, noWindow: true })); w.body.append(p); }
+    return;
+  }
+  if (d.type === 'modem') {
+    const w = openWin({ id: 'modem-' + d.id, title: d.name, ico: 'ico-modem', w: 420 });
+    if (!w.body.firstChild) { const p = h('div', { class: 'dlg' }); p.append(modemForm(d, true)); w.body.append(p); }
+  }
+}
+function onTap(kind, id, cx, cy) {
+  if (S.mode === 'sim') { if (kind === 'dev') openDeviceWindow(dev(id)); return; }
+  if (S.tool === 'cable') {
+    if (kind !== 'dev') return;
+    if (S.cableFrom == null) { S.cableFrom = id; }
+    else {
+      const err = connectDevices(S.cableFrom, id);
+      S.cableFrom = null;
+      if (err) toast(err); else { saveSoon(); renderProps(); }
+    }
+    render(); return;
+  }
+  if (S.tool) {
+    if (kind) return;
+    const type = S.tool, w = toWorld(cx, cy);
+    const put = n => {
+      const d = newDevice(type, Math.round(w.x), Math.round(w.y), n);
+      S.tool = null; S.sel = { kind: 'dev', id: d.id };
+      buildPalette(); render(); renderProps(); saveSoon();
+    };
+    if (type === 'router') openNics(put); else put();
+    return;
+  }
+  S.sel = kind ? { kind, id } : null;
+  render(); renderProps();
+}
+function deleteSel() {
+  if (S.mode !== 'design' || !S.sel) return toast('Sélectionnez d’abord un composant ou un câble.');
+  if (S.sel.kind === 'dev') { const d = dev(S.sel.id); removeDevice(S.sel.id); toast((d ? d.name : 'Composant') + ' supprimé.'); }
+  else { removeLink(S.sel.id); toast('Câble supprimé.'); }
+  S.sel = null; render(); renderProps(); saveSoon();
+}
+document.addEventListener('keydown', e => {
+  const tag = document.activeElement && document.activeElement.tagName;
+  if ((e.key === 'Delete' || e.key === 'Backspace') && S.mode === 'design' && S.sel && !/INPUT|TEXTAREA|SELECT/.test(tag)) { e.preventDefault(); deleteSel(); }
+  if (e.key === 'Escape') {
+    const top = Object.values(wins).sort((a, b) => b.el.style.zIndex - a.el.style.zIndex)[0];
+    if (top) top.close(); else if (S.tool) { S.tool = null; S.cableFrom = null; buildPalette(); render(); }
+  }
+});
+
+/* --- palette --- */
+function buildPalette() {
+  const p = $('#palette'); p.textContent = '';
+  const items = [['cable', 'Connexion', 'ico-cable']].concat(Object.entries(TYPES).map(([k, v]) => [k, v.label, 'ico-' + v.ico]));
+  items.forEach(([k, label, ico]) => {
+    p.append(h('button', { class: 'pal', type: 'button', 'aria-pressed': String(S.tool === k), onclick: () => { S.tool = S.tool === k ? null : k; S.cableFrom = null; buildPalette(); render(); } }, svgIcon(ico), label));
+  });
+}
+
+/* --- barre d'outils --- */
+function buildToolbar() {
+  const tb = $('#toolbar'); tb.textContent = '';
+  const mk = (ico, label, fn, id) => h('button', { class: 'tb', type: 'button', id, title: label, 'aria-label': label, onclick: fn }, svgIcon(ico), h('span', { class: 'lbl' }, label));
+  const speed = h('input', { id: 'speed', type: 'range', min: 0, max: 100, value: Sim.speed, 'aria-label': 'Vitesse de la simulation' });
+  speed.addEventListener('input', () => { Sim.speed = +speed.value; });
+  tb.append(mk('ico-new', 'Nouveau', newProject, 'b-new'), mk('ico-open', 'Ouvrir', openProject, 'b-open'), mk('ico-save', 'Enregistrer', saveProject, 'b-save'),
+    h('span', { class: 'sep' }),
+    mk('ico-hammer', 'Conception', () => setMode('design'), 'b-design'), mk('ico-play', 'Simulation', () => setMode('sim'), 'b-sim'),
+    h('span', { class: 'sep' }),
+    mk('ico-trash', 'Supprimer', deleteSel, 'b-del'),
+    h('span', { class: 'sep' }),
+    mk('ico-license', 'Licence', showLicense, 'b-license'),
+    h('span', { class: 'spacer' }),
+    h('div', { id: 'speedbox' }, h('label', { for: 'speed' }, 'Vitesse'), speed));
+  applyMode();
+}
+/* --- informations de licence --- */
+function showLicense() {
+  const FORGE = 'https://forge.apps.education.fr/dejouxyves/simulateur-reseau-comme-filius';
+  const link = (href, txt) => h('li', null, h('a', { href, target: '_blank', rel: 'noopener' }, txt));
+  dialog({ title: 'Licence', w: 480 }, (box, close) => {
+    box.append(
+      h('div', null, h('b', null, 'Simulateur de réseau'), ' — © 2026 Yves Dejoux'),
+      h('div', null, 'Inspiré du logiciel libre ', h('a', { href: 'https://www.lernsoftware-filius.de/', target: '_blank', rel: 'noopener' }, 'Filius'), ' (Stefan Freischlad, licence GPL v2 ou v3), dont il reprend l’organisation de l’interface. Projet indépendant, non affilié aux auteurs de Filius.'),
+      h('div', null, 'Ce simulateur est un logiciel libre, distribué sous licence ', h('b', null, 'GNU Affero General Public License version 3'), ' (AGPL-3.0).'),
+      h('div', null, 'Vous pouvez l’utiliser, l’étudier, le copier, le modifier et le redistribuer librement, y compris en classe.'),
+      h('div', null, 'Si vous diffusez une version modifiée, ou si vous la mettez en ligne, vous devez la publier sous la même licence et donner accès à son code source.'),
+      h('div', null, 'Ce logiciel est fourni sans aucune garantie.'),
+      h('ul', { style: { margin: 0, paddingLeft: '20px', lineHeight: 1.8 } },
+        link(FORGE, 'Code source sur la forge des communs numériques éducatifs'),
+        link(FORGE + '/-/blob/main/LICENSE', 'Texte de la licence (fichier LICENSE)'),
+        link('https://www.gnu.org/licenses/agpl-3.0.html', 'Texte officiel de l’AGPL-3.0 (gnu.org, en anglais)')),
+      h('div', { class: 'btns' }, h('button', { class: 'btn', type: 'button', onclick: close }, 'Fermer')));
+  });
+}
+function setMode(m) {
+  if (m === S.mode) return;
+  closeAllWins();
+  S.tool = null; S.cableFrom = null;
+  if (m === 'sim') { S.mode = 'sim'; S.sel = null; startSim(); } else { stopSim(); S.mode = 'design'; }
+  applyMode();
+}
+function applyMode() {
+  const sim = S.mode === 'sim';
+  $('#b-design').setAttribute('aria-pressed', String(!sim));
+  $('#b-sim').setAttribute('aria-pressed', String(sim));
+  $('#b-del').style.display = sim ? 'none' : '';
+  $('#speedbox').style.display = sim ? '' : 'none';
+  ['b-new', 'b-open'].forEach(id => { $('#' + id).disabled = sim; });
+  $('#palette').style.display = sim ? 'none' : '';
+  $('#pwrap').style.display = sim ? 'none' : '';
+  buildPalette(); render();
+  if (!sim) renderProps();
+}
+$('#ptab').addEventListener('click', () => $('#pwrap').classList.toggle('collapsed'));
+
+function newProject() {
+  if (S.mode !== 'design') return toast('Repassez en mode conception pour créer un nouveau schéma.');
+  confirmDlg('Effacer le schéma actuel et en commencer un nouveau ?', () => {
+    S.devices = []; S.links = []; S.nextId = 1; S.sel = null; S.tool = null; S.cableFrom = null; S.tabIdx = {}; S.view = { x: 0, y: 0, k: 1 };
+    buildPalette(); render(); renderProps(); saveSoon();
+  }, 'Effacer');
+}
+
+/* ===== Import d'un fichier Filius (.fls) ===== */
+async function unzipFirst(buf, wanted) {
+  const u8 = new Uint8Array(buf), dv = new DataView(buf);
+  let e = u8.length - 22;
+  while (e >= 0 && dv.getUint32(e, true) !== 0x06054b50) e--;
+  if (e < 0) throw new Error('ce n’est pas une archive Filius.');
+  const n = dv.getUint16(e + 10, true); let p = dv.getUint32(e + 16, true);
+  for (let i = 0; i < n; i++) {
+    const meth = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true);
+    const nl = dv.getUint16(p + 28, true), xl = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+    const name = new TextDecoder().decode(u8.subarray(p + 46, p + 46 + nl));
+    if (name.endsWith(wanted)) {
+      const lnl = dv.getUint16(off + 26, true), lxl = dv.getUint16(off + 28, true);
+      const data = u8.subarray(off + 30 + lnl + lxl, off + 30 + lnl + lxl + csize);
+      if (meth === 0) return new TextDecoder().decode(data);
+      if (meth !== 8) throw new Error('compression non gérée.');
+      const ds = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      return new TextDecoder().decode(await new Response(ds).arrayBuffer());
+    }
+    p += 46 + nl + xl + cl;
+  }
+  throw new Error('konfiguration.xml introuvable dans l’archive.');
+}
+function fitView() {
+  if (!S.devices.length) { S.view = { x: 0, y: 0, k: 1 }; return; }
+  const r = stage.getBoundingClientRect(), pad = 70;
+  const xs = S.devices.map(d => d.x), ys = S.devices.map(d => d.y);
+  const x0 = Math.min(...xs) - pad, x1 = Math.max(...xs) + pad, y0 = Math.min(...ys) - pad, y1 = Math.max(...ys) + pad + 20;
+  const k = Math.max(0.3, Math.min(1, r.width / (x1 - x0), r.height / (y1 - y0)));
+  S.view = { k, x: (r.width - (x1 - x0) * k) / 2 - x0 * k, y: (r.height - (y1 - y0) * k) / 2 - y0 * k };
+}
+async function importFilius(buf) {
+  const xml = await unzipFirst(buf, 'konfiguration.xml');
+  const doc = new DOMParser().parseFromString(xml, 'text/xml');
+  if (doc.querySelector('parsererror')) throw new Error('XML illisible.');
+  const root = doc.documentElement;
+  const lists = [...root.children].filter(c => c.tagName === 'object');
+  const kids = el => [...el.children];
+  const prop = (el, name) => kids(el).find(c => c.tagName === 'void' && c.getAttribute('property') === name);
+  const str = (el, name) => { const v = prop(el, name); const s = v && v.querySelector('string'); return s ? s.textContent : ''; };
+  const items = lists[0] ? kids(lists[0]).map(v => kids(v)[0]).filter(o => o && /GUIKnotenItem/.test(o.getAttribute('class') || '')) : [];
+  const cables = lists[1] ? kids(lists[1]).map(v => kids(v)[0]).filter(o => o && /GUIKabelItem/.test(o.getAttribute('class') || '')) : [];
+  const backup = { d: S.devices, l: S.links, n: S.nextId };
+  S.devices = []; S.links = []; S.nextId = 1;
+  try {
+    const byId = {}; const warn = [];
+    for (const it of items) {
+      const lab = prop(it, 'imageLabel'), kn = prop(it, 'knoten');
+      const label = lab && lab.querySelector('object'), node = kn && kn.querySelector('object');
+      if (!label || !node) continue;
+      const cls = node.getAttribute('class') || '', icon = (label.querySelector('string') || {}).textContent || '';
+      const typTxt = str(label, 'typ');
+      let type = null;
+      if (/Notebook/i.test(cls) || /laptop/i.test(icon)) type = 'laptop';
+      else if (/Switch/i.test(cls)) type = 'switch';
+      else if (/Modem/i.test(cls)) type = 'modem';
+      else if (/Vermittlung|Router/i.test(cls) && /Gateway|Domestic|Heim/i.test(cls + icon + typTxt)) type = 'homerouter';
+      else if (/Gateway/i.test(cls)) type = 'homerouter';
+      else if (/Vermittlung/i.test(cls)) type = 'router';
+      else if (/Rechner/i.test(cls)) type = 'computer';
+      if (!type) { warn.push(typTxt || cls); continue; }
+      // position (centre de l'icône)
+      let x = 0, y = 0, w = 85, hh = 115;
+      const rect = label.querySelector('[property="bounds"] > object');
+      if (rect) for (const f of rect.querySelectorAll('void[method="getField"]')) {
+        const nm = (f.querySelector('string') || {}).textContent, val = +((f.querySelector('int') || {}).textContent || 0);
+        if (nm === 'x') x = val; else if (nm === 'y') y = val; else if (nm === 'width') w = val; else if (nm === 'height') hh = val;
+      }
+      const tip = str(label, 'toolTipText');
+      const re = /(\d+\.\d+\.\d+\.\d+)\s*\/\s*(\d+\.\d+\.\d+\.\d+)\s*\(([0-9A-Fa-f:]{17})\)/g;
+      const nics = []; let m; while ((m = re.exec(tip))) nics.push({ ip: m[1], mask: m[2], mac: m[3].toUpperCase() });
+      const gw = (/(?:Passerelle|Gateway|Gateway):\s*(\d+\.\d+\.\d+\.\d+)/i.exec(tip) || [])[1] || '';
+      const dns = (/(?:Serveur DNS|DNS server|DNS-Server):\s*(\d+\.\d+\.\d+\.\d+)/i.exec(tip) || [])[1] || '';
+      const d = newDevice(type, Math.round(x + w / 2), Math.round(y + 45), Math.max(2, nics.length));
+      d.name = str(label, 'text') || str(node, 'name') || d.name;
+      if (d.ifs && type !== 'modem') {
+        if (type === 'homerouter' || type === 'router') {
+          nics.forEach((nc, i) => { if (d.ifs[i]) Object.assign(d.ifs[i], nc); });
+        } else if (nics[0]) Object.assign(d.ifs[0], nics[0]);
+        if (isHost(d) || type === 'router' || type === 'homerouter') { d.gw = gw; if ('dns' in d) d.dns = dns; }
+        if (isHost(d)) d.apps = ['cmd', 'files', 'editor'];
+      }
+      if (type === 'switch') { const ss = node.querySelector('[property="SSID"] string'); if (ss) d.ssid = ss.textContent; }
+      byId[it.getAttribute('id')] = d;
+    }
+    let skipped = 0;
+    for (const c of cables) {
+      const z1 = prop(c, 'kabelpanel') && prop(prop(c, 'kabelpanel'), 'ziel1'), z2 = prop(c, 'kabelpanel') && prop(prop(c, 'kabelpanel'), 'ziel2');
+      const id1 = z1 && z1.querySelector('object').getAttribute('idref'), id2 = z2 && z2.querySelector('object').getAttribute('idref');
+      const a = byId[id1], b = byId[id2];
+      if (!a || !b || connectDevices(a.id, b.id)) skipped++;
+    }
+    if (!S.devices.length) throw new Error('aucun appareil reconnu.');
+    fitView();
+    S.sel = null; S.tool = null; S.cableFrom = null; S.tabIdx = {};
+    return { n: S.devices.length, skipped: skipped + warn.length };
+  } catch (err) {
+    S.devices = backup.d; S.links = backup.l; S.nextId = backup.n;
+    throw err;
+  }
+}
+
+function openProject() {
+  if (S.mode !== 'design') return toast('Repassez en mode conception pour ouvrir un schéma.');
+  const file = h('input', { type: 'file', accept: '.fls', style: 'display:none', 'aria-label': 'Choisir un fichier Filius (.fls)' });
+  file.addEventListener('change', () => {
+    const f = file.files[0]; file.remove(); if (!f) return;
+    if (!/\.fls$/i.test(f.name)) return toast('Choisissez un fichier .fls.');
+    const r = new FileReader();
+    r.onload = () => importFilius(r.result).then(res => { buildPalette(); render(); renderProps(); saveSoon(); toast('« ' + f.name + ' » ouvert (' + res.n + ' appareils' + (res.skipped ? ', ' + res.skipped + ' élément(s) ignoré(s)' : '') + ').'); }, e => toast('Ouverture impossible : ' + e.message));
+    r.readAsArrayBuffer(f);
+  });
+  document.body.append(file); file.click();
+}
+
+/* ===== Export au format Filius (.fls) ===== */
+const crcTab = (() => { const t = []; for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32 = u8 => { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = crcTab[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function zipStore(files) {
+  const enc = new TextEncoder(), parts = [], cen = []; let off = 0;
+  for (const f of files) {
+    const nm = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data);
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(12, 0x5821, true);
+    lh.setUint32(14, crc, true); lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true); lh.setUint16(26, nm.length, true);
+    parts.push(new Uint8Array(lh.buffer), nm, data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(14, 0x5821, true);
+    ch.setUint32(16, crc, true); ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true); ch.setUint16(28, nm.length, true); ch.setUint32(42, off, true);
+    cen.push(new Uint8Array(ch.buffer), nm);
+    off += 30 + nm.length + data.length;
+  }
+  const csize = cen.reduce((n, a) => n + a.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, csize, true); end.setUint32(16, off, true);
+  return new Blob([...parts, ...cen, new Uint8Array(end.buffer)], { type: 'application/octet-stream' });
+}
+function filiusXml() {
+  const esc = t => String(t == null ? '' : t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const KIND = {
+    computer: ['filius.hardware.knoten.Rechner', 'Ordinateur', 'server.png'],
+    laptop: ['filius.hardware.knoten.Notebook', 'Portable', 'laptop.png'],
+    switch: ['filius.hardware.knoten.Switch', 'Switch / Wi-Fi', 'switch.png'],
+    router: ['filius.hardware.knoten.Vermittlungsrechner', 'Routeur', 'router.png'],
+    homerouter: ['filius.hardware.knoten.Vermittlungsrechner', 'Routeur Domestique', 'router.png'],
+    modem: ['filius.hardware.knoten.Modem', 'Modem', 'modem.png']
+  };
+  const rect = (x, y, w, hh) => '<object class="java.awt.Rectangle"><int>' + Math.round(x) + '</int><int>' + Math.round(y) + '</int><int>' + Math.round(w) + '</int><int>' + Math.round(hh) + '</int></object>';
+  const portId = {}; let np = 0;           // "deviceId:port" -> id de port Filius
+  const ports = d => {
+    const used = S.links.flatMap(l => (l.a === d.id ? [l.ap] : []).concat(l.b === d.id ? [l.bp] : []));
+    const idx = d.type === 'switch' ? [...new Set(used)].sort((p, q) => p - q) : Array.from({ length: portCount(d) }, (_, i) => i);
+    return idx;
+  };
+  const devs = S.devices;
+  for (const d of devs) for (const i of ports(d)) portId[d.id + ':' + i] = 'Port' + (np++);
+  let x = '<?xml version="1.0" encoding="UTF-8"?>\n<java version="25.0.2" class="java.beans.XMLDecoder">\n <string>Filius version: 2.14.0 (29.08.2026)</string>\n <object class="java.util.LinkedList">\n';
+  devs.forEach((d, n) => {
+    const [cls, typ, img] = KIND[d.type];
+    const ifs = d.ifs || [];
+    const tip = ifs.length ? ' ' + ifs.map(i => (i.ip || '') + ' / ' + (i.mask || '') + ' (' + i.mac + ')').join('\n ') + '\nPasserelle: ' + (d.gw || '') + '\nServeur DNS: ' + (d.dns || '') : '';
+    x += '  <void method="add">\n   <object class="filius.gui.netzwerksicht.GUIKnotenItem" id="GUIKnotenItem' + n + '">\n    <void property="imageLabel">\n     <object class="filius.gui.netzwerksicht.JSidebarButton">\n';
+    x += '      <void property="bounds">' + rect(d.x - 42, d.y - 45, 85, 115) + '</void>\n      <void property="horizontalAlignment"><object class="javax.swing.SwingConstants" field="CENTER"/></void>\n';
+    x += '      <void property="icon"><object class="javax.swing.ImageIcon"><string>jar:file:/C:/Program%20Files/Filius/Filius.exe!/gfx/hardware/' + img + '</string></object></void>\n';
+    x += '      <void property="text"><string>' + esc(d.name) + '</string></void>\n';
+    x += '      <void property="toolTipText"><string>' + esc('<html><pre>' + (tip ? 'Adresse IP/masque (Adresse MAC):\n' + tip : '') + '</pre></html>') + '</string></void>\n';
+    x += '      <void property="typ"><string>' + esc(typ) + '</string></void>\n     </object>\n    </void>\n';
+    x += '    <void property="knoten">\n     <object class="' + cls + '">\n';
+    if (d.type !== 'switch') {
+      x += '      <void property="name"><string>' + esc(d.name) + '</string></void>\n      <void property="netzwerkInterfaces">\n';
+      ifs.forEach((i, k) => {
+        x += '       <void index="' + k + '">\n';
+        if (i.ip && i.ip !== '192.168.0.10') x += '        <void property="ip"><string>' + esc(i.ip) + '</string></void>\n';
+        if (i.mask && i.mask !== '255.255.255.0') x += '        <void property="subnetzMaske"><string>' + esc(i.mask) + '</string></void>\n';
+        x += '        <void property="mac"><string>' + esc(i.mac) + '</string></void>\n        <void id="' + portId[d.id + ':' + k] + '" property="port"/>\n       </void>\n';
+      });
+      x += '      </void>\n';
+      if (d.gw || d.dns) {
+        x += '      <void property="systemSoftware">\n';
+        if (d.gw) x += '       <void property="standardGateway"><string>' + esc(d.gw) + '</string></void>\n';
+        if (d.dns) x += '       <void property="dnsServer"><string>' + esc(d.dns) + '</string></void>\n';
+        x += '      </void>\n';
+      }
+    } else {
+      x += '      <void property="systemSoftware"><void property="SSID"><string>' + esc(d.ssid) + '</string></void></void>\n      <void property="anschluesse">\n';
+      ports(d).forEach((i, k) => { x += '       <void id="' + portId[d.id + ':' + i] + '" index="' + k + '"/>\n'; });
+      x += '      </void>\n';
+    }
+    x += '     </object>\n    </void>\n   </object>\n  </void>\n';
+  });
+  x += ' </object>\n <object class="java.util.LinkedList">\n';
+  S.links.forEach((l, n) => {
+    const A = dev(l.a), B = dev(l.b), ia = devs.indexOf(A), ib = devs.indexOf(B);
+    const x0 = Math.min(A.x, B.x), y0 = Math.min(A.y, B.y);
+    x += '  <void method="add">\n   <object class="filius.gui.netzwerksicht.GUIKabelItem" id="GUIKabelItem' + n + '">\n    <void property="dasKabel"><object class="filius.hardware.Kabel"><void property="anschluesse"><array class="filius.hardware.Port" length="2">';
+    x += '<void index="0"><object idref="' + portId[l.a + ':' + l.ap] + '"/></void><void index="1"><object idref="' + portId[l.b + ':' + l.bp] + '"/></void></array></void></object></void>\n';
+    x += '    <void property="kabelpanel">\n     <void property="bounds">' + rect(x0, y0, Math.abs(A.x - B.x) + 1, Math.abs(A.y - B.y) + 1) + '</void>\n';
+    x += '     <void property="ziel1"><object idref="GUIKnotenItem' + ia + '"/></void>\n     <void property="ziel2"><object idref="GUIKnotenItem' + ib + '"/></void>\n    </void>\n   </object>\n  </void>\n';
+  });
+  return x + ' </object>\n <object class="java.util.ArrayList"/>\n</java>\n';
+}
+function saveProject() {
+  if (!S.devices.length) return toast('Le schéma est vide : rien à enregistrer.');
+  const blob = zipStore([{ name: 'projekt/anwendungen/EigeneAnwendungen.txt', text: '' }, { name: 'projekt/konfiguration.xml', text: filiusXml() }]);
+  const a = h('a', { href: URL.createObjectURL(blob), download: 'schema.fls', style: 'display:none' });
+  document.body.append(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  toast('Fichier schema.fls enregistré (dossier Téléchargements).');
+}
+/* ===== Bureau des machines et logiciels ===== */
+const srvState = (d, id) => d.rt.srv[id] || (d.rt.srv[id] = { log: [] });
+function slog(d, id, msg) {
+  const st = srvState(d, id);
+  st.log.push(msg); if (st.log.length > 300) st.log.shift();
+  if (d.rt.ui[id]) d.rt.ui[id]();
+}
+const apad = (...k) => h('div', { class: 'apad' }, ...k);
+function askText(title, label, value, cb) {
+  dialog({ title, w: 380 }, (box, close) => {
+    const i = h('input', { class: 'in', value, 'aria-label': label });
+    const ok = () => { const v = i.value.trim(); if (!v) return; close(); cb(v); };
+    i.addEventListener('keydown', e => { if (e.key === 'Enter') ok(); });
+    box.append(h('label', { class: 'lbl' }, label), i, h('div', { class: 'btns' }, btn('Annuler', close), btn('OK', ok)));
+    setTimeout(() => i.focus(), 30);
+  });
+}
+const isImg = f => f.kind === 'image' || /\.(png|jpe?g|gif|svg|webp)$/i.test(f.name) || String(f.content).startsWith('data:image');
+const fsGet = (d, n) => d.fs.find(f => f.name === n);
+function fsPut(d, name, content, kind) {
+  const f = fsGet(d, name);
+  if (f) { f.content = content; if (kind) f.kind = kind; } else d.fs.push({ name, content, kind: kind || 'text' });
+  saveSoon();
+}
+function logView(d, id) {
+  const box = h('div', { class: 'logbox', role: 'log' });
+  const paint = () => { box.textContent = srvState(d, id).log.join('\n'); box.scrollTop = box.scrollHeight; };
+  paint(); d.rt.ui[id] = paint;
+  return box;
+}
+function startStop(d, id, isRunning, start, stop) {
+  const b = h('button', { class: 'btn', type: 'button' });
+  const paint = () => { const r = isRunning(); b.textContent = r ? 'Arrêter' : 'Démarrer'; b.className = 'btn ' + (r ? 'stop' : 'go'); };
+  b.addEventListener('click', () => { if (isRunning()) stop(); else if (start() === false) return; paint(); });
+  paint();
+  return { b, paint };
+}
+
+const APPS = [
+  { id: 'cmd', name: 'Ligne de commande', ico: 'app-cmd', open: appCmd },
+  { id: 'files', name: 'Explorateur de fichiers', ico: 'app-files', open: appFiles },
+  { id: 'editor', name: 'Éditeur de textes', ico: 'app-editor', open: appEditor },
+  { id: 'images', name: 'Afficheur d’images', ico: 'app-images', open: appImages },
+  { id: 'firewall', name: 'Parefeu', ico: 'app-firewall', open: appFirewall },
+  { id: 'dns', name: 'Serveur DNS', ico: 'app-dns', open: appDns },
+  { id: 'gensrv', name: 'Serveur générique', ico: 'app-gensrv', open: appGenSrv },
+  { id: 'gencli', name: 'Client générique', ico: 'app-gencli', open: appGenCli },
+  { id: 'websrv', name: 'Serveur web', ico: 'app-websrv', open: appWebSrv },
+  { id: 'browser', name: 'Navigateur web', ico: 'app-browser', open: appBrowser },
+  { id: 'mailsrv', name: 'Serveur de messagerie', ico: 'app-mailsrv', open: appMailSrv },
+  { id: 'mailcli', name: 'Client de messagerie', ico: 'app-mailcli', open: appMailCli },
+  { id: 'p2p', name: 'Gnutella (P2P)', ico: 'app-p2p', open: appP2p }
+];
+const appById = id => APPS.find(a => a.id === id);
+function stopApp(d, id) {
+  const st = d.rt && d.rt.srv[id];
+  if (st && st.stop) st.stop();
+}
+
+function openDesktop(d) {
+  const id = 'desk-' + d.id;
+  if (wins[id]) { wins[id].focus(); return; }
+  let cur = null;
+  const title = () => d.name + ' - ' + ifc(d, 0).ip;
+  const w = openWin({ id, title: title(), ico: 'ico-' + TYPES[d.type].ico, w: 820, h: 580, big: true, onClose: () => { teardown(); refreshers.delete(upd); } });
+  const main = h('div', { class: 'desk-main' });
+  const bar = h('div', { class: 'deskbar' }, h('button', { type: 'button', onclick: () => home() }, 'Écran d’accueil'), svgIcon('app-net'));
+  bar.lastChild.style.cssText = 'width:32px;height:32px;margin:0 10px;flex:none';
+  w.body.style.position = 'relative';
+  const desk = h('div', { class: 'desk' }, main, bar);
+  desk.style.cssText = 'position:absolute;inset:0';
+  w.body.append(desk);
+  const upd = () => w.setTitle(title());
+  refreshers.add(upd);
+  const teardown = () => { if (cur) { try { cur(); } catch (e) { /* ignoré */ } cur = null; } };
+  const ctx = { open: (aid, arg) => { if (!d.apps.includes(aid)) return toast('Installez d’abord « ' + appById(aid).name + ' » (Installation des logiciels).'); show(appById(aid), arg); }, home: () => home() };
+  function home() {
+    teardown(); main.textContent = '';
+    const icons = h('div', { class: 'icons' });
+    const mkIcon = (ico, label, fn) => h('button', { class: 'icon', type: 'button', onclick: fn }, svgIcon(ico), label);
+    icons.append(mkIcon('app-install', 'Installation des logiciels', install));
+    d.apps.map(appById).filter(Boolean).forEach(a => icons.append(mkIcon(a.ico, a.name, () => show(a))));
+    main.append(h('div', { class: 'desk-home' }, icons));
+  }
+  function frame(titleText, ico) {
+    teardown(); main.textContent = '';
+    const body = h('div', { class: 'appbody' });
+    main.append(h('div', { class: 'apptitle' }, svgIcon(ico), titleText), body);
+    return body;
+  }
+  function show(app, arg) {
+    const body = frame(app.name, app.ico);
+    cur = app.open(d, body, arg, ctx) || null;
+  }
+  function install() {
+    const body = frame('Installation des logiciels', 'app-install');
+    let inst = APPS.filter(a => d.apps.includes(a.id)).map(a => a.id);
+    let selI = null, selA = null;
+    const left = h('div', { class: 'swlist', role: 'listbox', 'aria-label': 'Logiciels installés' }), right = h('div', { class: 'swlist', role: 'listbox', 'aria-label': 'Logiciels disponibles' });
+    const draw = () => {
+      left.textContent = ''; right.textContent = '';
+      APPS.filter(a => inst.includes(a.id)).forEach(a => left.append(h('div', { class: a.id === selI ? 'sel' : '', onclick: () => { selI = a.id; selA = null; draw(); } }, a.name)));
+      APPS.filter(a => !inst.includes(a.id)).forEach(a => right.append(h('div', { class: a.id === selA ? 'sel' : '', onclick: () => { selA = a.id; selI = null; draw(); } }, a.name)));
+    };
+    draw();
+    const toLeft = btn('←', () => { if (selA) { inst.push(selA); selI = selA; selA = null; draw(); } });
+    const toRight = btn('→', () => { if (selI) { inst = inst.filter(x => x !== selI); selA = selI; selI = null; draw(); } });
+    toLeft.setAttribute('aria-label', 'Installer'); toRight.setAttribute('aria-label', 'Désinstaller');
+    body.append(apad(
+      h('div', { class: 'cols' },
+        h('div', { class: 'grow' }, h('div', { class: 'lbl', style: { textAlign: 'center', marginBottom: '6px' } }, 'Installés :'), left),
+        h('div', { class: 'arrows' }, toLeft, toRight),
+        h('div', { class: 'grow' }, h('div', { class: 'lbl', style: { textAlign: 'center', marginBottom: '6px' } }, 'Disponibles :'), right)),
+      h('div', { class: 'btns', style: { justifyContent: 'center' } }, btn('Appliquer les modifications', () => {
+        d.apps.filter(x => !inst.includes(x)).forEach(x => stopApp(d, x));
+        d.apps = APPS.filter(a => inst.includes(a.id)).map(a => a.id); saveSoon(); home(); toast('Modifications appliquées.');
+      }))));
+  }
+  home();
+}
+
+/* ===== Ligne de commande ===== */
+function appCmd(d, body) {
+  const out = h('pre');
+  const inp = h('input', { type: 'text', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', 'aria-label': 'Commande' });
+  body.append(h('div', { class: 'term' }, out, h('div', { class: 'line' }, '>', inp)));
+  const api = { print: s => { out.textContent += s + '\n'; out.scrollTop = out.scrollHeight; }, clear: () => { out.textContent = ''; } };
+  const hist = []; let hi = 0, busy = false;
+  api.print('Ligne de commande de ' + d.name + '\nTapez « help » pour la liste des commandes.\n');
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'ArrowUp' && hist.length) { hi = Math.max(0, hi - 1); inp.value = hist[hi]; e.preventDefault(); }
+    else if (e.key === 'ArrowDown') { hi = Math.min(hist.length, hi + 1); inp.value = hist[hi] || ''; e.preventDefault(); }
+    else if (e.key === 'Enter' && !busy) {
+      const line = inp.value; inp.value = '';
+      api.print('> ' + line);
+      if (line.trim()) { hist.push(line); hi = hist.length; }
+      busy = true; inp.disabled = true;
+      runCmd(d, line, api, () => { busy = false; inp.disabled = false; inp.focus(); });
+    }
+  });
+  setTimeout(() => inp.focus(), 50);
+}
+function runCmd(d, line, api, done) {
+  const parts = line.trim().split(/\s+/), c = (parts[0] || '').toLowerCase(), args = parts.slice(1);
+  const P = api.print;
+  switch (c) {
+    case '': return done();
+    case 'help':
+      P('Commandes disponibles :\n  ipconfig            adresse IP, masque, passerelle, DNS, MAC\n  ping <hôte>         envoie 4 demandes d’écho ICMP\n  traceroute <hôte>   affiche les routeurs traversés (aussi : tracert)\n  arp                 table ARP de la machine\n  host <nom>          résolution DNS (aussi : nslookup)\n  hostname            nom de la machine\n  dir                 liste des fichiers (aussi : ls)\n  cat <fichier>       affiche un fichier (aussi : type)\n  echo <texte> [> fichier]\n  rm <fichier>        supprime un fichier (aussi : del)\n  clear               efface l’écran (aussi : cls)');
+      return done();
+    case 'clear': case 'cls': api.clear(); return done();
+    case 'hostname': P(d.name); return done();
+    case 'ipconfig': {
+      const c0 = ifc(d, 0);
+      P('Adresse IP    : ' + c0.ip + '\nMasque        : ' + c0.mask + '\nPasserelle    : ' + (gwOf(d) || '(aucune)') + '\nServeur DNS   : ' + (dnsOf(d) || '(aucun)') + '\nAdresse MAC   : ' + c0.mac + '\nMode          : ' + (d.wifi ? 'Wi-Fi (' + (d.ssid || 'aucun réseau') + ')' : 'filaire'));
+      return done();
+    }
+    case 'arp': {
+      const e = Object.entries(d.rt.arp);
+      P(e.length ? e.map(([ip, mac]) => ip.padEnd(16) + mac).join('\n') : 'La table ARP est vide.');
+      return done();
+    }
+    case 'host': case 'nslookup':
+      if (!args[0]) { P('Utilisation : host <nom>'); return done(); }
+      resolveName(d, args[0], (ip, err) => { P(ip ? args[0] + ' a pour adresse ' + ip : err); done(); });
+      return;
+    case 'dir': case 'ls':
+      P(d.fs.length ? d.fs.map(f => f.name.padEnd(28) + (isImg(f) ? 'image' : 'texte') + '  ' + String(f.content).length + ' o').join('\n') : 'Aucun fichier.');
+      return done();
+    case 'cat': case 'type': {
+      const f = fsGet(d, args[0]);
+      P(!args[0] ? 'Utilisation : cat <fichier>' : !f ? 'Fichier introuvable : ' + args[0] : isImg(f) ? '(fichier image)' : f.content);
+      return done();
+    }
+    case 'rm': case 'del': {
+      const i = d.fs.findIndex(f => f.name === args[0]);
+      if (i < 0) P('Fichier introuvable : ' + (args[0] || '')); else { d.fs.splice(i, 1); saveSoon(); P('Fichier supprimé.'); }
+      return done();
+    }
+    case 'echo': {
+      const rest = line.trim().slice(parts[0].length).trim(), k = rest.lastIndexOf('>');
+      if (k >= 0) { const name = rest.slice(k + 1).trim(), txt = rest.slice(0, k).trim(); if (name) { fsPut(d, name, txt); P('Écrit dans ' + name); } else P('Nom de fichier manquant.'); }
+      else P(rest);
+      return done();
+    }
+    case 'ping': return cmdPing(d, args[0], api, done);
+    case 'traceroute': case 'tracert': return cmdTrace(d, args[0], api, done);
+    default: P('Commande inconnue : ' + c + '. Tapez « help ».'); return done();
+  }
+}
+const pingMs = ms => Math.max(1, Math.round(ms / D() * 0.4));
+function cmdPing(d, target, api, done) {
+  const P = api.print;
+  if (!target) { P('Utilisation : ping <adresse IP ou nom>'); return done(); }
+  resolveName(d, target, (ip, err) => {
+    if (!ip) { P(err || 'Résolution impossible.'); return done(); }
+    P('PING ' + target + (target !== ip ? ' [' + ip + ']' : '') + ' : 32 octets de données');
+    let sent = 0, ok = 0;
+    const next = () => {
+      if (sent >= 4) { P('\n--- statistiques ping pour ' + ip + ' ---\n' + sent + ' paquets émis, ' + ok + ' reçus, ' + Math.round((sent - ok) / sent * 100) + '% perdus'); return done(); }
+      sent++;
+      sendEcho(d, ip, 64, (pkt, ms) => {
+        if (pkt.type === 'noroute') { P('Impossible de joindre l’hôte de destination (aucune route ou adresse IP non configurée).'); return done(); }
+        if (pkt.type === 'echo-rep') { ok++; P('Réponse de ' + pkt.src + ' : octets=32 temps=' + pingMs(ms) + ' ms TTL=' + pkt.ttl); }
+        else if (pkt.type === 'timeout') P('Délai d’attente de la demande dépassé.');
+        else if (pkt.type === 'ttl') P('Réponse de ' + pkt.src + ' : durée de vie dépassée en transit.');
+        else P('Réponse de ' + pkt.src + ' : destination inaccessible.');
+        later(Math.min(500, D() * 2), next);
+      });
+    };
+    next();
+  });
+}
+function cmdTrace(d, target, api, done) {
+  const P = api.print;
+  if (!target) { P('Utilisation : traceroute <adresse IP ou nom>'); return done(); }
+  resolveName(d, target, (ip, err) => {
+    if (!ip) { P(err || 'Résolution impossible.'); return done(); }
+    P('Détermination de l’itinéraire vers ' + ip + ' (30 sauts maximum) :');
+    let ttl = 1, lost = 0;
+    const step = () => {
+      if (ttl > 30) { P('Nombre maximal de sauts atteint.'); return done(); }
+      sendEcho(d, ip, ttl, (pkt, ms) => {
+        const n = String(ttl).padStart(2, ' ');
+        if (pkt.type === 'ttl') { lost = 0; P(n + '  ' + pkt.src + '  (' + pingMs(ms) + ' ms)'); ttl++; later(60, step); }
+        else if (pkt.type === 'echo-rep') { P(n + '  ' + pkt.src + '  (' + pingMs(ms) + ' ms)\nItinéraire terminé.'); done(); }
+        else if (pkt.type === 'unreach') { P(n + '  ' + pkt.src + '  destination inaccessible'); done(); }
+        else if (pkt.type === 'noroute') { P('Impossible de joindre l’hôte de destination.'); done(); }
+        else { P(n + '  *  délai dépassé'); ttl++; if (++lost >= 3) { P('Abandon : plus aucune réponse.'); done(); } else later(60, step); }
+      });
+    };
+    step();
+  });
+}
+
+/* ===== Fichiers, éditeur, images ===== */
+function readImport(file, d, cb) {
+  const img = /^image\//.test(file.type) || /\.(png|jpe?g|gif|svg|webp)$/i.test(file.name);
+  if (file.size > (img ? 1e6 : 2e5)) return toast('Fichier trop volumineux (max. ' + (img ? '1 Mo' : '200 Ko') + ').');
+  const r = new FileReader();
+  r.onload = () => { fsPut(d, file.name, String(r.result), img ? 'image' : 'text'); cb(); };
+  if (img) r.readAsDataURL(file); else r.readAsText(file);
+}
+function appFiles(d, body, arg, ctx) {
+  let sel = null;
+  const tb = h('tbody');
+  const file = h('input', { type: 'file', style: { display: 'none' }, 'aria-label': 'Importer un fichier' });
+  file.addEventListener('change', () => { [...file.files].forEach(f => readImport(f, d, draw)); file.value = ''; });
+  function draw() {
+    tb.textContent = '';
+    d.fs.forEach(f => tb.append(h('tr', { class: f.name === sel ? 'sel' : '', onclick: () => { sel = f.name; draw(); }, ondblclick: open },
+      h('td', { style: { padding: '5px 8px' } }, f.name), h('td', { style: { padding: '5px 8px' } }, isImg(f) ? 'Image' : 'Texte'), h('td', { style: { padding: '5px 8px' } }, String(f.content).length + ' o'))));
+    if (!d.fs.length) tb.append(h('tr', null, h('td', { colspan: 3, style: { padding: '10px', color: '#666' } }, 'Aucun fichier sur cette machine. Créez-en un ou importez-en depuis votre appareil.')));
+  }
+  function open() { const f = fsGet(d, sel); if (!f) return toast('Sélectionnez un fichier.'); ctx.open(isImg(f) ? 'images' : 'editor', f.name); }
+  draw();
+  body.append(apad(
+    h('div', { class: 'btns' },
+      btn('Ouvrir', open),
+      btn('Nouveau fichier', () => askText('Nouveau fichier', 'Nom du fichier', 'notes.txt', n => { if (fsGet(d, n)) return toast('Ce nom existe déjà.'); fsPut(d, n, ''); sel = n; draw(); })),
+      btn('Importer…', () => file.click()),
+      btn('Renommer', () => { const f = fsGet(d, sel); if (!f) return toast('Sélectionnez un fichier.'); askText('Renommer', 'Nouveau nom', f.name, n => { if (fsGet(d, n)) return toast('Ce nom existe déjà.'); f.name = n; sel = n; saveSoon(); draw(); }); }),
+      btn('Supprimer', () => { const i = d.fs.findIndex(f => f.name === sel); if (i < 0) return toast('Sélectionnez un fichier.'); d.fs.splice(i, 1); sel = null; saveSoon(); draw(); }), file),
+    h('div', { class: 'tblwrap', style: { flex: 1 } }, h('table', { class: 'tbl' }, h('thead', null, h('tr', null, ['Nom', 'Type', 'Taille'].map(t => h('th', null, t)))), tb))));
+}
+function appEditor(d, body, arg) {
+  const name = h('input', { class: 'in', placeholder: 'nom-du-fichier.txt', value: arg || '', 'aria-label': 'Nom du fichier' });
+  const ta = h('textarea', { class: 'in', style: { flex: 1, minHeight: '220px' }, 'aria-label': 'Contenu du fichier', spellcheck: 'false' });
+  const texts = () => d.fs.filter(f => !isImg(f));
+  const pick = h('select', { class: 'in', 'aria-label': 'Ouvrir un fichier' });
+  const fillPick = () => { pick.textContent = ''; pick.append(h('option', { value: '' }, 'Ouvrir un fichier…'), texts().map(f => h('option', { value: f.name }, f.name))); };
+  fillPick();
+  const load = n => { const f = fsGet(d, n); if (f && !isImg(f)) { ta.value = f.content; name.value = n; } };
+  pick.addEventListener('change', () => { if (pick.value) load(pick.value); });
+  if (arg) load(arg);
+  body.append(apad(h('div', { class: 'inline' }, name, btn('Enregistrer', () => {
+    const n = name.value.trim(); if (!n) return toast('Donnez un nom au fichier.');
+    const f = fsGet(d, n); if (f && isImg(f)) return toast('Ce nom est celui d’une image.');
+    fsPut(d, n, ta.value); fillPick(); toast('Fichier enregistré : ' + n);
+  })), pick, ta));
+}
+function appImages(d, body, arg) {
+  const view = h('div', { style: { flex: 1, minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', border: '1px solid #7f8ba0', overflow: 'auto' } });
+  const pick = h('select', { class: 'in', 'aria-label': 'Choisir une image' });
+  const file = h('input', { type: 'file', accept: 'image/*', style: { display: 'none' }, 'aria-label': 'Importer une image' });
+  const imgs = () => d.fs.filter(isImg);
+  const show = n => {
+    view.textContent = ''; const f = fsGet(d, n);
+    if (f && isImg(f)) view.append(h('img', { src: f.content, alt: n, style: { maxWidth: '100%', maxHeight: '100%' } }));
+    else view.append(h('div', { class: 'note' }, 'Aucune image à afficher. Importez-en une depuis votre appareil.'));
+  };
+  const fill = (sel) => { pick.textContent = ''; imgs().forEach(f => pick.append(h('option', { value: f.name }, f.name))); if (sel) pick.value = sel; show(pick.value); };
+  pick.addEventListener('change', () => show(pick.value));
+  file.addEventListener('change', () => { const f = file.files[0]; if (f) readImport(f, d, () => fill(f.name)); file.value = ''; });
+  fill(arg);
+  body.append(apad(h('div', { class: 'inline' }, pick, btn('Importer une image…', () => file.click()), file), view));
+}
+function appFirewall(d, body) { const p = h('div', { style: { padding: '12px' } }); renderFirewall(p, d); body.append(p); }
+
+/* ===== Serveur DNS ===== */
+function appDns(d, body) {
+  const st = srvState(d, 'dns');
+  st.stop = () => dnsServerStop(d);
+  let sel = -1;
+  const tb = h('tbody');
+  const fill = () => {
+    tb.textContent = '';
+    d.dnsRecords.forEach((r, i) => {
+      const a = textIn(r, 'name', { label: 'Nom de domaine' }), b = ipIn(r, 'ip', { label: 'Adresse IP' });
+      [a, b].forEach(e => { e.classList.add('cell'); e.classList.remove('in'); });
+      tb.append(h('tr', { class: i === sel ? 'sel' : '', onclick: () => { sel = i; [...tb.children].forEach((x, j) => x.classList.toggle('sel', j === i)); } }, h('td', null, a), h('td', null, b)));
+    });
+  };
+  fill();
+  const ss = startStop(d, 'dns', () => !!st.running, () => dnsServerStart(d), () => dnsServerStop(d));
+  body.append(apad(
+    h('div', { class: 'inline' }, ss.b, h('span', { class: 'note' }, 'Écoute sur le port 53 (UDP). Les machines doivent avoir l’adresse de ce serveur dans « Serveur DNS ».')),
+    h('div', { class: 'tblwrap', style: { height: '170px' } }, h('table', { class: 'tbl' }, h('thead', null, h('tr', null, h('th', null, 'Nom de domaine'), h('th', null, 'Adresse IP'))), tb)),
+    h('div', { class: 'btns' }, btn('Ajouter', () => { d.dnsRecords.push({ name: '', ip: '' }); sel = d.dnsRecords.length - 1; fill(); saveSoon(); }), btn('Supprimer', () => { if (sel >= 0) { d.dnsRecords.splice(sel, 1); sel = -1; fill(); saveSoon(); } })),
+    h('div', { class: 'lbl' }, 'Requêtes reçues'), logView(d, 'dns')));
+  return () => { delete d.rt.ui.dns; };
+}
+
+/* ===== Serveur et client génériques ===== */
+function appGenSrv(d, body) {
+  const st = srvState(d, 'gensrv'), g = d.gen;
+  st.conns = st.conns || new Set();
+  const stop = () => {
+    if (!st.running) return;
+    st.running = false;
+    if (st.proto === 'TCP') { tcpUnlisten(d, st.port); st.conns.clear(); } else udpUnlisten(d, st.port);
+  };
+  st.stop = stop;
+  const start = () => {
+    const port = +g.sport, proto = g.sproto;
+    if (!(port > 0 && port < 65536)) { toast('Port invalide.'); return false; }
+    if (d.rt.tcpL[port] || d.rt.udp[port]) { toast('Le port ' + port + ' est déjà utilisé sur cette machine.'); return false; }
+    st.running = true; st.port = port; st.proto = proto;
+    if (proto === 'TCP') {
+      tcpListen(d, port, conn => {
+        st.conns.add(conn); slog(d, 'gensrv', 'Connexion de ' + conn.rip + ':' + conn.rport);
+        conn.onData = data => slog(d, 'gensrv', conn.rip + ' > ' + data);
+        conn.onClose = () => { st.conns.delete(conn); slog(d, 'gensrv', conn.rip + ' s’est déconnecté'); };
+      });
+    } else {
+      udpListen(d, port, pkt => { st.last = { ip: pkt.src, port: pkt.sport }; slog(d, 'gensrv', pkt.src + ':' + pkt.sport + ' > ' + pkt.data); });
+    }
+    slog(d, 'gensrv', 'Serveur démarré sur le port ' + port + ' (' + proto + ')');
+  };
+  const ss = startStop(d, 'gensrv', () => !!st.running, start, () => { stop(); slog(d, 'gensrv', 'Serveur arrêté'); });
+  const msg = h('input', { class: 'in', placeholder: 'Message à envoyer', 'aria-label': 'Message' });
+  const send = () => {
+    const t = msg.value; if (!t || !st.running) return toast('Démarrez le serveur pour envoyer un message.');
+    if (st.proto === 'TCP') { if (!st.conns.size) return toast('Aucun client connecté.'); st.conns.forEach(c => c.send(t)); }
+    else { if (!st.last) return toast('Aucun client n’a encore écrit.'); udpSend(d, st.last.ip, st.last.port, st.port, t); }
+    slog(d, 'gensrv', '< ' + t); msg.value = '';
+  };
+  msg.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+  body.append(apad(
+    h('div', { class: 'inline' }, h('label', { class: 'lbl' }, 'Port'), textIn(g, 'sport', { num: true, min: 1, label: 'Port' }), sel(['TCP', 'UDP'], g.sproto, v => { g.sproto = v; }, { label: 'Protocole' }), ss.b),
+    logView(d, 'gensrv'), h('div', { class: 'inline' }, msg, btn('Envoyer', send))));
+  return () => { delete d.rt.ui.gensrv; };
+}
+function appGenCli(d, body) {
+  const g = d.gen, st = srvState(d, 'gencli');
+  let conn = null, sport = 0;
+  const cleanup = () => { if (conn) { conn.close(); conn = null; } if (sport) { udpUnlisten(d, sport); sport = 0; } };
+  const stat = h('div', { class: 'note' }, 'Non connecté');
+  const cbtn = h('button', { class: 'btn', type: 'button' });
+  const paint = () => { cbtn.textContent = (conn || sport) ? 'Déconnecter' : 'Connecter'; cbtn.className = 'btn ' + ((conn || sport) ? 'stop' : 'go'); };
+  cbtn.addEventListener('click', () => {
+    if (conn || sport) { cleanup(); stat.textContent = 'Non connecté'; slog(d, 'gencli', 'Déconnecté'); paint(); return; }
+    const port = +g.cport;
+    if (!g.chost.trim()) return toast('Indiquez l’adresse ou le nom du serveur.');
+    if (!(port > 0 && port < 65536)) return toast('Port invalide.');
+    stat.textContent = 'Résolution…';
+    resolveName(d, g.chost, (ip, err) => {
+      if (!ip) { stat.textContent = err; return; }
+      if (g.cproto === 'UDP') {
+        sport = eph(d); udpListen(d, sport, pkt => slog(d, 'gencli', pkt.src + ' > ' + pkt.data));
+        stat.textContent = 'Prêt (UDP vers ' + ip + ':' + port + ')'; slog(d, 'gencli', 'Socket UDP ouvert vers ' + ip + ':' + port); paint(); return;
+      }
+      stat.textContent = 'Connexion à ' + ip + ':' + port + '…';
+      tcpConnect(d, ip, port, (c, e) => {
+        if (!c) { stat.textContent = e; slog(d, 'gencli', 'Échec : ' + e); return; }
+        conn = c; stat.textContent = 'Connecté à ' + ip + ':' + port; slog(d, 'gencli', 'Connecté à ' + ip + ':' + port);
+        c.onData = data => slog(d, 'gencli', ip + ' > ' + data);
+        c.onClose = () => { conn = null; stat.textContent = 'Connexion fermée par le serveur'; slog(d, 'gencli', 'Connexion fermée'); paint(); };
+        paint();
+      });
+    });
+  });
+  paint();
+  const msg = h('input', { class: 'in', placeholder: 'Message à envoyer', 'aria-label': 'Message' });
+  const send = () => {
+    const t = msg.value; if (!t) return;
+    if (conn) { conn.send(t); }
+    else if (sport) { resolveName(d, g.chost, ip => { if (ip) udpSend(d, ip, +g.cport, sport, t); }); }
+    else return toast('Connectez-vous d’abord.');
+    slog(d, 'gencli', '< ' + t); msg.value = '';
+  };
+  msg.addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+  body.append(apad(
+    row('Adresse du serveur', textIn(g, 'chost', { label: 'Adresse du serveur' })),
+    h('div', { class: 'inline' }, h('label', { class: 'lbl' }, 'Port'), textIn(g, 'cport', { num: true, min: 1, label: 'Port' }), sel(['TCP', 'UDP'], g.cproto, v => { g.cproto = v; }, { label: 'Protocole' }), cbtn),
+    stat, logView(d, 'gencli'), h('div', { class: 'inline' }, msg, btn('Envoyer', send))));
+  return () => { cleanup(); delete d.rt.ui.gencli; };
+}
+
+/* ===== Serveur web et navigateur ===== */
+function appWebSrv(d, body) {
+  const st = srvState(d, 'websrv'), wcfg = d.web;
+  const stop = () => { if (st.running) { st.running = false; tcpUnlisten(d, st.port); } };
+  st.stop = stop;
+  const start = () => {
+    const port = +wcfg.port;
+    if (!(port > 0 && port < 65536)) { toast('Port invalide.'); return false; }
+    if (d.rt.tcpL[port]) { toast('Le port ' + port + ' est déjà utilisé sur cette machine.'); return false; }
+    st.running = true; st.port = port;
+    tcpListen(d, port, conn => {
+      conn.onData = data => {
+        const m = /^GET\s+(\S+)/.exec(String(data));
+        const path = m ? m[1] : '/';
+        const page = wcfg.pages.find(p => p.path === path) || (path === '/index.html' ? wcfg.pages.find(p => p.path === '/') : null);
+        slog(d, 'websrv', conn.rip + ' GET ' + path + ' → ' + (page ? '200' : '404'));
+        conn.send(page ? 'HTTP/1.1 200 OK\n\n' + page.html : 'HTTP/1.1 404 Not Found\n\n<h1>404</h1><p>Page introuvable : ' + path.replace(/</g, '&lt;') + '</p>');
+        conn.close();
+      };
+    });
+    slog(d, 'websrv', 'Serveur web démarré sur le port ' + port);
+  };
+  const ss = startStop(d, 'websrv', () => !!st.running, start, () => { stop(); slog(d, 'websrv', 'Serveur web arrêté'); });
+  let cur = wcfg.pages[0] ? wcfg.pages[0].path : null;
+  const pick = h('select', { class: 'in', 'aria-label': 'Page à modifier' });
+  const ta = h('textarea', { class: 'in', style: { minHeight: '150px' }, spellcheck: 'false', 'aria-label': 'Code HTML de la page' });
+  const fillPick = () => { pick.textContent = ''; wcfg.pages.forEach(p => pick.append(h('option', { value: p.path }, p.path))); if (cur) pick.value = cur; const p = wcfg.pages.find(x => x.path === cur); ta.value = p ? p.html : ''; ta.disabled = !p; };
+  pick.addEventListener('change', () => { cur = pick.value; fillPick(); });
+  ta.addEventListener('input', () => { const p = wcfg.pages.find(x => x.path === cur); if (p) { p.html = ta.value; saveSoon(); } });
+  fillPick();
+  body.append(apad(
+    h('div', { class: 'inline' }, h('label', { class: 'lbl' }, 'Port'), textIn(wcfg, 'port', { num: true, min: 1, label: 'Port' }), ss.b),
+    h('div', { class: 'inline' }, pick, btn('Nouvelle page', () => askText('Nouvelle page', 'Chemin (exemple : /contact.html)', '/page.html', p => { if (!p.startsWith('/')) p = '/' + p; if (wcfg.pages.some(x => x.path === p)) return toast('Cette page existe déjà.'); wcfg.pages.push({ path: p, html: '<h1>' + p + '</h1>' }); cur = p; fillPick(); saveSoon(); })),
+      btn('Supprimer', () => { const i = wcfg.pages.findIndex(x => x.path === cur); if (i >= 0) { wcfg.pages.splice(i, 1); cur = wcfg.pages[0] ? wcfg.pages[0].path : null; fillPick(); saveSoon(); } })),
+    ta, h('div', { class: 'lbl' }, 'Journal'), logView(d, 'websrv')));
+  return () => { delete d.rt.ui.websrv; };
+}
+function appBrowser(d, body) {
+  const url = h('input', { class: 'in', placeholder: 'http://adresse-ou-nom/', 'aria-label': 'Adresse', spellcheck: 'false', autocapitalize: 'off' });
+  const stat = h('div', { class: 'note' }, 'Saisissez une adresse puis touchez « Aller ».');
+  const frame = h('iframe', { class: 'browserframe', sandbox: '', title: 'Page web', srcdoc: '' });
+  let token = 0;
+  const go = () => {
+    let u = url.value.trim().replace(/^https?:\/\//i, ''); if (!u) return;
+    const m = /^([^\/:]+)(?::(\d+))?(\/.*)?$/.exec(u);
+    if (!m) return (stat.textContent = 'Adresse invalide.');
+    const host = m[1], port = m[2] ? +m[2] : 80, path = m[3] || '/', my = ++token;
+    stat.textContent = 'Résolution de ' + host + '…';
+    resolveName(d, host, (ip, err) => {
+      if (my !== token) return;
+      if (!ip) return (stat.textContent = 'Erreur : ' + err);
+      stat.textContent = 'Connexion à ' + ip + ':' + port + '…';
+      tcpConnect(d, ip, port, (c, e) => {
+        if (my !== token) { if (c) c.close(); return; }
+        if (!c) return (stat.textContent = 'Erreur : ' + e);
+        c.onData = data => {
+          const s = String(data), k = s.indexOf('\n\n'), head = k >= 0 ? s.slice(0, k) : '', html = k >= 0 ? s.slice(k + 2) : s;
+          frame.srcdoc = html; stat.textContent = (head.replace('HTTP/1.1 ', '') || 'Réponse reçue') + ' — ' + ip + ':' + port + path;
+        };
+        c.send('GET ' + path + ' HTTP/1.1\nHost: ' + host);
+      });
+    });
+  };
+  url.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  body.append(apad(h('div', { class: 'inline' }, url, btn('Aller', go)), stat, frame));
+  return () => { token++; };
+}
+
+/* ===== Messagerie ===== */
+function appMailSrv(d, body) {
+  const st = srvState(d, 'mailsrv'), m = d.mailSrv;
+  st.boxes = st.boxes || {};
+  const local = a => String(a).split('@')[0].toLowerCase();
+  const dom = a => String(a).split('@')[1] || '';
+  const user = a => m.users.find(u => u.user.toLowerCase() === local(a));
+  const stop = () => { if (st.running) { st.running = false; tcpUnlisten(d, 25); } };
+  st.stop = stop;
+  const deliver = (msg, cb) => {
+    if (dom(msg.to).toLowerCase() === m.domain.toLowerCase()) {
+      if (!user(msg.to)) return cb({ ok: false, err: 'Destinataire inconnu : ' + msg.to });
+      (st.boxes[local(msg.to)] = st.boxes[local(msg.to)] || []).push({ from: msg.from, subject: msg.subject, body: msg.body, date: Date.now() });
+      slog(d, 'mailsrv', 'Message de ' + msg.from + ' pour ' + msg.to + ' (' + msg.subject + ')');
+      return cb({ ok: true });
+    }
+    resolveName(d, dom(msg.to), (ip, err) => {
+      if (!ip) return cb({ ok: false, err: 'Domaine introuvable : ' + dom(msg.to) });
+      tcpConnect(d, ip, 25, (c, e) => {
+        if (!c) return cb({ ok: false, err: 'Serveur distant injoignable : ' + e });
+        c.onData = r => { c.close(); try { cb(JSON.parse(r)); } catch (x) { cb({ ok: false, err: 'Réponse invalide' }); } };
+        c.send(JSON.stringify({ op: 'relay', from: msg.from, to: msg.to, subject: msg.subject, body: msg.body }));
+      });
+    });
+  };
+  const start = () => {
+    if (d.rt.tcpL[25]) { toast('Le port 25 est déjà utilisé sur cette machine.'); return false; }
+    st.running = true;
+    tcpListen(d, 25, conn => {
+      conn.onData = data => {
+        let q; try { q = JSON.parse(data); } catch (e) { conn.send(JSON.stringify({ ok: false, err: 'Requête invalide' })); return conn.close(); }
+        const reply = r => { conn.send(JSON.stringify(r)); conn.close(); };
+        const auth = () => { const u = user(q.user || ''); return u && u.pass === q.pass && dom(q.user).toLowerCase() === m.domain.toLowerCase(); };
+        if (q.op === 'relay') return deliver(q, reply);
+        if (!auth()) { slog(d, 'mailsrv', 'Authentification refusée pour ' + q.user); return reply({ ok: false, err: 'Identifiants refusés par le serveur.' }); }
+        if (q.op === 'send') return deliver({ from: q.user, to: q.to, subject: q.subject, body: q.body }, reply);
+        if (q.op === 'fetch') { slog(d, 'mailsrv', q.user + ' relève sa boîte'); return reply({ ok: true, msgs: st.boxes[local(q.user)] || [] }); }
+        reply({ ok: false, err: 'Commande inconnue' });
+      };
+    });
+    slog(d, 'mailsrv', 'Serveur de messagerie démarré pour le domaine ' + m.domain);
+  };
+  const ss = startStop(d, 'mailsrv', () => !!st.running, start, () => { stop(); slog(d, 'mailsrv', 'Serveur arrêté'); });
+  let sel = -1;
+  const tb = h('tbody');
+  const fill = () => {
+    tb.textContent = '';
+    m.users.forEach((u, i) => {
+      const a = textIn(u, 'user', { label: 'Utilisateur' }), b = textIn(u, 'pass', { label: 'Mot de passe' });
+      [a, b].forEach(e => { e.classList.add('cell'); e.classList.remove('in'); });
+      tb.append(h('tr', { class: i === sel ? 'sel' : '', onclick: () => { sel = i; [...tb.children].forEach((x, j) => x.classList.toggle('sel', j === i)); } }, h('td', null, a), h('td', null, b)));
+    });
+  };
+  fill();
+  body.append(apad(
+    h('div', { class: 'inline' }, h('label', { class: 'lbl' }, 'Domaine'), textIn(m, 'domain', { label: 'Domaine' }), ss.b),
+    h('div', { class: 'note' }, 'Écoute sur le port 25. Les comptes sont de la forme utilisateur@domaine.'),
+    h('div', { class: 'tblwrap', style: { height: '140px' } }, h('table', { class: 'tbl' }, h('thead', null, h('tr', null, h('th', null, 'Utilisateur'), h('th', null, 'Mot de passe'))), tb)),
+    h('div', { class: 'btns' }, btn('Ajouter un compte', () => { m.users.push({ user: 'utilisateur' + (m.users.length + 1), pass: 'secret' }); sel = m.users.length - 1; fill(); saveSoon(); }), btn('Supprimer', () => { if (sel >= 0) { m.users.splice(sel, 1); sel = -1; fill(); saveSoon(); } })),
+    h('div', { class: 'lbl' }, 'Journal'), logView(d, 'mailsrv')));
+  return () => { delete d.rt.ui.mailsrv; };
+}
+function appMailCli(d, body) {
+  const c = d.mailCli, st = srvState(d, 'mailcli');
+  st.inbox = st.inbox || [];
+  const ask = (req, cb) => {
+    resolveName(d, c.server, (ip, err) => {
+      if (!ip) return cb({ ok: false, err: err || 'Serveur introuvable.' });
+      tcpConnect(d, ip, 25, (cn, e) => {
+        if (!cn) return cb({ ok: false, err: e });
+        cn.onData = r => { cn.close(); try { cb(JSON.parse(r)); } catch (x) { cb({ ok: false, err: 'Réponse invalide' }); } };
+        cn.send(JSON.stringify(req));
+      });
+    });
+  };
+  const holder = h('div');
+  const settings = () => h('div', { class: 'apad' },
+    row('Adresse e-mail', textIn(c, 'user', { label: 'Adresse e-mail' })), row('Mot de passe', textIn(c, 'pass', { label: 'Mot de passe', type: 'password' })), row('Serveur (IP ou nom)', textIn(c, 'server', { label: 'Serveur' })),
+    h('div', { class: 'note' }, 'Exemple : eleve@exemple.fr, avec le serveur de messagerie démarré sur une machine du réseau.'));
+  const compose = () => {
+    const to = h('input', { class: 'in', placeholder: 'destinataire@domaine', 'aria-label': 'Destinataire', autocapitalize: 'off' }), sub = h('input', { class: 'in', placeholder: 'Objet', 'aria-label': 'Objet' });
+    const ta = h('textarea', { class: 'in', style: { minHeight: '130px' }, 'aria-label': 'Message' }), res = h('div', { class: 'note' });
+    return h('div', { class: 'apad' }, row('À', to), row('Objet', sub), ta, h('div', { class: 'btns' }, btn('Envoyer', () => {
+      if (!to.value.trim()) return toast('Indiquez un destinataire.');
+      res.textContent = 'Envoi en cours…';
+      ask({ op: 'send', user: c.user, pass: c.pass, to: to.value.trim(), subject: sub.value, body: ta.value }, r => { res.textContent = r.ok ? 'Message envoyé.' : 'Échec : ' + r.err; });
+    })), res);
+  };
+  const inbox = () => {
+    const list = h('div', { class: 'mail' }), view = h('div', { class: 'logbox', style: { minHeight: '120px' } }), res = h('div', { class: 'note' });
+    const draw = () => { list.textContent = ''; st.inbox.forEach(mm => list.append(h('div', { onclick: () => { view.textContent = 'De : ' + mm.from + '\nObjet : ' + mm.subject + '\nDate : ' + hhmmss(mm.date) + '\n\n' + mm.body; } }, mm.subject + ' — ' + mm.from))); if (!st.inbox.length) list.append(h('div', { style: { color: '#666', cursor: 'default' } }, 'Boîte vide. Touchez « Relever le courrier ».')); };
+    draw();
+    return h('div', { class: 'apad' }, h('div', { class: 'btns' }, btn('Relever le courrier', () => {
+      res.textContent = 'Relève en cours…';
+      ask({ op: 'fetch', user: c.user, pass: c.pass }, r => { if (r.ok) { st.inbox = r.msgs; res.textContent = r.msgs.length + ' message(s).'; draw(); } else res.textContent = 'Échec : ' + r.err; });
+    })), res, list, view);
+  };
+  holder.append(tabsUI('mail-' + d.id, [{ title: () => 'Réglages', build: settings }, { title: () => 'Nouveau message', build: compose }, { title: () => 'Boîte de réception', build: inbox }], true));
+  body.append(holder);
+}
+
+/* ===== Gnutella (partage simplifié) ===== */
+function appP2p(d, body) {
+  const st = srvState(d, 'p2p'), g = d.p2p;
+  st.peers = st.peers || []; st.seen = st.seen || new Set(); st.route = st.route || {}; st.hits = st.hits || [];
+  const send = (c, o) => c.send(JSON.stringify(o));
+  const stop = () => { if (!st.running) return; st.running = false; tcpUnlisten(d, st.port); st.peers.forEach(c => c.close()); st.peers = []; };
+  st.stop = stop;
+  const me = () => ifc(d, 0).ip;
+  const onMsg = (c, raw) => {
+    let m; try { m = JSON.parse(raw); } catch (e) { return; }
+    if (m.t === 'q') {
+      if (st.seen.has(m.id)) return; st.seen.add(m.id); st.route[m.id] = c;
+      const files = d.fs.filter(f => f.name.toLowerCase().includes(String(m.q).toLowerCase())).map(f => f.name);
+      slog(d, 'p2p', 'Recherche « ' + m.q + ' » reçue de ' + c.rip + (files.length ? ' : ' + files.length + ' fichier(s) à partager' : ''));
+      if (files.length) send(c, { t: 'h', id: m.id, files, ip: me(), port: st.port });
+      if (m.ttl > 1) st.peers.filter(p => p !== c).forEach(p => send(p, { t: 'q', id: m.id, q: m.q, ttl: m.ttl - 1 }));
+    } else if (m.t === 'h') {
+      const r = st.route[m.id];
+      if (r === 'me') { m.files.forEach(f => { if (!st.hits.some(x => x.ip === m.ip && x.name === f)) st.hits.push({ ip: m.ip, port: m.port, name: f }); }); if (d.rt.ui.p2p) d.rt.ui.p2p(); }
+      else if (r) send(r, m);
+    } else if (m.t === 'get') {
+      const f = fsGet(d, m.name);
+      c.send(JSON.stringify(f ? { t: 'file', name: f.name, content: f.content, kind: isImg(f) ? 'image' : 'text' } : { t: 'err' })); c.close();
+      slog(d, 'p2p', c.rip + ' télécharge ' + m.name);
+    }
+  };
+  const addPeer = c => { st.peers.push(c); c.onData = raw => onMsg(c, raw); c.onClose = () => { st.peers = st.peers.filter(x => x !== c); slog(d, 'p2p', 'Voisin ' + c.rip + ' parti'); }; };
+  const start = () => {
+    const port = +g.port;
+    if (!(port > 0 && port < 65536)) { toast('Port invalide.'); return false; }
+    if (d.rt.tcpL[port]) { toast('Le port ' + port + ' est déjà utilisé sur cette machine.'); return false; }
+    st.running = true; st.port = port;
+    tcpListen(d, port, c => { if (st.running) { addPeer(c); slog(d, 'p2p', 'Voisin connecté : ' + c.rip); } });
+    slog(d, 'p2p', 'Nœud démarré sur le port ' + port);
+  };
+  const ss = startStop(d, 'p2p', () => !!st.running, start, () => { stop(); slog(d, 'p2p', 'Nœud arrêté'); });
+  const peerIp = h('input', { class: 'in', placeholder: 'Adresse IP d’un voisin', 'aria-label': 'Adresse IP du voisin' });
+  const q = h('input', { class: 'in', placeholder: 'Nom de fichier recherché', 'aria-label': 'Recherche' });
+  const hits = h('div', { class: 'mail' });
+  const drawHits = () => {
+    hits.textContent = '';
+    st.hits.forEach(x => hits.append(h('div', { onclick: () => download(x) }, x.name + ' — ' + x.ip + ' (toucher pour télécharger)')));
+    if (!st.hits.length) hits.append(h('div', { style: { color: '#666', cursor: 'default' } }, 'Aucun résultat.'));
+  };
+  const download = x => {
+    tcpConnect(d, x.ip, x.port, (c, e) => {
+      if (!c) return toast('Téléchargement impossible : ' + e);
+      c.onData = raw => { try { const m = JSON.parse(raw); if (m.t === 'file') { fsPut(d, m.name, m.content, m.kind); toast('Fichier reçu : ' + m.name); slog(d, 'p2p', 'Téléchargé : ' + m.name); } else toast('Fichier introuvable chez le voisin.'); } catch (er) { /* ignoré */ } };
+      c.send(JSON.stringify({ t: 'get', name: x.name }));
+    });
+  };
+  const logB = logView(d, 'p2p');
+  d.rt.ui.p2p = () => { logB.textContent = srvState(d, 'p2p').log.join('\n'); logB.scrollTop = logB.scrollHeight; drawHits(); };
+  drawHits();
+  body.append(apad(
+    h('div', { class: 'inline' }, h('label', { class: 'lbl' }, 'Port'), textIn(g, 'port', { num: true, min: 1, label: 'Port' }), ss.b),
+    h('div', { class: 'inline' }, peerIp, btn('Connecter un voisin', () => {
+      if (!st.running) return toast('Démarrez d’abord le nœud.');
+      if (!isIp(peerIp.value)) return toast('Adresse IP invalide.');
+      tcpConnect(d, peerIp.value.trim(), +g.port, (c, e) => { if (!c) return toast('Connexion impossible : ' + e); addPeer(c); slog(d, 'p2p', 'Connecté au voisin ' + c.rip); });
+    })),
+    h('div', { class: 'note' }, 'Les fichiers de cette machine (explorateur) sont partagés avec les voisins. La recherche est relayée de voisin en voisin (5 sauts maximum).'),
+    h('div', { class: 'inline' }, q, btn('Rechercher', () => {
+      if (!st.running) return toast('Démarrez d’abord le nœud.');
+      if (!q.value.trim()) return;
+      if (!st.peers.length) return toast('Aucun voisin connecté.');
+      const id = d.id + '-' + Date.now() + '-' + Math.floor(Math.random() * 1e4);
+      st.seen.add(id); st.route[id] = 'me'; st.hits = [];
+      st.peers.forEach(p => send(p, { t: 'q', id, q: q.value.trim(), ttl: 5 }));
+      slog(d, 'p2p', 'Recherche « ' + q.value.trim() + ' » envoyée'); drawHits();
+    })), hits, h('div', { class: 'lbl' }, 'Journal'), logB));
+  return () => { delete d.rt.ui.p2p; };
+}
+/* ===== Démarrage ===== */
+Sim.notify = () => { render(); refreshers.forEach(f => { try { f(); } catch (e) { /* fenêtre fermée */ } }); };
+(function boot() {
+  let loaded = false;
+  try { const t = localStorage.getItem('simulateur-reseau-v1'); if (t) { loadState(t); loaded = true; } } catch (e) { /* stockage indisponible ou schéma illisible */ }
+  if (!loaded) loadEmpty();
+  buildToolbar();
+  renderProps();
+})();
+</script>
+</body>
+</html>
